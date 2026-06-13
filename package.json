@@ -1,0 +1,29 @@
+{
+  "name": "bannersin48",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Banners In 48 - speed-first custom banner ordering platform",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build -w @bannersin48/design-tokens -w @bannersin48/shared -w @bannersin48/api-client -w @bannersin48/frontend",
+    "build:ws": "npm run build -w @bannersin48/design-tokens -w @bannersin48/shared -w @bannersin48/api-client -w @bannersin48/frontend",
+    "test": "npm run test -w @bannersin48/design-tokens -w @bannersin48/shared -w @bannersin48/frontend",
+    "test:ws": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "e2e": "npm run e2e -w frontend",
+    "clean": "rimraf packages/*/dist packages/*/.turbo frontend/.next"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5",
+    "typescript": "~5.4.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

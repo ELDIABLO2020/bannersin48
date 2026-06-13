@@ -1,0 +1,56 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Home, Package, PenTool, LayoutGrid, User } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
+
+const TABS = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/orders", label: "Orders", icon: Package },
+  { href: "/design", label: "Design", icon: PenTool, soon: true },
+  { href: "/templates", label: "Templates", icon: LayoutGrid, soon: true },
+  { href: "/dashboard", label: "Account", icon: User },
+] as const;
+
+export function BottomTabBar() {
+  const pathname = usePathname();
+  return (
+    <nav
+      className="mobile-tab-bar fixed bottom-0 inset-x-0 bg-navy-base border-t z-tab-bar"
+      style={{ borderTopColor: "rgba(255,255,255,0.08)" }}
+      aria-label="Primary mobile navigation"
+    >
+      <ul className="grid grid-cols-5">
+        {TABS.map((tab) => {
+          const active =
+            tab.href === "/"
+              ? pathname === "/"
+              : pathname === tab.href || pathname.startsWith(`${tab.href}/`);
+          const Icon = tab.icon;
+          return (
+            <li key={tab.href}>
+              <Link
+                href={tab.href}
+                className={cn(
+                  "flex flex-col items-center justify-center min-h-[56px] py-sm no-underline relative",
+                  active ? "text-cta" : "text-white/60 hover:text-white",
+                )}
+                aria-current={active ? "page" : undefined}
+              >
+                <Icon className="h-6 w-6" strokeWidth={2} aria-hidden />
+                <span className="text-[11px] mt-xs font-bold leading-none">{tab.label}</span>
+                {"soon" in tab && tab.soon && (
+                  <span
+                    aria-label="Coming soon"
+                    className="absolute top-1 right-1/4 w-1 h-1 rounded-pill bg-warning"
+                  />
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}

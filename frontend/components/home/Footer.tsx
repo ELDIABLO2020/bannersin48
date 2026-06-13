@@ -1,0 +1,96 @@
+import Link from "next/link";
+
+const COLUMNS = [
+  {
+    title: "Products",
+    items: [
+      { href: "/order/vinyl", label: "Vinyl Banners" },
+      { href: "/order/retractable", label: "Retractable Banners" },
+      { href: "/sizes", label: "All Sizes & Pricing" },
+      { href: "/templates", label: "Templates", soon: true },
+      { href: "/graduation", label: "Graduation Banners", soon: true },
+    ],
+  },
+  {
+    title: "Company",
+    items: [
+      { href: "/about", label: "About Us" },
+      { href: "/reviews", label: "Reviews" },
+      { href: "/guarantee", label: "Delivery Guarantee" },
+      { href: "/quality", label: "Production & Quality" },
+    ],
+  },
+  {
+    title: "Support",
+    items: [
+      { href: "/help", label: "Help Center" },
+      { href: "/faq", label: "FAQs" },
+      { href: "/orders/lookup", label: "Track Your Order" },
+      { href: "/chat", label: "Chat With Us" },
+      { href: "mailto:support@bannersin48.com", label: "Email Support" },
+    ],
+  },
+  {
+    title: "Account",
+    items: [
+      { href: "/login", label: "Log In" },
+      { href: "/register", label: "Create Account" },
+      { href: "/dashboard", label: "Reorder" },
+      { href: "/tax-exempt", label: "Tax-Exempt Program" },
+    ],
+  },
+] as const;
+
+const PAYMENT_METHODS = ["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "PayPal"];
+
+export function Footer() {
+  return (
+    <footer className="bg-navy-base text-white">
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
+          {COLUMNS.map((col) => (
+            <div key={col.title}>
+              <h3 className="font-bold text-body mb-md text-white">{col.title}</h3>
+              <ul className="space-y-xs">
+                {col.items.map((item) => (
+                  <li key={item.href + item.label}>
+                    <Link
+                      href={item.href}
+                      className="text-sm text-white/70 hover:text-white hover:underline inline-flex items-center gap-xs no-underline"
+                    >
+                      {item.label}
+                      {"soon" in item && item.soon && (
+                        <span className="text-[10px] font-bold text-warning">SOON</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3xl pt-xl border-t border-white/10 flex flex-col lg:flex-row lg:items-center gap-md">
+          <p className="text-sm text-white/60">
+            &copy; 2026 Banners In 48 &middot; BannersIn48.com
+          </p>
+          <nav className="flex flex-wrap gap-md text-sm text-white/60">
+            <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white">Terms of Service</Link>
+            <Link href="/refunds" className="hover:text-white">Refund &amp; Reprint Policy</Link>
+          </nav>
+          <div className="lg:ml-auto flex flex-wrap gap-xs">
+            {PAYMENT_METHODS.map((m) => (
+              <span
+                key={m}
+                className="text-[10px] font-bold text-white/80 border border-white/20 rounded-sm px-sm py-xs"
+              >
+                {m}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

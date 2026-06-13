@@ -1,0 +1,17 @@
+{
+  "extends": "next/core-web-vitals",
+  "overrides": [
+    {
+      "files": ["components/**/*.{ts,tsx}", "app/**/page.tsx", "app/**/layout.tsx"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[value=/^#[0-9A-Fa-f]{3,8}$/]",
+            "message": "Do not use raw hex colors in components. Use the design tokens from @bannersin48/design-tokens."
+          }
+        ]
+      }
+    }
+  ]
+}

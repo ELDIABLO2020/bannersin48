@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg-navy-base: #13191E;
+  --color-bg-navy-deep: #002942;
+  --color-bg-navy-dark: #0E2634;
+  --color-bg-navy-darkest: #0A2443;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-tint: #F5F5F5;
+  --color-bg-surface-very-light: #ECEFF1;
+  --color-bg-info-tint: #DEF0FF;
+  --color-bg-black: #000000;
+
+  --color-cta-primary: #FF9B24;
+  --color-cta-accent: #FFB706;
+  --color-cta-active: #FCB900;
+  --color-cta-text: #13191E;
+
+  --color-link: #0F77CC;
+  --color-link-hover: #0055FF;
+  --color-link-active: #002942;
+
+  --color-text-dark: #212121;
+  --color-text-charcoal: #13181A;
+  --color-text-light: #FFFFFF;
+  --color-text-medium: #979797;
+
+  --color-border: #E0E0E0;
+  --color-border-input: #BDBDBD;
+  --color-divider: #BDBDBD;
+
+  --color-error: #CF2E2E;
+
+  --color-badge-success-bg: #E8F5E9;
+  --color-badge-success-text: #2E7D32;
+  --color-badge-warning-bg: #FFF3E0;
+  --color-badge-warning-text: #F57C00;
+  --color-badge-error-bg: #FFEBEE;
+  --color-badge-error-text: #CF2E2E;
+
+  --radius-none: 0px;
+  --radius-modal: 4px;
+  --radius-button: 8px;
+  --radius-feature: 16px;
+  --radius-card: 24px;
+  --radius-pill: 100px;
+
+  --shadow-nav: 0px 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-level-1: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-level-2: 0px 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-level-3: 0px 8px 24px rgba(0, 0, 0, 0.16);
+  --shadow-level-4: 0px 12px 32px rgba(0, 0, 0, 0.2);
+  --shadow-focus: 0px 0px 12px rgba(15, 119, 204, 0.2);
+  --shadow-focus-small: 0px 0px 8px rgba(15, 119, 204, 0.16);
+
+  --container-content: 1200px;
+  --container-hero: 1440px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text-dark);
+  background-color: var(--color-bg-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "tnum" 0;
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide desktop nav on small screens, show mobile tab bar */
+@media (max-width: 1023px) {
+  .desktop-nav {
+    display: none;
+  }
+  main {
+    padding-bottom: 80px; /* leave room for the mobile tab bar */
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-tab-bar {
+    display: none;
+  }
+}
+
+/* Serwist offline page styling */
+.serwist-offline-ready {
+  background: var(--color-bg-info-tint);
+  color: var(--color-text-dark);
+  padding: 8px 16px;
+  border-radius: var(--radius-button);
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 100;
+}
