@@ -21,14 +21,22 @@ export function CountdownCard({ variant = "hero" }: Props) {
     retry: 1,
   });
 
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
   // Use API data when available, otherwise compute client-side fallback
   const cutoffInfo = useMemo(() => {
+    if (now === null) {
+      return {
+        cutoffAtMs: 0,
+        remainingMs: 0,
+        deliveryDow: "next delivery",
+      };
+    }
     if (apiData) {
       return {
         cutoffAtMs: new Date(apiData.cutoffAtEt).getTime(),
@@ -41,13 +49,16 @@ export function CountdownCard({ variant = "hero" }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiData, now]);
 
-  const { padded } = formatCountdown(cutoffInfo.remainingMs);
+  const { padded } = now === null ? { padded: "-- : -- : --" } : formatCountdown(cutoffInfo.remainingMs);
 
   // Progress bar: fraction of 24h window elapsed
-  const progressPct = Math.max(
-    0,
-    Math.min(100, ((24 * 60 * 60 * 1000 - cutoffInfo.remainingMs) / (24 * 60 * 60 * 1000)) * 100),
-  );
+  const progressPct =
+    now === null
+      ? 0
+      : Math.max(
+          0,
+          Math.min(100, ((24 * 60 * 60 * 1000 - cutoffInfo.remainingMs) / (24 * 60 * 60 * 1000)) * 100),
+        );
 
   return (
     <div

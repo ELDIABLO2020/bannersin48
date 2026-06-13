@@ -1,4 +1,5 @@
 import { Hero } from "@/components/home/Hero";
+import { UseCaseMarquee } from "@/components/home/UseCaseMarquee";
 import { QuickActions } from "@/components/home/QuickActions";
 import { PopularSizes } from "@/components/home/PopularSizes";
 import { MaterialsBand } from "@/components/home/MaterialsBand";
@@ -12,6 +13,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <UseCaseMarquee />
       <QuickActions />
       <PopularSizes />
       <MaterialsBand />

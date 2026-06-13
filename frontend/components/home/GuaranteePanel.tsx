@@ -1,74 +1,59 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
-import { Shield, Clock, DollarSign, Truck } from "lucide-react";
-import { useGSAP } from "@gsap/react";
-import { fadeUpIn } from "@/lib/gsap/registry";
+import { ArrowRight, BadgeCheck, Clock3, FileCheck2, MapPinned, Truck } from "lucide-react";
 
-const POINTS = [
-  { icon: Clock, label: "Order by 9:00 PM ET" },
-  { icon: Truck, label: "Delivered by 12:00 PM" },
-  { icon: DollarSign, label: "$10 flat shipping / banner" },
-  { icon: Shield, label: "FedEx — US & Canada" },
-];
+const METRICS = [
+  { icon: Clock3, value: "9 PM ET", label: "daily order cutoff" },
+  { icon: Truck, value: "48 hr", label: "business-hour delivery promise" },
+  { icon: MapPinned, value: "US + CA", label: "FedEx delivery region" },
+  { icon: FileCheck2, value: "3 files", label: "PDF, JPG, and JPEG accepted" },
+] as const;
 
 export function GuaranteePanel() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-      fadeUpIn({
-        target: sectionRef.current.querySelectorAll(".gp-row"),
-        stagger: 0.1,
-      });
-    },
-    { scope: sectionRef },
-  );
-
   return (
-    <section ref={sectionRef} className="bg-surface-tint" aria-labelledby="guarantee-h">
+    <section className="bg-surface" aria-labelledby="guarantee-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <Card variant="default" className="bg-surface p-2xl">
-          <div className="gp-heading text-center">
-            <h2 id="guarantee-h" className="font-display text-section-h2 text-ink leading-section-h2">
-              The 48-hour promise
-            </h2>
-            <p className="text-body text-ink-muted mt-md max-w-2xl mx-auto">
-              We only do banners, so we do them faster and simpler than everyone else.
-              If we miss the guarantee, the $10 shipping charge for that banner is refunded — automatically.
-            </p>
-          </div>
-          <ul className="grid grid-cols-2 lg:grid-cols-4 gap-md mt-2xl">
-            {POINTS.map((p) => {
-              const Icon = p.icon;
+        <div className="grid grid-cols-1 gap-lg lg:grid-cols-[1fr_420px]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
+            {METRICS.map((metric) => {
+              const Icon = metric.icon;
               return (
-                <li
-                  key={p.label}
-                  className="gp-row flex items-center gap-md p-md rounded-feature bg-surface-tint"
+                <article
+                  key={metric.label}
+                  className="gp-row rounded-feature border border-line bg-surface p-lg text-center shadow-elev-1"
                 >
-                  <div
-                    className="rounded-pill p-sm shrink-0"
-                    style={{ backgroundColor: "var(--color-bg-info-tint)" }}
-                  >
-                    <Icon className="h-5 w-5 text-link" aria-hidden />
-                  </div>
-                  <span className="text-sm font-bold text-ink leading-tight">{p.label}</span>
-                </li>
+                  <Icon className="mx-auto h-8 w-8 text-link" aria-hidden />
+                  <p className="mt-md font-display text-[34px] uppercase leading-none text-ink">
+                    {metric.value}
+                  </p>
+                  <p className="mt-sm text-sm text-ink-muted">{metric.label}</p>
+                </article>
               );
             })}
-          </ul>
-          <div className="gp-cta text-center mt-2xl">
+          </div>
+
+          <aside className="gp-row rounded-feature border border-cta bg-[linear-gradient(135deg,#fff7ed,#ffffff)] p-xl shadow-elev-2">
+            <BadgeCheck className="h-12 w-12 text-cta" aria-hidden />
+            <h2
+              id="guarantee-h"
+              className="mt-md font-display uppercase text-[38px] leading-none text-ink"
+            >
+              Our 48-hour guarantee
+            </h2>
+            <p className="mt-md text-body text-ink-muted">
+              If we miss the 48-business-hour delivery for reasons on our side, the $10
+              shipping charge for that banner is refunded automatically.
+            </p>
             <Link
               href="/guarantee"
-              className="inline-block bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover"
+              className="mt-lg inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
             >
-              Read the full guarantee
+              Learn about the guarantee
+              <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-          </div>
-        </Card>
+          </aside>
+        </div>
       </div>
     </section>
   );

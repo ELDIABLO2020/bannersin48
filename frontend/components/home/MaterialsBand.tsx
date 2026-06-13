@@ -1,72 +1,87 @@
-"use client";
-
-import { useRef } from "react";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatUsdFromMajor } from "@/lib/utils/format";
-import { useGSAP } from "@gsap/react";
-import { slideInLeft } from "@/lib/gsap/registry";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 const MATERIALS = [
   {
     name: "13 oz Vinyl",
-    pricePerSqFt: 4.0,
-    description: "Standard indoor and outdoor. The workhorse.",
-    singleSided: true,
+    label: "Most ordered",
+    description: "Standard indoor and outdoor vinyl for events, retail, contractors, and general signage.",
+    texture: "bg-[linear-gradient(135deg,#0c3d76_0%,#0c3d76_48%,#f8f8f8_49%,#ffffff_100%)]",
+    points: ["Water resistant", "Strong color", "Great everyday durability"],
   },
   {
     name: "15 oz Premium Vinyl",
-    pricePerSqFt: 4.75,
-    description: "Heavier, more durable, premium outdoor feel.",
-    singleSided: true,
+    label: undefined,
+    description: "A heavier option when the banner needs a more substantial outdoor feel.",
+    texture: "bg-[linear-gradient(135deg,#f5f8fa_0%,#d6dde4_50%,#ffffff_100%)]",
+    points: ["Thicker hand feel", "Premium finish", "Outdoor-ready"],
   },
   {
-    name: "18 oz Heavy-Duty Blockout",
-    pricePerSqFt: 5.25,
-    description: "Heavy-duty, opaque. The only material available double-sided.",
-    singleSided: true,
-    doubleSidedAvailable: true,
+    name: "18 oz Blockout",
+    label: undefined,
+    description: "Heavy-duty opaque vinyl and the material option for double-sided work.",
+    texture: "bg-[linear-gradient(135deg,#111827_0%,#1f2937_42%,#f5f5f5_43%,#ffffff_100%)]",
+    points: ["Opaque construction", "Double-sided available", "Maximum durability"],
   },
-];
+] as const;
 
 export function MaterialsBand() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-      slideInLeft({
-        target: sectionRef.current.querySelectorAll(".mat-card"),
-        stagger: 0.15,
-      });
-    },
-    { scope: sectionRef },
-  );
-
   return (
-    <section ref={sectionRef} className="bg-surface" aria-labelledby="materials-h">
+    <section
+      className="bg-[linear-gradient(180deg,#ffffff_0%,#eef7ff_100%)]"
+      aria-labelledby="materials-h"
+    >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <h2 id="materials-h" className="font-display text-section-h2 text-ink text-center leading-section-h2">
-          Premium vinyl, three weights
-        </h2>
-        <p className="text-body text-ink-muted text-center mt-md max-w-2xl mx-auto">
-          Every banner is printed on heavy-duty vinyl, finished with welded seams and grommets by default.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-lg mt-2xl">
-          {MATERIALS.map((m) => (
-            <Card key={m.name} variant="feature" className="mat-card h-full flex flex-col">
-              <h3 className="font-bold text-heading-h4 text-ink">{m.name}</h3>
-              <p className="text-heading-h4 font-bold text-cta mt-md">
-                {formatUsdFromMajor(m.pricePerSqFt)}
-                <span className="text-body-sm font-normal text-ink-muted"> / sq ft</span>
-              </p>
-              <p className="text-body-sm text-ink-muted mt-md flex-1">{m.description}</p>
-              {m.doubleSidedAvailable && (
-                <div className="mt-md">
-                  <Badge variant="success">Double-sided available</Badge>
-                </div>
-              )}
-            </Card>
+        <div className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2
+              id="materials-h"
+              className="font-display uppercase text-[42px] sm:text-[58px] leading-[0.95] text-ink"
+            >
+              Choose the right material
+            </h2>
+            <p className="text-body text-ink-muted mt-md max-w-2xl">
+              Durable vinyl options for different environments, visibility needs, and handling.
+            </p>
+          </div>
+          <Link
+            href="/order/vinyl"
+            className="inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
+          >
+            Compare materials
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
+          {MATERIALS.map((material) => (
+            <article
+              key={material.name}
+              className="mat-card overflow-hidden rounded-feature border border-line bg-surface shadow-elev-1"
+            >
+              <div className={`relative h-40 ${material.texture}`}>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.9)_0_3px,transparent_4px),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.9)_0_3px,transparent_4px)]" />
+                {material.label && (
+                  <span className="absolute bottom-md right-md rounded-btn bg-link px-md py-sm text-xs font-bold uppercase text-white">
+                    {material.label}
+                  </span>
+                )}
+              </div>
+              <div className="p-lg">
+                <h3 className="font-bold text-heading-h4 text-ink">{material.name}</h3>
+                <p className="mt-sm text-sm text-ink-muted leading-relaxed">
+                  {material.description}
+                </p>
+                <ul className="mt-md space-y-xs text-sm text-ink">
+                  {material.points.map((point) => (
+                    <li key={point} className="flex items-center gap-xs">
+                      <CheckCircle2 className="h-4 w-4 text-link" aria-hidden />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
           ))}
         </div>
       </div>

@@ -7,8 +7,8 @@ const COLUMNS = [
       { href: "/order/vinyl", label: "Vinyl Banners" },
       { href: "/order/retractable", label: "Retractable Banners" },
       { href: "/sizes", label: "All Sizes & Pricing" },
-      { href: "/templates", label: "Templates", soon: true },
-      { href: "/graduation", label: "Graduation Banners", soon: true },
+      { href: "/order/artwork", label: "Upload Artwork" },
+      { href: "/help", label: "Artwork Guidelines" },
     ],
   },
   {
@@ -59,9 +59,6 @@ export function Footer() {
                       className="text-sm text-white/70 hover:text-white hover:underline inline-flex items-center gap-xs no-underline"
                     >
                       {item.label}
-                      {"soon" in item && item.soon && (
-                        <span className="text-[10px] font-bold text-warning">SOON</span>
-                      )}
                     </Link>
                   </li>
                 ))}

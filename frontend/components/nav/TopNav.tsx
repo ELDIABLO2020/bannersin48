@@ -6,22 +6,21 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
-const CENTER_LINKS: ReadonlyArray<{ href: string; label: string; soon?: boolean }> = [
-  { href: "/order/vinyl", label: "Vinyl Banners" },
-  { href: "/order/retractable", label: "Retractable Banners" },
-  { href: "/templates", label: "Templates", soon: true },
-  { href: "/graduation", label: "Graduation Banners", soon: true },
+const CENTER_LINKS: ReadonlyArray<{ href: string; label: string }> = [
+  { href: "/order/vinyl", label: "Banners" },
+  { href: "/sizes", label: "Sizes & Pricing" },
+  { href: "/order/retractable", label: "Retractable" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/help", label: "Help Center" },
 ];
 
-const SOON_TEMPLATES: ReadonlyArray<{ label: string; soon: boolean }> = [
-  { label: "Business", soon: true },
-  { label: "Restaurant", soon: true },
-  { label: "Contractor", soon: true },
-  { label: "School & Sports", soon: true },
-  { label: "Events", soon: true },
-  { label: "Real Estate", soon: true },
+const USE_CASES: ReadonlyArray<{ href: string; label: string }> = [
+  { href: "/order/vinyl?use=business", label: "Business" },
+  { href: "/order/vinyl?use=restaurant", label: "Restaurant" },
+  { href: "/order/vinyl?use=contractor", label: "Contractor" },
+  { href: "/order/vinyl?use=school", label: "School & Sports" },
+  { href: "/order/vinyl?use=events", label: "Events" },
+  { href: "/order/vinyl?use=real-estate", label: "Real Estate" },
 ];
 
 export function TopNav() {
@@ -33,15 +32,15 @@ export function TopNav() {
       <div className="mx-auto max-w-content flex items-center h-16 px-md lg:px-2xl">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-xs no-underline mr-xl" aria-label="Banners In 48 home">
-          <span className="font-display text-xl font-bold tracking-tight text-ink">BANNERS IN</span>
-          <span className="font-display text-xl font-bold text-cta">48</span>
+          <span className="font-display text-xl font-bold uppercase tracking-tight text-ink">Banners In</span>
+          <span className="rounded-sm bg-cta px-xs font-display text-xl font-bold text-cta-fg">48</span>
         </Link>
 
         {/* Center links */}
         <nav className="hidden lg:flex items-center gap-xs flex-1">
           {CENTER_LINKS.map((l) => (
             <div key={l.href} className="relative">
-              {l.label === "Templates" ? (
+              {l.label === "Banners" ? (
                 <button
                   type="button"
                   onMouseEnter={() => setTemplatesOpen(true)}
@@ -53,7 +52,6 @@ export function TopNav() {
                   )}
                 >
                   {l.label}
-                  {l.soon && <SoonDot />}
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
               ) : (
@@ -65,28 +63,26 @@ export function TopNav() {
                   )}
                 >
                   {l.label}
-                  {l.soon && <SoonDot />}
                 </Link>
               )}
 
-              {l.label === "Templates" && templatesOpen && (
+              {l.label === "Banners" && templatesOpen && (
                 <div
                   onMouseEnter={() => setTemplatesOpen(true)}
                   onMouseLeave={() => setTemplatesOpen(false)}
                   className="absolute top-full left-0 mt-1 w-56 bg-surface rounded-btn shadow-elev-3 border border-line py-sm z-dropdown"
                 >
-                  {SOON_TEMPLATES.map((s) => (
-                    <span
+                  {USE_CASES.map((s) => (
+                    <Link
                       key={s.label}
-                      className="flex items-center justify-between gap-xs px-md py-sm text-body text-ink-muted cursor-not-allowed"
-                      aria-disabled
+                      href={s.href}
+                      className="flex items-center justify-between gap-xs px-md py-sm text-body text-ink no-underline hover:bg-info-tint hover:text-link"
                     >
                       <span>{s.label}</span>
-                      <span className="text-[10px] font-bold text-warning">SOON</span>
-                    </span>
+                    </Link>
                   ))}
                   <p className="px-md pt-xs text-xs text-ink-muted border-t border-line mt-xs">
-                    Coming soon
+                    Use-case quick starts
                   </p>
                 </div>
               )}
@@ -133,7 +129,6 @@ export function TopNav() {
                 onClick={() => setMobileOpen(false)}
               >
                 {l.label}
-                {l.soon && <SoonDot />}
               </Link>
             ))}
             <div className="border-t border-line my-sm" />
@@ -158,14 +153,5 @@ export function TopNav() {
         </div>
       )}
     </header>
-  );
-}
-
-function SoonDot() {
-  return (
-    <span
-      aria-label="Coming soon"
-      className="inline-block w-1 h-1 rounded-pill bg-warning"
-    />
   );
 }

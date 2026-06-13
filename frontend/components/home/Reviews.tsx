@@ -1,68 +1,73 @@
 "use client";
 
-import { useRef } from "react";
-import { Card } from "@/components/ui/card";
-import { Star } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { useGSAP } from "@gsap/react";
-import { fadeUpIn } from "@/lib/gsap/registry";
+import Link from "next/link";
+import { ArrowRight, Building2, GraduationCap, Megaphone, Store } from "lucide-react";
 
-const REVIEWS = [
+const SCENARIOS = [
   {
-    name: "Jamie R.",
-    location: "Dallas, TX",
-    quote: "Ordered Friday at 8 PM, banner landed at the shop by Tuesday lunch. The price beat every other quote I got.",
+    icon: Store,
+    title: "Retail launches",
+    body: "Grand openings, seasonal sales, curbside pickup, and high-traffic storefront promotions.",
   },
   {
-    name: "Sam T.",
-    location: "Chicago, IL",
-    quote: "We needed a graduation banner in two days. Banners In 48 actually did it. FedEx driver even called on arrival.",
+    icon: Building2,
+    title: "Contractor sites",
+    body: "Jobsite visibility, safety messaging, sponsor placements, and directional signage.",
   },
   {
-    name: "Morgan K.",
-    location: "Toronto, ON",
-    quote: "The instant proof is exactly what I uploaded. No surprises. Will reorder for the next event.",
+    icon: GraduationCap,
+    title: "Schools & teams",
+    body: "Graduation banners, tournament signage, booster events, and campus announcements.",
+  },
+  {
+    icon: Megaphone,
+    title: "Events",
+    body: "Festivals, markets, fundraisers, trade booths, conferences, and last-minute campaigns.",
   },
 ] as const;
 
 export function Reviews() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-      fadeUpIn({
-        target: sectionRef.current.querySelectorAll(".rev-card"),
-        stagger: 0.12,
-      });
-    },
-    { scope: sectionRef },
-  );
-
   return (
-    <section ref={sectionRef} className="bg-surface" aria-labelledby="reviews-h">
+    <section className="bg-surface" aria-labelledby="reviews-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="text-center mb-2xl">
-          <h2 id="reviews-h" className="font-display text-section-h2 text-ink leading-section-h2">
-            What customers say
-          </h2>
+        <div className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2
+              id="reviews-h"
+              className="font-display uppercase text-[42px] sm:text-[58px] leading-[0.95] text-ink"
+            >
+              Built for banners people need fast
+            </h2>
+            <p className="mt-md max-w-2xl text-body text-ink-muted">
+              The homepage should sell the real jobs Banners In 48 can support, without fake
+              testimonials or inflated review counts.
+            </p>
+          </div>
+          <Link
+            href="/order/vinyl"
+            className="inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
+          >
+            Start your banner
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
-          {REVIEWS.map((r) => (
-            <Card key={r.name} variant="default" className="rev-card h-full flex flex-col">
-              <div className="flex items-center gap-xs mb-md" aria-label="5 out of 5 stars">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 text-cta fill-current" aria-hidden />
-                ))}
-              </div>
-              <p className="text-body text-ink leading-relaxed flex-1">&ldquo;{r.quote}&rdquo;</p>
-              <div className="mt-lg pt-md border-t border-line">
-                <p className="text-sm font-bold text-ink">{r.name}</p>
-                <p className="text-body-sm text-ink-muted">{r.location}</p>
-                <Badge variant="neutral" className="mt-xs">Sample review</Badge>
-              </div>
-            </Card>
-          ))}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-md">
+          {SCENARIOS.map((scenario) => {
+            const Icon = scenario.icon;
+            return (
+              <article
+                key={scenario.title}
+                className="rev-card rounded-feature border border-line bg-surface p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-3"
+              >
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-feature bg-info-tint text-link">
+                  <Icon className="h-6 w-6" aria-hidden />
+                </div>
+                <h3 className="mt-lg font-bold text-heading-h4 text-ink">{scenario.title}</h3>
+                <p className="mt-sm text-sm leading-relaxed text-ink-muted">{scenario.body}</p>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

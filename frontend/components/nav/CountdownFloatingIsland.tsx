@@ -19,13 +19,20 @@ export function CountdownFloatingIsland() {
     retry: 1,
   });
 
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
   const cutoffInfo = useMemo(() => {
+    if (now === null) {
+      return {
+        remainingMs: 0,
+        deliveryDow: "next delivery",
+      };
+    }
     if (apiData) {
       return {
         remainingMs: new Date(apiData.cutoffAtEt).getTime() - now,
@@ -36,7 +43,7 @@ export function CountdownFloatingIsland() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiData, now]);
 
-  const { padded } = formatCountdown(cutoffInfo.remainingMs);
+  const { padded } = now === null ? { padded: "-- : -- : --" } : formatCountdown(cutoffInfo.remainingMs);
 
   return (
     <div

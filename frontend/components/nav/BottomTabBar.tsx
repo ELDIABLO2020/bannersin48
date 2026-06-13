@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils/cn";
 const TABS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/orders", label: "Orders", icon: Package },
-  { href: "/design", label: "Design", icon: PenTool, soon: true },
-  { href: "/templates", label: "Templates", icon: LayoutGrid, soon: true },
+  { href: "/order/artwork", label: "Artwork", icon: PenTool },
+  { href: "/sizes", label: "Sizes", icon: LayoutGrid },
   { href: "/dashboard", label: "Account", icon: User },
 ] as const;
 
@@ -40,12 +40,6 @@ export function BottomTabBar() {
               >
                 <Icon className="h-6 w-6" strokeWidth={2} aria-hidden />
                 <span className="text-[11px] mt-xs font-bold leading-none">{tab.label}</span>
-                {"soon" in tab && tab.soon && (
-                  <span
-                    aria-label="Coming soon"
-                    className="absolute top-1 right-1/4 w-1 h-1 rounded-pill bg-warning"
-                  />
-                )}
               </Link>
             </li>
           );

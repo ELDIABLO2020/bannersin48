@@ -1,88 +1,163 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
-import { Card } from "@/components/ui/card";
 import { formatUsd } from "@/lib/utils/format";
-import { ArrowRight, Star } from "lucide-react";
-import { useGSAP } from "@gsap/react";
-import { fadeUpIn } from "@/lib/gsap/registry";
+import { ArrowRight, BadgeCheck, Truck } from "lucide-react";
+
+const FALLBACK_SIZES = [
+  {
+    id: "fallback-2x4",
+    label: "2' x 4'",
+    widthFt: 2,
+    heightFt: 4,
+    sqFt: 8,
+    total: 42,
+    note: "Small events and announcements",
+  },
+  {
+    id: "fallback-3x6",
+    label: "3' x 6'",
+    widthFt: 3,
+    heightFt: 6,
+    sqFt: 18,
+    total: 82,
+    note: "Storefronts and booth displays",
+  },
+  {
+    id: "fallback-4x8",
+    label: "4' x 8'",
+    widthFt: 4,
+    heightFt: 8,
+    sqFt: 32,
+    total: 138,
+    note: "High-visibility promotions",
+  },
+  {
+    id: "fallback-2x8",
+    label: "2' x 8'",
+    widthFt: 2,
+    heightFt: 8,
+    sqFt: 16,
+    total: 74,
+    note: "Long and narrow storefront spaces",
+  },
+  {
+    id: "fallback-custom",
+    label: "Custom",
+    widthFt: 0,
+    heightFt: 0,
+    sqFt: 0,
+    total: 0,
+    note: "Any size up to 10' x 10'",
+  },
+] as const;
+
+type SizeCard = {
+  id: string;
+  label: string;
+  widthFt: number;
+  heightFt: number;
+  sqFt: number;
+  total: number;
+  note?: string;
+};
 
 export function PopularSizes() {
-  const sectionRef = useRef<HTMLDivElement>(null);
   const { data, isLoading } = useQuery({
     queryKey: ["popular-sizes"],
     queryFn: () => getApiClient().getPopularSizes(),
     staleTime: 5 * 60_000,
   });
 
-  const sizes = (data ?? []).slice(0, 5);
-
-  useGSAP(
-    () => {
-      if (!sectionRef.current || isLoading || sizes.length === 0) return;
-      fadeUpIn({
-        target: sectionRef.current.querySelectorAll(".ps-card"),
-        stagger: 0.08,
-      });
-    },
-    { scope: sectionRef, dependencies: [isLoading, sizes.length] },
-  );
+  const apiSizes = (data ?? []).slice(0, 5).map((s) => ({
+    ...s,
+    note: s.sqFt >= 30 ? "High-visibility promotions" : "Fast-turn banner projects",
+  }));
+  const sizes: readonly SizeCard[] = apiSizes.length > 0 ? apiSizes : FALLBACK_SIZES;
+  const getLabel = (size: SizeCard) =>
+    size.widthFt > 0 && size.heightFt > 0 ? `${size.widthFt}' x ${size.heightFt}'` : size.label;
 
   return (
-    <section ref={sectionRef} className="bg-surface-tint" aria-labelledby="popular-sizes-h">
+    <section className="bg-surface" aria-labelledby="popular-sizes-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="ps-heading text-center mb-2xl">
-          <h2 id="popular-sizes-h" className="font-display text-section-h2 text-ink leading-section-h2">
-            Popular banner sizes
-          </h2>
-          <p className="text-body text-ink-muted mt-md">
-            Quick-pick 13 oz vinyl. All prices include $10 flat shipping.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-md">
-          {isLoading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <Card key={i} className="animate-pulse-slow h-40" />
-              ))
-            : sizes.map((s, idx) => (
-                <Link
-                  key={s.id}
-                  href={`/order/vinyl?w=${s.widthFt}&h=${s.heightFt}`}
-                  className="ps-card block no-underline"
-                >
-                  <Card
-                    className={`h-full transition-all ${
-                      idx === 0
-                        ? "bg-info-tint border border-link"
-                        : "hover:bg-info-tint hover:border-link hover:border"
-                    }`}
-                  >
-                    <p className="text-heading-h4 font-bold text-ink">{s.label}</p>
-                    <p className="text-body-sm text-ink-muted mt-xs">{s.sqFt} sq ft</p>
-                    <p className="text-heading-h4 font-bold text-ink mt-md">
-                      {formatUsd(s.total)}
-                    </p>
-                    <p className="text-body-sm text-ink-muted mt-xs">incl. $10 shipping</p>
-                    {idx === 0 && (
-                      <p className="text-body-sm text-link font-bold mt-md flex items-center gap-xs">
-                        <Star className="h-3 w-3 fill-current" aria-hidden /> Most popular
-                      </p>
-                    )}
-                  </Card>
-                </Link>
-              ))}
-        </div>
-        <div className="ps-cta text-center mt-2xl">
+        <div className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2
+              id="popular-sizes-h"
+              className="font-display uppercase text-[42px] sm:text-[58px] leading-[0.95] text-ink"
+            >
+              Popular sizes & pricing
+            </h2>
+            <p className="text-body text-ink-muted mt-md max-w-2xl">
+              High quality, fast turnaround, and clear pricing before checkout.
+            </p>
+          </div>
           <Link
             href="/sizes"
-            className="inline-flex items-center gap-xs bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover"
+            className="inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
           >
-            See all sizes & prices
+            View all sizes
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md">
+          {sizes.map((s, idx) => {
+            const isCustom = s.label.toLowerCase() === "custom";
+            return (
+              <Link
+                key={s.id}
+                href={isCustom ? "/order/vinyl" : `/order/vinyl?w=${s.widthFt}&h=${s.heightFt}`}
+                className="ps-card group block no-underline"
+              >
+                <article
+                  className={`relative flex min-h-[240px] flex-col rounded-feature border bg-surface p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-3 ${
+                    idx === 0 ? "border-cta ring-1 ring-cta" : "border-line hover:border-link"
+                  }`}
+                >
+                  {idx === 0 && (
+                    <span className="absolute -top-sm left-lg rounded-sm bg-cta px-sm py-xs text-[11px] font-bold uppercase text-cta-fg">
+                      Quick pick
+                    </span>
+                  )}
+                  <h3 className="font-display text-[30px] uppercase leading-none text-ink">
+                    {getLabel(s)}
+                  </h3>
+                  <p className="mt-md min-h-[44px] text-sm text-ink-muted">{s.note}</p>
+                  <div className="mt-auto pt-lg">
+                    {isCustom ? (
+                      <p className="text-heading-h4 font-bold text-ink">Built to fit</p>
+                    ) : (
+                      <>
+                        <p className="text-sm text-ink-muted">{s.sqFt} sq ft</p>
+                        <p className="mt-xs text-heading-h4 font-bold text-ink">
+                          {formatUsd(s.total)}
+                        </p>
+                      </>
+                    )}
+                    <span className="mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn bg-cta px-md py-sm text-sm font-bold text-cta-fg transition-colors group-hover:bg-cta-hover">
+                      {isCustom ? "Get a quote" : "Order now"}
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </span>
+                  </div>
+                </article>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-xl flex flex-col gap-sm text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-center">
+          <span className="inline-flex items-center justify-center gap-xs">
+            <Truck className="h-4 w-4 text-link" aria-hidden />
+            Delivery promise shown before checkout
+          </span>
+          <span className="hidden sm:inline text-ink-muted">|</span>
+          <span className="inline-flex items-center justify-center gap-xs">
+            <BadgeCheck className="h-4 w-4 text-link" aria-hidden />
+            Proof approval starts production
+          </span>
         </div>
       </div>
     </section>

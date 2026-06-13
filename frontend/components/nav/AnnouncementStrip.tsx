@@ -15,18 +15,21 @@ export function AnnouncementStrip() {
     retry: 1,
   });
 
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
   const remainingMs = useMemo(() => {
+    if (now === null) return 0;
     if (apiData) return apiData.cutoffInMs;
     return getNextCutoffFallback(new Date(now)).remainingMs;
   }, [apiData, now]);
 
-  const { padded: countdownPadded } = formatCountdown(remainingMs);
+  const { padded: countdownPadded } =
+    now === null ? { padded: "-- : -- : --" } : formatCountdown(remainingMs);
 
   return (
     <div className="bg-navy-deep text-white text-sm">
