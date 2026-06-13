@@ -609,6 +609,9 @@ svg {
   display: block;
   margin-bottom: 8px;
   color: var(--cta);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   content: "CLEAR PRICING.";
 }
 
@@ -625,8 +628,10 @@ svg {
 
 .popular .size-card:hover,
 .popular .size-card.is-selected {
-  border-color: transparent;
+  border-color: rgba(255, 255, 255, 0.45);
   background: linear-gradient(180deg, var(--cta-hover), var(--cta));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  transform: scale(1.03);
 }
 
 .popular .size-card strong {
@@ -1162,7 +1167,7 @@ body.force-desktop .hero {
   }
 
   .popular .section-heading h2::before {
-    font-size: inherit;
+    font-size: 18px;
   }
 
   .section-heading--split a {
@@ -1373,14 +1378,16 @@ body.force-desktop .hero {
   }
 }
 
-@media (max-width: 1023px) {
-  body.force-mobile .desktop-only {
-    display: none;
-  }
+body.force-mobile .desktop-only {
+  display: none;
+}
 
-  body.force-mobile .mobile-only {
-    display: block;
-  }
+body.force-mobile .mobile-only {
+  display: block;
+}
+
+body.force-mobile .hero {
+  padding: 48px 0 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

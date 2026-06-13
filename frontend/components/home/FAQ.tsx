@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import gsap from "gsap";
+import { prefersReducedMotion } from "@/lib/gsap/registry";
 
 const FAQS = [
   {
@@ -29,6 +31,62 @@ const FAQS = [
 
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
+  const answersRef = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  const toggle = useCallback(
+    (i: number) => {
+      const nextOpen = open === i ? null : i;
+      const reduced = prefersReducedMotion();
+
+      // Animate closing the currently open panel
+      if (open !== null && open !== i) {
+        const currentAnswer = answersRef.current.get(open);
+        if (currentAnswer) {
+          gsap.to(currentAnswer, {
+            height: 0,
+            opacity: 0,
+            duration: reduced ? 0 : 0.25,
+            ease: "power2.in",
+          });
+        }
+      }
+
+      // Animate opening the new panel
+      if (nextOpen !== null && nextOpen !== open) {
+        const newAnswer = answersRef.current.get(nextOpen);
+        if (newAnswer) {
+          // Set height to auto first, then measure
+          newAnswer.style.display = "block";
+          newAnswer.style.height = "auto";
+          const targetHeight = newAnswer.offsetHeight;
+          newAnswer.style.height = "0px";
+          newAnswer.style.opacity = "0";
+
+          gsap.to(newAnswer, {
+            height: targetHeight,
+            opacity: 1,
+            duration: reduced ? 0 : 0.3,
+            ease: "power2.out",
+          });
+        }
+      } else if (nextOpen === null && open !== null) {
+        // Closing the currently open panel without opening a new one
+        const currentAnswer = answersRef.current.get(open);
+        if (currentAnswer) {
+          gsap.to(currentAnswer, {
+            height: 0,
+            opacity: 0,
+            duration: reduced ? 0 : 0.25,
+            ease: "power2.in",
+          });
+        }
+      }
+
+      setOpen(nextOpen);
+    },
+    [open],
+  );
+
   return (
     <section className="bg-surface-tint" aria-labelledby="faq-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
@@ -46,7 +104,7 @@ export function FAQ() {
                   type="button"
                   className="w-full flex items-center justify-between gap-md p-lg text-left"
                   aria-expanded={isOpen}
-                  onClick={() => setOpen(isOpen ? null : i)}
+                  onClick={() => toggle(i)}
                 >
                   <span className="font-bold text-body text-ink">{f.q}</span>
                   <ChevronDown
@@ -57,11 +115,22 @@ export function FAQ() {
                     aria-hidden
                   />
                 </button>
-                {isOpen && (
+                <div
+                  ref={(el) => {
+                    if (el) answersRef.current.set(i, el);
+                    else answersRef.current.delete(i);
+                  }}
+                  className="overflow-hidden"
+                  style={{
+                    height: isOpen ? "auto" : 0,
+                    opacity: isOpen ? 1 : 0,
+                    display: isOpen ? undefined : "none",
+                  }}
+                >
                   <div className="px-lg pb-lg text-body text-ink-muted leading-relaxed">
                     {f.a}
                   </div>
-                )}
+                </div>
               </li>
             );
           })}

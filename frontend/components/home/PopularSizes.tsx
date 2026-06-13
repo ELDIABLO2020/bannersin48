@@ -1,26 +1,40 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
 import { Card } from "@/components/ui/card";
 import { formatUsd } from "@/lib/utils/format";
 import { ArrowRight, Star } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import { fadeUpIn } from "@/lib/gsap/registry";
 
 export function PopularSizes() {
+  const sectionRef = useRef<HTMLDivElement>(null);
   const { data, isLoading } = useQuery({
     queryKey: ["popular-sizes"],
     queryFn: () => getApiClient().getPopularSizes(),
     staleTime: 5 * 60_000,
   });
 
-  // Show first 5 quick-picks on the homepage
   const sizes = (data ?? []).slice(0, 5);
 
+  useGSAP(
+    () => {
+      if (!sectionRef.current || isLoading || sizes.length === 0) return;
+      fadeUpIn({
+        target: sectionRef.current.querySelectorAll(".ps-card"),
+        stagger: 0.08,
+      });
+    },
+    { scope: sectionRef, dependencies: [isLoading, sizes.length] },
+  );
+
   return (
-    <section className="bg-surface-tint" aria-labelledby="popular-sizes-h">
+    <section ref={sectionRef} className="bg-surface-tint" aria-labelledby="popular-sizes-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="text-center mb-2xl">
+        <div className="ps-heading text-center mb-2xl">
           <h2 id="popular-sizes-h" className="font-display text-section-h2 text-ink leading-section-h2">
             Popular banner sizes
           </h2>
@@ -37,7 +51,7 @@ export function PopularSizes() {
                 <Link
                   key={s.id}
                   href={`/order/vinyl?w=${s.widthFt}&h=${s.heightFt}`}
-                  className="block no-underline"
+                  className="ps-card block no-underline"
                 >
                   <Card
                     className={`h-full transition-all ${
@@ -61,12 +75,12 @@ export function PopularSizes() {
                 </Link>
               ))}
         </div>
-        <div className="text-center mt-2xl">
+        <div className="ps-cta text-center mt-2xl">
           <Link
             href="/sizes"
             className="inline-flex items-center gap-xs bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover"
           >
-            See all sizes &amp; prices
+            See all sizes & prices
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </div>

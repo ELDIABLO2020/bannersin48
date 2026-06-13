@@ -1,6 +1,11 @@
+"use client";
+
+import { useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatUsdFromMajor } from "@/lib/utils/format";
+import { useGSAP } from "@gsap/react";
+import { slideInLeft } from "@/lib/gsap/registry";
 
 const MATERIALS = [
   {
@@ -25,8 +30,21 @@ const MATERIALS = [
 ];
 
 export function MaterialsBand() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      slideInLeft({
+        target: sectionRef.current.querySelectorAll(".mat-card"),
+        stagger: 0.15,
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="bg-surface" aria-labelledby="materials-h">
+    <section ref={sectionRef} className="bg-surface" aria-labelledby="materials-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <h2 id="materials-h" className="font-display text-section-h2 text-ink text-center leading-section-h2">
           Premium vinyl, three weights
@@ -36,7 +54,7 @@ export function MaterialsBand() {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-lg mt-2xl">
           {MATERIALS.map((m) => (
-            <Card key={m.name} variant="feature" className="h-full flex flex-col">
+            <Card key={m.name} variant="feature" className="mat-card h-full flex flex-col">
               <h3 className="font-bold text-heading-h4 text-ink">{m.name}</h3>
               <p className="text-heading-h4 font-bold text-cta mt-md">
                 {formatUsdFromMajor(m.pricePerSqFt)}

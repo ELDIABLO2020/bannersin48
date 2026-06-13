@@ -1,3 +1,9 @@
+"use client";
+
+import { useRef } from "react";
+import { useGSAP } from "@gsap/react";
+import { fadeUpIn } from "@/lib/gsap/registry";
+
 const STEPS = [
   {
     n: 1,
@@ -22,8 +28,22 @@ const STEPS = [
 ] as const;
 
 export function HowItWorks() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      fadeUpIn({
+        target: sectionRef.current.querySelectorAll(".hw-step"),
+        stagger: 0.2,
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
     <section
+      ref={sectionRef}
       className="bg-navy-deep text-white"
       aria-labelledby="how-h"
     >
@@ -33,7 +53,7 @@ export function HowItWorks() {
         </h2>
         <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl mt-2xl">
           {STEPS.map((s) => (
-            <li key={s.n} className="relative">
+            <li key={s.n} className="hw-step relative">
               <div
                 className="inline-flex items-center justify-center w-10 h-10 rounded-pill font-bold text-body bg-link text-white mb-md"
                 aria-hidden

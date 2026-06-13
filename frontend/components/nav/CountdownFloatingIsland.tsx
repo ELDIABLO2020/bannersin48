@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
 import { formatCountdown } from "@/lib/utils/time";
+import { getNextCutoffFallback } from "@/lib/utils/countdown-fallback";
 
 /**
  * Mobile-only floating countdown chip. Hidden on desktop.
  * Updates client-side between refetches of the next-cutoff endpoint.
+ * Falls back to client-side computation when the API is unavailable.
  */
 export function CountdownFloatingIsland() {
-  const { data } = useQuery({
+  const { data: apiData } = useQuery({
     queryKey: ["next-cutoff"],
     queryFn: () => getApiClient().getNextCutoff(),
     refetchInterval: 60_000,
+    retry: 1,
   });
 
   const [now, setNow] = useState(() => Date.now());
@@ -22,14 +25,23 @@ export function CountdownFloatingIsland() {
     return () => clearInterval(id);
   }, []);
 
-  if (!data) return null;
-  const cutoffTs = new Date(data.cutoffAtEt).getTime();
-  const { padded } = formatCountdown(cutoffTs - now);
+  const cutoffInfo = useMemo(() => {
+    if (apiData) {
+      return {
+        remainingMs: new Date(apiData.cutoffAtEt).getTime() - now,
+        deliveryDow: apiData.guaranteedDeliveryDow,
+      };
+    }
+    return getNextCutoffFallback(new Date(now));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiData, now]);
+
+  const { padded } = formatCountdown(cutoffInfo.remainingMs);
 
   return (
     <div
       className="lg:hidden fixed left-1/2 -translate-x-1/2 z-sticky pointer-events-none"
-        style={{ bottom: 76 }}
+      style={{ bottom: 76 }}
     >
       <div
         className="rounded-card shadow-elev-2 px-md py-sm text-center text-white"
@@ -38,7 +50,7 @@ export function CountdownFloatingIsland() {
       >
         <div className="text-[10px] uppercase tracking-wider text-white/60">Order within</div>
         <div className="font-display text-base font-bold tabular-nums leading-none">{padded}</div>
-        <div className="text-[10px] text-white/60">Cutoff {data.guaranteedDeliveryDow} 12:00 PM</div>
+        <div className="text-[10px] text-white/60">Cutoff {cutoffInfo.deliveryDow} 12:00 PM</div>
       </div>
     </div>
   );

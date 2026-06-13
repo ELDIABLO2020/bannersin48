@@ -1,6 +1,11 @@
+"use client";
+
+import { useRef } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Shield, Clock, DollarSign, Truck } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import { fadeUpIn } from "@/lib/gsap/registry";
 
 const POINTS = [
   { icon: Clock, label: "Order by 9:00 PM ET" },
@@ -10,11 +15,24 @@ const POINTS = [
 ];
 
 export function GuaranteePanel() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      fadeUpIn({
+        target: sectionRef.current.querySelectorAll(".gp-row"),
+        stagger: 0.1,
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="bg-surface-tint" aria-labelledby="guarantee-h">
+    <section ref={sectionRef} className="bg-surface-tint" aria-labelledby="guarantee-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <Card variant="default" className="bg-surface p-2xl">
-          <div className="text-center">
+          <div className="gp-heading text-center">
             <h2 id="guarantee-h" className="font-display text-section-h2 text-ink leading-section-h2">
               The 48-hour promise
             </h2>
@@ -29,7 +47,7 @@ export function GuaranteePanel() {
               return (
                 <li
                   key={p.label}
-                  className="flex items-center gap-md p-md rounded-feature bg-surface-tint"
+                  className="gp-row flex items-center gap-md p-md rounded-feature bg-surface-tint"
                 >
                   <div
                     className="rounded-pill p-sm shrink-0"
@@ -42,7 +60,7 @@ export function GuaranteePanel() {
               );
             })}
           </ul>
-          <div className="text-center mt-2xl">
+          <div className="gp-cta text-center mt-2xl">
             <Link
               href="/guarantee"
               className="inline-block bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover"

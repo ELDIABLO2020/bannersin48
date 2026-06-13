@@ -1,6 +1,11 @@
+"use client";
+
+import { useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useGSAP } from "@gsap/react";
+import { fadeUpIn } from "@/lib/gsap/registry";
 
 const REVIEWS = [
   {
@@ -21,8 +26,21 @@ const REVIEWS = [
 ] as const;
 
 export function Reviews() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      fadeUpIn({
+        target: sectionRef.current.querySelectorAll(".rev-card"),
+        stagger: 0.12,
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="bg-surface" aria-labelledby="reviews-h">
+    <section ref={sectionRef} className="bg-surface" aria-labelledby="reviews-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="text-center mb-2xl">
           <h2 id="reviews-h" className="font-display text-section-h2 text-ink leading-section-h2">
@@ -31,7 +49,7 @@ export function Reviews() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
           {REVIEWS.map((r) => (
-            <Card key={r.name} variant="default" className="h-full flex flex-col">
+            <Card key={r.name} variant="default" className="rev-card h-full flex flex-col">
               <div className="flex items-center gap-xs mb-md" aria-label="5 out of 5 stars">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="h-4 w-4 text-cta fill-current" aria-hidden />

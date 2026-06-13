@@ -1,7 +1,12 @@
+"use client";
+
+import { useRef } from "react";
 import Link from "next/link";
 import { Upload, PenTool, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useGSAP } from "@gsap/react";
+import { fadeUpIn } from "@/lib/gsap/registry";
 
 const ACTIONS = [
   {
@@ -27,8 +32,21 @@ const ACTIONS = [
 ] as const;
 
 export function QuickActions() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      fadeUpIn({
+        target: sectionRef.current.querySelectorAll(".qa-card"),
+        stagger: 0.1,
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="bg-surface" aria-label="Quick start options">
+    <section ref={sectionRef} className="bg-surface" aria-label="Quick start options">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
           {ACTIONS.map((a) => {
@@ -37,7 +55,7 @@ export function QuickActions() {
               <Link
                 key={a.href}
                 href={a.href}
-                className="block no-underline"
+                className="qa-card block no-underline"
                 aria-label={a.label}
               >
                 <Card variant="feature" className="hover:shadow-elev-3 transition-shadow h-full">
