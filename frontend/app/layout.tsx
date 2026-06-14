@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { Providers } from "./providers";
 import { TopNav } from "@/components/nav/TopNav";
 import { BottomTabBar } from "@/components/nav/BottomTabBar";
@@ -6,6 +7,14 @@ import { AnnouncementStrip } from "@/components/nav/AnnouncementStrip";
 import { Footer } from "@/components/home/Footer";
 import { CountdownFloatingIsland } from "@/components/nav/CountdownFloatingIsland";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
+  preload: true,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
@@ -47,14 +56,14 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Banners In 48",
   },
   formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: "var(--color-bg-navy-base)",
+  themeColor: "var(--color-bg-lightest)",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -62,8 +71,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col">
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen flex flex-col font-body">
         <Providers>
           <AnnouncementStrip />
           <TopNav />

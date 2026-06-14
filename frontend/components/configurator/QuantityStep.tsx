@@ -1,6 +1,7 @@
 "use client";
 
-import { useConfigurator, MAX_QUANTITY_PER_LINE } from "@/lib/stores/configurator";
+import { useConfigurator } from "@/lib/stores/configurator";
+import { MAX_QUANTITY_PER_LINE } from "@bannersin48/shared";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, Info } from "lucide-react";
