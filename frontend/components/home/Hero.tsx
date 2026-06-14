@@ -90,7 +90,7 @@ export function Hero() {
         aria-hidden
       />
 
-      <div className="mx-auto max-w-hero px-md lg:px-2xl py-3xl lg:py-[96px]">
+      <div className="mx-auto max-w-hero px-md lg:px-2xl pt-md-lg pb-2xl lg:pt-xl lg:pb-3xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-end min-h-[620px]">
           <div className="lg:col-span-7 max-w-4xl">
             <p className="hero-kicker text-strong-accent text-sm font-semibold mb-md">
