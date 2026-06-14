@@ -63,34 +63,33 @@ export function CountdownCard({ variant = "hero" }: Props) {
   return (
     <div
       className={cn(
-        "rounded-card text-center text-white",
+        "rounded-card text-left text-ink bg-soft-accent",
         variant === "hero" ? "p-3xl" : "p-xl",
       )}
-      style={{ backgroundColor: "var(--color-bg-navy-deep)" }}
       aria-live="polite"
     >
-      <p className="text-xs uppercase tracking-widest text-white/60">Order within</p>
+      <p className="text-xs font-semibold tracking-wide text-ink-muted">Order within</p>
       <p
         className={cn(
-          "font-display font-bold tabular-nums leading-none mt-sm",
+          "font-display font-extrabold tabular-nums leading-none mt-xs text-strong-accent tracking-tight",
           variant === "hero" ? "text-[40px] sm:text-[48px]" : "text-2xl",
         )}
       >
         {padded}
       </p>
-      <p className="text-sm text-white/60 mt-sm">
+      <p className="text-sm text-ink-muted mt-sm">
         <Clock className="inline h-3.5 w-3.5 mr-1 -mt-1" aria-hidden />
-        Today&rsquo;s cutoff: <span className="text-white font-bold">9:00 PM ET</span>
+        Today&rsquo;s cutoff: <span className="text-ink font-bold">9:00 PM ET</span>
       </p>
-      <p className="text-sm text-white mt-md">
+      <p className="text-sm text-ink mt-md">
         to receive by{" "}
-        <span className="text-cta font-bold">{cutoffInfo.deliveryDow}</span> at{" "}
-        <span className="text-cta font-bold">12:00 PM</span>
+        <span className="text-strong-accent font-bold">{cutoffInfo.deliveryDow}</span> at{" "}
+        <span className="text-strong-accent font-bold">12:00 PM</span>
       </p>
       {/* Progress bar */}
-      <div className="mt-lg h-1 bg-white/10 rounded-pill overflow-hidden">
+      <div className="mt-lg h-1.5 bg-white/60 rounded-pill overflow-hidden">
         <div
-          className="h-full bg-link transition-all"
+          className="h-full bg-strong-accent transition-all"
           style={{ width: `${progressPct}%` }}
         />
       </div>

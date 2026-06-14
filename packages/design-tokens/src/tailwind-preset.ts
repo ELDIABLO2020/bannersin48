@@ -1,6 +1,11 @@
 /**
  * Tailwind CSS preset derived from design tokens.
  * Consumed by frontend/tailwind.config.ts.
+ *
+ * Ecwid-style: semantic utility names point at the new Ecwid palette.
+ * Legacy utility names (`bg-navy-base`, `bg-info-tint`, etc.) are
+ * preserved where possible to keep downstream components compiling
+ * while the re-skin rolls out.
  */
 
 import type { Config } from "tailwindcss";
@@ -14,6 +19,30 @@ export const tailwindPreset: Partial<Config> = {
   theme: {
     extend: {
       colors: {
+        // ── Ecwid 6-role backgrounds ──────────────────────────────────────
+        lightest: colors.lightest,
+        light: colors.light,
+        "soft-accent": colors.softAccent,
+        "soft-accent-2": colors.softAccent2,
+        darkest: colors.darkest,
+
+        // Strong accent (Ecwid green) — exposed both as `strong-accent` and
+        // as `cta` so existing components keep compiling.
+        "strong-accent": {
+          DEFAULT: colors.strongAccent,
+          hover: colors.strongAccentHover,
+          active: colors.strongAccentActive,
+          fg: colors.strongAccentText,
+        },
+        cta: {
+          DEFAULT: colors.ctaPrimary,
+          hover: colors.ctaAccent,
+          active: colors.ctaActive,
+          fg: colors.ctaText,
+        },
+
+        // Legacy background utilities — kept as aliases so downstream
+        // components continue to compile. They now resolve to Ecwid values.
         "navy-base": colors.navyBase,
         "navy-deep": colors.navyDeep,
         "navy-dark": colors.navyDark,
@@ -22,42 +51,63 @@ export const tailwindPreset: Partial<Config> = {
         "surface-tint": colors.surfaceTint,
         "surface-very-light": colors.surfaceVeryLight,
         "info-tint": colors.infoTint,
-        cta: {
-          DEFAULT: colors.ctaPrimary,
-          hover: colors.ctaAccent,
-          active: colors.ctaActive,
-          fg: colors.ctaText,
-        },
+        black: colors.black,
+
+        // Links — Ecwid-green based for cohesion
         link: {
           DEFAULT: colors.link,
           hover: colors.linkHover,
           active: colors.linkActive,
         },
+
+        // Ink (text colors)
         ink: {
           DEFAULT: colors.textDark,
           charcoal: colors.textCharcoal,
           muted: colors.textMedium,
           light: colors.textLight,
         },
+        dark: {
+          DEFAULT: colors.dark,
+          muted: colors.darkMuted,
+        },
+        muted: colors.muted,
+
+        // Lines & dividers
         line: {
           DEFAULT: colors.border,
           input: colors.borderInput,
           divider: colors.divider,
         },
+
+        // Status
         danger: colors.error,
-        success: { bg: colors.badgeSuccessBg, fg: colors.badgeSuccessText },
-        warning: { bg: colors.badgeWarningBg, fg: colors.badgeWarningText },
+        error: colors.error,
+        warning: colors.warning,
+        success: {
+          DEFAULT: colors.success,
+          bg: colors.badgeSuccessBg,
+          fg: colors.badgeSuccessText,
+        },
         "badge-error": { bg: colors.badgeErrorBg, fg: colors.badgeErrorText },
-        "tab-bar": "rgba(255, 255, 255, 0.08)",
+        "badge-warning": { bg: colors.badgeWarningBg, fg: colors.badgeWarningText },
+
+        // Badges (legacy nested shapes used by `bg-warning-bg` etc.)
+        "warning-bg": colors.badgeWarningBg,
+        "warning-fg": colors.badgeWarningText,
+
+        // Tab bar (legacy)
+        "tab-bar": shadow.tabBarBorder,
       },
       fontFamily: {
         display: [...FONT_DISPLAY],
         body: [...FONT_BODY],
         input: [...FONT_INPUT],
+        sans: [...FONT_BODY],
       },
       fontSize: {
-        "hero-h1": [`${typography.fontSize.heroH1}px`, { lineHeight: `${typography.lineHeight.heroH1}px` }],
-        "section-h2": [`${typography.fontSize.sectionH2}px`, { lineHeight: `${typography.lineHeight.sectionH2}px` }],
+        "hero-h1": [`${typography.fontSize.heroH1}px`, { lineHeight: `${typography.lineHeight.heroH1}px`, letterSpacing: typography.letterSpacing.tighter }],
+        "section-h2": [`${typography.fontSize.sectionH2}px`, { lineHeight: `${typography.lineHeight.sectionH2}px`, letterSpacing: typography.letterSpacing.tight }],
         "heading-h4": [`${typography.fontSize.headingH4}px`, { lineHeight: `${typography.lineHeight.headingH4}px` }],
         "heading-h5": [`${typography.fontSize.headingH5}px`, { lineHeight: `${typography.lineHeight.headingH5}px` }],
         body: [`${typography.fontSize.body}px`, { lineHeight: `${typography.lineHeight.body}px` }],
@@ -65,8 +115,15 @@ export const tailwindPreset: Partial<Config> = {
         input: [`${typography.fontSize.input}px`, { lineHeight: `${typography.lineHeight.input}px` }],
         "list-item": [`${typography.fontSize.listItem}px`, { lineHeight: `${typography.lineHeight.listItem}px` }],
       },
+      letterSpacing: {
+        tight: typography.letterSpacing.tight,
+        tighter: typography.letterSpacing.tighter,
+        wide: typography.letterSpacing.wide,
+        widest: typography.letterSpacing.widest,
+      },
       borderRadius: {
         none: `${radius.none}px`,
+        sm: `${radius.sm}px`,
         modal: `${radius.modal}px`,
         btn: `${radius.button}px`,
         feature: `${radius.featureCard}px`,

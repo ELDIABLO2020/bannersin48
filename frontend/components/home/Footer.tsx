@@ -45,7 +45,7 @@ const PAYMENT_METHODS = ["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", 
 
 export function Footer() {
   return (
-    <footer className="bg-navy-base text-white">
+    <footer className="bg-darkest text-white">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
           {COLUMNS.map((col) => (
@@ -67,7 +67,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-3xl pt-xl border-t border-white/10 flex flex-col lg:flex-row lg:items-center gap-md">
+        <div className="mt-3xl pt-xl border-t border-white/15 flex flex-col lg:flex-row lg:items-center gap-md">
           <p className="text-sm text-white/60">
             &copy; 2026 Banners In 48 &middot; BannersIn48.com
           </p>
@@ -80,7 +80,7 @@ export function Footer() {
             {PAYMENT_METHODS.map((m) => (
               <span
                 key={m}
-                className="text-[10px] font-bold text-white/80 border border-white/20 rounded-sm px-sm py-xs"
+                className="text-[10px] font-bold text-white/80 border border-white/25 rounded-sm px-sm py-xs"
               >
                 {m}
               </span>

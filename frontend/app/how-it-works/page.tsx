@@ -28,7 +28,7 @@ export default function HowItWorksPage() {
           {STEPS.map((s) => (
             <li key={s.n} className="flex items-start gap-md bg-surface rounded-card p-lg shadow-elev-1">
               <div
-                className="inline-flex items-center justify-center w-10 h-10 rounded-pill font-bold text-body bg-link text-white shrink-0"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-pill font-bold text-body bg-strong-accent text-white shrink-0"
                 aria-hidden
               >
                 {s.n}

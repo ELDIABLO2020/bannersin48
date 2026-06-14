@@ -7,25 +7,24 @@ import { Button } from "@/components/ui/button";
 export function EmailCapture() {
   return (
     <section
-      className="relative isolate overflow-hidden bg-navy-base text-white"
+      className="relative isolate overflow-hidden bg-soft-accent text-ink"
       aria-labelledby="capture-h"
     >
+      {/* Subtle soft-accent-2 wash on the trailing edge */}
       <div
-        className="absolute inset-0 -z-10 bg-cover bg-center opacity-[0.35]"
-        style={{ backgroundImage: "url('/images/hero-print-workshop.png')" }}
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_50%,#E0F2FE_0%,transparent_55%)]"
         aria-hidden
       />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(8,22,34,0.98),rgba(8,22,34,0.82))]" aria-hidden />
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="grid grid-cols-1 gap-xl lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="ec-copy">
             <h2
               id="capture-h"
-              className="font-display uppercase text-[42px] sm:text-[64px] leading-[0.95]"
+              className="font-display font-extrabold tracking-tight text-[clamp(34px,5vw,58px)] leading-[1.05] text-ink"
             >
               Ready to get your banner in 48 hours?
             </h2>
-            <p className="mt-md max-w-2xl text-body text-white/[0.76]">
+            <p className="mt-md max-w-2xl text-body text-ink-muted">
               Order now, upload your artwork, and keep your project moving with a clear
               cutoff window and delivery promise.
             </p>
@@ -38,7 +37,7 @@ export function EmailCapture() {
               </Button>
             </Link>
             <Link href="/order/artwork">
-              <Button variant="secondary-on-dark" size="lg">
+              <Button variant="outline" size="lg">
                 <Upload className="mr-sm h-5 w-5" aria-hidden />
                 Upload artwork
               </Button>

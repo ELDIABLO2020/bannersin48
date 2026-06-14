@@ -15,8 +15,8 @@ export const prefersReducedMotion = (): boolean => {
 
 /**
  * Scroll-triggered animation presets.
- * All return gsap.core.Timeline | gsap.core.Tween for composition.
- * Each preset respects prefers-reduced-motion (instant to/from when true).
+ * Ecwid aesthetic: short slide distance (~12-16px), slower durations (0.55-0.7s),
+ * subtle ease. Each preset respects prefers-reduced-motion.
  */
 
 export interface RevealOptions {
@@ -30,7 +30,7 @@ export interface RevealOptions {
   delay?: number;
 }
 
-/** Fade + slide up — the primary section reveal */
+/** Fade + slide up — the primary section reveal (Ecwid: subtle 12px slide) */
 export function fadeUpIn(options: RevealOptions): gsap.core.Timeline {
   const reduced = prefersReducedMotion();
   return gsap.timeline({
@@ -42,8 +42,8 @@ export function fadeUpIn(options: RevealOptions): gsap.core.Timeline {
     delay: options.delay ?? 0,
   }).fromTo(
     options.target,
-    reduced ? {} : { opacity: 0, y: 32 },
-    { opacity: 1, y: 0, duration: 0.65, ease: "power3.out", stagger: options.stagger ?? 0 },
+    reduced ? {} : { opacity: 0, y: 14 },
+    { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: options.stagger ?? 0 },
   );
 }
 
@@ -60,11 +60,11 @@ export function fadeIn(options: RevealOptions): gsap.core.Timeline {
   }).fromTo(
     options.target,
     reduced ? {} : { opacity: 0 },
-    { opacity: 1, duration: 0.5, ease: "power2.out", stagger: options.stagger ?? 0 },
+    { opacity: 1, duration: 0.55, ease: "power2.out", stagger: options.stagger ?? 0 },
   );
 }
 
-/** Slide in from left */
+/** Slide in from left (Ecwid: subtle 16px slide) */
 export function slideInLeft(options: RevealOptions): gsap.core.Timeline {
   const reduced = prefersReducedMotion();
   return gsap.timeline({
@@ -76,12 +76,12 @@ export function slideInLeft(options: RevealOptions): gsap.core.Timeline {
     delay: options.delay ?? 0,
   }).fromTo(
     options.target,
-    reduced ? {} : { opacity: 0, x: -40 },
-    { opacity: 1, x: 0, duration: 0.6, ease: "power3.out", stagger: options.stagger ?? 0 },
+    reduced ? {} : { opacity: 0, x: -16 },
+    { opacity: 1, x: 0, duration: 0.6, ease: "power2.out", stagger: options.stagger ?? 0 },
   );
 }
 
-/** Slide in from right */
+/** Slide in from right (Ecwid: subtle 16px slide) */
 export function slideInRight(options: RevealOptions): gsap.core.Timeline {
   const reduced = prefersReducedMotion();
   return gsap.timeline({
@@ -93,8 +93,8 @@ export function slideInRight(options: RevealOptions): gsap.core.Timeline {
     delay: options.delay ?? 0,
   }).fromTo(
     options.target,
-    reduced ? {} : { opacity: 0, x: 40 },
-    { opacity: 1, x: 0, duration: 0.6, ease: "power3.out", stagger: options.stagger ?? 0 },
+    reduced ? {} : { opacity: 0, x: 16 },
+    { opacity: 1, x: 0, duration: 0.6, ease: "power2.out", stagger: options.stagger ?? 0 },
   );
 }
 

@@ -1,12 +1,24 @@
 /**
  * CSS custom property names for the design tokens.
  * The root layout writes these to :root via a style tag.
+ *
+ * Ecwid-style: every semantic role is exposed as a CSS variable so
+ * components can read them at runtime (e.g. inline styles for the
+ * floating countdown island and StatusHeroCard).
  */
 
 import { colors, radius, shadow, spacing, breakpoints, container, zIndex } from "./tokens";
 
 export const cssVarName = {
-  // Backgrounds
+  // ── Ecwid 6-role backgrounds ───────────────────────────────────────────
+  bgLightest: "--color-bg-lightest",
+  bgLight: "--color-bg-light",
+  bgSoftAccent: "--color-bg-soft-accent",
+  bgSoftAccent2: "--color-bg-soft-accent-2",
+  bgStrongAccent: "--color-bg-strong-accent",
+  bgDarkest: "--color-bg-darkest",
+
+  // ── Legacy background tokens (still consumed by some components) ────────
   bgNavyBase: "--color-bg-navy-base",
   bgNavyDeep: "--color-bg-navy-deep",
   bgNavyDark: "--color-bg-navy-dark",
@@ -17,32 +29,44 @@ export const cssVarName = {
   bgInfoTint: "--color-bg-info-tint",
   bgBlack: "--color-bg-black",
 
-  // CTA
+  // ── Strong Accent (CTA) ────────────────────────────────────────────────
+  strongAccent: "--color-strong-accent",
+  strongAccentHover: "--color-strong-accent-hover",
+  strongAccentActive: "--color-strong-accent-active",
+  strongAccentText: "--color-strong-accent-text",
+
+  // CTA role (legacy alias — points to the Ecwid green accent)
   ctaPrimary: "--color-cta-primary",
   ctaAccent: "--color-cta-accent",
   ctaActive: "--color-cta-active",
   ctaText: "--color-cta-text",
 
-  // Link
+  // ── Link ───────────────────────────────────────────────────────────────
   link: "--color-link",
   linkHover: "--color-link-hover",
   linkActive: "--color-link-active",
 
-  // Text
+  // ── Text ───────────────────────────────────────────────────────────────
   textDark: "--color-text-dark",
   textCharcoal: "--color-text-charcoal",
   textLight: "--color-text-light",
   textMedium: "--color-text-medium",
+  textOnAccent: "--color-text-on-accent",
+  dark: "--color-dark",
+  darkMuted: "--color-dark-muted",
+  muted: "--color-muted",
 
-  // Borders
+  // ── Borders ────────────────────────────────────────────────────────────
   border: "--color-border",
   borderInput: "--color-border-input",
   divider: "--color-divider",
 
-  // Error
+  // ── Status ─────────────────────────────────────────────────────────────
+  success: "--color-success",
+  warning: "--color-warning",
   error: "--color-error",
 
-  // Badges
+  // ── Badges ─────────────────────────────────────────────────────────────
   badgeSuccessBg: "--color-badge-success-bg",
   badgeSuccessText: "--color-badge-success-text",
   badgeWarningBg: "--color-badge-warning-bg",
@@ -50,15 +74,16 @@ export const cssVarName = {
   badgeErrorBg: "--color-badge-error-bg",
   badgeErrorText: "--color-badge-error-text",
 
-  // Radius
+  // ── Radius ─────────────────────────────────────────────────────────────
   radiusNone: "--radius-none",
+  radiusSm: "--radius-sm",
   radiusModal: "--radius-modal",
   radiusButton: "--radius-button",
   radiusFeature: "--radius-feature",
   radiusCard: "--radius-card",
   radiusPill: "--radius-pill",
 
-  // Shadows
+  // ── Shadows ────────────────────────────────────────────────────────────
   shadowNav: "--shadow-nav",
   shadowL1: "--shadow-level-1",
   shadowL2: "--shadow-level-2",
@@ -67,7 +92,7 @@ export const cssVarName = {
   shadowFocus: "--shadow-focus",
   shadowFocusSmall: "--shadow-focus-small",
 
-  // Spacing
+  // ── Spacing ────────────────────────────────────────────────────────────
   spaceMicro: "--space-micro",
   spaceXs: "--space-xs",
   spaceSm: "--space-sm",
@@ -79,17 +104,17 @@ export const cssVarName = {
   space3xl: "--space-3xl",
   space4xl: "--space-4xl",
 
-  // Containers
+  // ── Containers ─────────────────────────────────────────────────────────
   containerContent: "--container-content",
   containerHero: "--container-hero",
 
-  // Breakpoints (read via media queries, but expose for JS)
+  // ── Breakpoints (read via media queries, but expose for JS) ─────────────
   bpMobile: "--bp-mobile",
   bpTablet: "--bp-tablet",
   bpDesktop: "--bp-desktop",
   bpDesktopLg: "--bp-desktop-lg",
 
-  // Z-index
+  // ── Z-index ────────────────────────────────────────────────────────────
   zTabBar: "--z-tab-bar",
   zDropdown: "--z-dropdown",
   zSticky: "--z-sticky",
@@ -100,6 +125,15 @@ export const cssVarName = {
 } as const;
 
 export const cssVars: Record<string, string> = {
+  // Ecwid 6-role backgrounds
+  [cssVarName.bgLightest]: colors.lightest,
+  [cssVarName.bgLight]: colors.light,
+  [cssVarName.bgSoftAccent]: colors.softAccent,
+  [cssVarName.bgSoftAccent2]: colors.softAccent2,
+  [cssVarName.bgStrongAccent]: colors.strongAccent,
+  [cssVarName.bgDarkest]: colors.darkest,
+
+  // Legacy backgrounds
   [cssVarName.bgNavyBase]: colors.navyBase,
   [cssVarName.bgNavyDeep]: colors.navyDeep,
   [cssVarName.bgNavyDark]: colors.navyDark,
@@ -110,26 +144,44 @@ export const cssVars: Record<string, string> = {
   [cssVarName.bgInfoTint]: colors.infoTint,
   [cssVarName.bgBlack]: colors.black,
 
+  // Strong accent
+  [cssVarName.strongAccent]: colors.strongAccent,
+  [cssVarName.strongAccentHover]: colors.strongAccentHover,
+  [cssVarName.strongAccentActive]: colors.strongAccentActive,
+  [cssVarName.strongAccentText]: colors.strongAccentText,
+
+  // CTA role
   [cssVarName.ctaPrimary]: colors.ctaPrimary,
   [cssVarName.ctaAccent]: colors.ctaAccent,
   [cssVarName.ctaActive]: colors.ctaActive,
   [cssVarName.ctaText]: colors.ctaText,
 
+  // Link
   [cssVarName.link]: colors.link,
   [cssVarName.linkHover]: colors.linkHover,
   [cssVarName.linkActive]: colors.linkActive,
 
+  // Text
   [cssVarName.textDark]: colors.textDark,
   [cssVarName.textCharcoal]: colors.textCharcoal,
   [cssVarName.textLight]: colors.textLight,
   [cssVarName.textMedium]: colors.textMedium,
+  [cssVarName.textOnAccent]: colors.textOnAccent,
+  [cssVarName.dark]: colors.dark,
+  [cssVarName.darkMuted]: colors.darkMuted,
+  [cssVarName.muted]: colors.muted,
 
+  // Borders
   [cssVarName.border]: colors.border,
   [cssVarName.borderInput]: colors.borderInput,
   [cssVarName.divider]: colors.divider,
 
+  // Status
+  [cssVarName.success]: colors.success,
+  [cssVarName.warning]: colors.warning,
   [cssVarName.error]: colors.error,
 
+  // Badges
   [cssVarName.badgeSuccessBg]: colors.badgeSuccessBg,
   [cssVarName.badgeSuccessText]: colors.badgeSuccessText,
   [cssVarName.badgeWarningBg]: colors.badgeWarningBg,
@@ -137,13 +189,16 @@ export const cssVars: Record<string, string> = {
   [cssVarName.badgeErrorBg]: colors.badgeErrorBg,
   [cssVarName.badgeErrorText]: colors.badgeErrorText,
 
+  // Radius
   [cssVarName.radiusNone]: `${radius.none}px`,
+  [cssVarName.radiusSm]: `${radius.sm}px`,
   [cssVarName.radiusModal]: `${radius.modal}px`,
   [cssVarName.radiusButton]: `${radius.button}px`,
   [cssVarName.radiusFeature]: `${radius.featureCard}px`,
   [cssVarName.radiusCard]: `${radius.card}px`,
   [cssVarName.radiusPill]: `${radius.pill}px`,
 
+  // Shadows
   [cssVarName.shadowNav]: shadow.nav,
   [cssVarName.shadowL1]: shadow.level1,
   [cssVarName.shadowL2]: shadow.level2,
@@ -152,6 +207,7 @@ export const cssVars: Record<string, string> = {
   [cssVarName.shadowFocus]: shadow.focusGlow,
   [cssVarName.shadowFocusSmall]: shadow.focusGlowSmall,
 
+  // Spacing
   [cssVarName.spaceMicro]: `${spacing.micro}px`,
   [cssVarName.spaceXs]: `${spacing.xs}px`,
   [cssVarName.spaceSm]: `${spacing.sm}px`,
@@ -163,14 +219,17 @@ export const cssVars: Record<string, string> = {
   [cssVarName.space3xl]: `${spacing["3xl"]}px`,
   [cssVarName.space4xl]: `${spacing["4xl"]}px`,
 
+  // Containers
   [cssVarName.containerContent]: `${container.contentMax}px`,
   [cssVarName.containerHero]: `${container.heroMax}px`,
 
+  // Breakpoints
   [cssVarName.bpMobile]: `${breakpoints.mobile}px`,
   [cssVarName.bpTablet]: `${breakpoints.tablet}px`,
   [cssVarName.bpDesktop]: `${breakpoints.desktop}px`,
   [cssVarName.bpDesktopLg]: `${breakpoints.desktopLg}px`,
 
+  // Z-index
   [cssVarName.zTabBar]: `${zIndex.tabBar}`,
   [cssVarName.zDropdown]: `${zIndex.dropdown}`,
   [cssVarName.zSticky]: `${zIndex.sticky}`,

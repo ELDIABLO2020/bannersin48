@@ -34,7 +34,7 @@ export function Reviews() {
           <div>
             <h2
               id="reviews-h"
-              className="font-display uppercase text-[42px] sm:text-[58px] leading-[0.95] text-ink"
+              className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink"
             >
               Built for banners people need fast
             </h2>
@@ -45,7 +45,7 @@ export function Reviews() {
           </div>
           <Link
             href="/order/vinyl"
-            className="inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
+            className="inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
           >
             Start your banner
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -58,9 +58,9 @@ export function Reviews() {
             return (
               <article
                 key={scenario.title}
-                className="rev-card rounded-feature border border-line bg-surface p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-3"
+                className="rev-card rounded-card border border-line bg-surface p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2"
               >
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-feature bg-info-tint text-link">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-card bg-soft-accent text-strong-accent">
                   <Icon className="h-6 w-6" aria-hidden />
                 </div>
                 <h3 className="mt-lg font-bold text-heading-h4 text-ink">{scenario.title}</h3>

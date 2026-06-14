@@ -44,7 +44,7 @@ export default function RegisterPage() {
   return (
     <div
       className="min-h-[80vh] flex items-center justify-center px-md py-3xl"
-      style={{ backgroundColor: "var(--color-bg-navy-base)" }}
+      style={{ backgroundColor: "var(--color-bg-soft-accent)" }}
     >
       <Card variant="default" className="bg-surface w-full max-w-md">
         <h1 className="font-display text-section-h2 text-ink leading-tight">Create an account</h1>

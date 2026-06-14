@@ -86,9 +86,9 @@ export function PopularSizes() {
           <div>
             <h2
               id="popular-sizes-h"
-              className="font-display uppercase text-[42px] sm:text-[58px] leading-[0.95] text-ink"
+              className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink"
             >
-              Popular sizes & pricing
+              Popular sizes &amp; pricing
             </h2>
             <p className="text-body text-ink-muted mt-md max-w-2xl">
               High quality, fast turnaround, and clear pricing before checkout.
@@ -96,7 +96,7 @@ export function PopularSizes() {
           </div>
           <Link
             href="/sizes"
-            className="inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
+            className="inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
           >
             View all sizes
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -113,16 +113,16 @@ export function PopularSizes() {
                 className="ps-card group block no-underline"
               >
                 <article
-                  className={`relative flex min-h-[240px] flex-col rounded-feature border bg-surface p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-3 ${
-                    idx === 0 ? "border-cta ring-1 ring-cta" : "border-line hover:border-link"
+                  className={`relative flex min-h-[240px] flex-col rounded-card border bg-surface p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2 ${
+                    idx === 0 ? "border-strong-accent ring-1 ring-strong-accent" : "border-line hover:border-strong-accent"
                   }`}
                 >
                   {idx === 0 && (
-                    <span className="absolute -top-sm left-lg rounded-sm bg-cta px-sm py-xs text-[11px] font-bold uppercase text-cta-fg">
+                    <span className="absolute -top-sm left-lg rounded-sm bg-strong-accent px-sm py-xs text-[11px] font-bold uppercase text-white">
                       Quick pick
                     </span>
                   )}
-                  <h3 className="font-display text-[30px] uppercase leading-none text-ink">
+                  <h3 className="font-display font-extrabold tracking-tight text-[28px] leading-none text-ink">
                     {getLabel(s)}
                   </h3>
                   <p className="mt-md min-h-[44px] text-sm text-ink-muted">{s.note}</p>
@@ -137,7 +137,7 @@ export function PopularSizes() {
                         </p>
                       </>
                     )}
-                    <span className="mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn bg-cta px-md py-sm text-sm font-bold text-cta-fg transition-colors group-hover:bg-cta-hover">
+                    <span className="mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn bg-strong-accent px-md py-sm text-sm font-bold text-white transition-colors group-hover:bg-strong-accent-hover">
                       {isCustom ? "Get a quote" : "Order now"}
                       <ArrowRight className="h-4 w-4" aria-hidden />
                     </span>
@@ -150,12 +150,12 @@ export function PopularSizes() {
 
         <div className="mt-xl flex flex-col gap-sm text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-center">
           <span className="inline-flex items-center justify-center gap-xs">
-            <Truck className="h-4 w-4 text-link" aria-hidden />
+            <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
             Delivery promise shown before checkout
           </span>
           <span className="hidden sm:inline text-ink-muted">|</span>
           <span className="inline-flex items-center justify-center gap-xs">
-            <BadgeCheck className="h-4 w-4 text-link" aria-hidden />
+            <BadgeCheck className="h-4 w-4 text-strong-accent" aria-hidden />
             Proof approval starts production
           </span>
         </div>

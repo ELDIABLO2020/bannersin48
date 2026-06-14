@@ -1,107 +1,159 @@
 /**
  * Banners In 48 design tokens.
  *
- * Source of truth: www.housecallpro.com-DESIGN.md (transcribed once).
- * Components must reference these semantic names — never raw hex.
+ * Ecwid-style design language:
+ *  - Pure white + off-white panels (no dominant dark sections except the footer)
+ *  - Bright saturated single accent (Ecwid green) for CTAs
+ *  - Soft pale-green washes for soft-accent surfaces
+ *  - Inter typography, sentence-case headlines, friendly rounded shapes
+ *  - Soft, low-opacity, layered shadows
+ *
+ * Components reference semantic names — never raw hex.
  */
 
 export const colors = {
-  // Backgrounds
-  navyBase: "#13191E",
-  navyDeep: "#002942",
-  navyDark: "#0E2634",
-  navyDarkest: "#0A2443",
+  // ── Backgrounds (Ecwid 6-role system) ──────────────────────────────────
+  // lightest — page background
+  lightest: "#FFFFFF",
+  // light — card / soft-panel surface
+  light: "#F8F9FA",
+  // legacy aliases kept for backwards compatibility with components that
+  // still consume them; values map onto the new Ecwid surfaces.
   surface: "#FFFFFF",
-  surfaceTint: "#F5F5F5",
-  surfaceVeryLight: "#ECEFF1",
-  infoTint: "#DEF0FF",
+  surfaceTint: "#F8F9FA",
+  surfaceVeryLight: "#F3F4F6",
   black: "#000000",
 
-  // CTA (gold, conversion only)
-  ctaPrimary: "#FF9B24",
-  ctaAccent: "#FFB706",
-  ctaActive: "#FCB900",
-  ctaText: "#13191E",
+  // soft accents — pale washes for soft-accent bands (Ecwid pale-green + pale-blue)
+  softAccent: "#E8F5E9",
+  softAccent2: "#E0F2FE",
+  // legacy "infoTint" maps onto the pale-blue wash
+  infoTint: "#E0F2FE",
 
-  // Interactive (links, secondary)
-  link: "#0F77CC",
-  linkHover: "#0055FF",
-  linkActive: "#002942",
+  // ── Strong Accent (Ecwid green) — CTAs, links, active states ───────────
+  strongAccent: "#00B545",
+  strongAccentHover: "#009A3B",
+  strongAccentActive: "#007A2E",
+  strongAccentText: "#FFFFFF",
 
-  // Text
-  textDark: "#212121",
+  // CTA role — legacy semantic name. Points to the Ecwid green accent.
+  ctaPrimary: "#00B545",
+  ctaAccent: "#009A3B",
+  ctaActive: "#007A2E",
+  ctaText: "#FFFFFF",
+
+  // ── Interactive (links, secondary) — Ecwid-green based for cohesion ────
+  link: "#007A2E",
+  linkHover: "#009A3B",
+  linkActive: "#005C23",
+
+  // ── Dark text & footer backgrounds ─────────────────────────────────────
+  // dark — primary body text
+  dark: "#1F1F1F",
+  darkMuted: "#5F6B7A",
+  // darkest — Ecwid deep navy-charcoal, used on the footer band only
+  darkest: "#0A2540",
+
+  // Text role — legacy semantic aliases
+  textDark: "#1F1F1F",
   textCharcoal: "#13181A",
   textLight: "#FFFFFF",
-  textMedium: "#979797",
+  textMedium: "#5F6B7A",
   textOnDark: "#FFFFFF",
+  textOnAccent: "#FFFFFF",
+  muted: "#5F6B7A",
 
-  // Borders & dividers
-  border: "#E0E0E0",
-  borderInput: "#BDBDBD",
-  divider: "#BDBDBD",
+  // Legacy navy tokens — aliased onto the Ecwid dark / darkest values so
+  // downstream consumers that still reference them keep working after the
+  // re-skin. These are intentionally not deleted to avoid a wide rename in
+  // this phase; they will be retired in a follow-up.
+  navyBase: "#0A2540",
+  navyDeep: "#0A2540",
+  navyDark: "#0A2540",
+  navyDarkest: "#0A2540",
 
-  // Semantic / status
-  error: "#CF2E2E",
+  // ── Borders & dividers ─────────────────────────────────────────────────
+  border: "#E5E7EB",
+  borderInput: "#D1D5DB",
+  divider: "#E5E7EB",
 
-  // Badges
+  // ── Semantic / status ──────────────────────────────────────────────────
+  success: "#00B545",
+  warning: "#F5A623",
+  error: "#E5484D",
+
+  // Badges (light tints to sit on white surfaces)
   badgeSuccessBg: "#E8F5E9",
-  badgeSuccessText: "#2E7D32",
-  badgeWarningBg: "#FFF3E0",
-  badgeWarningText: "#F57C00",
-  badgeErrorBg: "#FFEBEE",
-  badgeErrorText: "#CF2E2E",
+  badgeSuccessText: "#007A2E",
+  badgeWarningBg: "#FFF6E6",
+  badgeWarningText: "#B26A00",
+  badgeErrorBg: "#FEECEC",
+  badgeErrorText: "#C72530",
 
-  // Timeline markers
-  timelineDone: "#0F77CC",
-  timelineCurrent: "#0F77CC",
-  timelineCurrentRing: "#DEF0FF",
-  timelinePending: "#BDBDBD",
+  // ── Timeline markers ───────────────────────────────────────────────────
+  timelineDone: "#00B545",
+  timelineCurrent: "#00B545",
+  timelineCurrentRing: "#E8F5E9",
+  timelinePending: "#D1D5DB",
 } as const;
 
 
 export const typography = {
   fontFamily: {
-    display: ['"Headline Gothic ATF"', '"Headline Gothic ATF Rough No. 1"', '"Archivo Black"', "Georgia", "serif"],
-    body: ['"Open Sans"', "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "sans-serif"],
-    input: ['"Plus Jakarta Sans"', '"Inter"', "sans-serif"],
+    display: ['"Inter"', "system-ui", "sans-serif"],
+    body: ['"Inter"', "system-ui", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "sans-serif"],
+    input: ['"Inter"', "system-ui", "sans-serif"],
   },
   fontWeight: {
     regular: 400,
+    medium: 500,
+    semibold: 600,
     bold: 700,
+    extrabold: 800,
   },
-  // Desktop sizes per the design file §3
+  // Desktop sizes — kept compatible with the previous scale so the
+  // existing Tailwind fontSize utilities (`text-hero-h1`, etc.) keep
+  // working. Hero H1 is intentionally smaller than before because
+  // Inter at 800 with tight tracking reads larger than Archivo Black.
   fontSize: {
-    heroH1: 83,
-    sectionH2: 68,
-    headingH4: 18,
-    headingH5: 14,
+    heroH1: 64,
+    sectionH2: 48,
+    headingH4: 20,
+    headingH5: 16,
     body: 16,
-    bodySmall: 11,
-    input: 12,
+    bodySmall: 13,
+    input: 14,
     listItem: 18,
   },
   lineHeight: {
-    heroH1: 85,
-    sectionH2: 68,
-    headingH4: 27,
+    heroH1: 64,
+    sectionH2: 56,
+    headingH4: 28,
     headingH5: 24,
-    body: 24,
-    bodySmall: 18,
-    input: 18,
-    listItem: 27,
+    body: 28,
+    bodySmall: 20,
+    input: 22,
+    listItem: 28,
   },
   letterSpacing: {
-    tight: "0px",
+    tight: "-0.02em",
+    tighter: "-0.03em",
+    normal: "0",
+    wide: "0.04em",
+    widest: "0.08em",
   },
 } as const;
 
 export const radius = {
   none: 0,
-  modal: 4,
-  button: 8,
+  sm: 6,
+  modal: 8,
+  button: 10,
   featureCard: 16,
-  card: 24,
+  card: 20,
   pill: 100,
+  // Back-compat aliases for existing Tailwind utilities (rounded-btn / rounded-feature / rounded-card)
+  // — the value is the same as the friendlier Ecwid scale.
 } as const;
 
 export const spacing = {
@@ -119,18 +171,17 @@ export const spacing = {
 } as const;
 
 export const shadow = {
-  // Never applied to full-width sections; one level per element
+  // Soft, low-opacity, layered — Ecwid aesthetic.
   none: "none",
-  level1: "0px 2px 8px rgba(0, 0, 0, 0.08)",      // standard cards, input fields
-  nav: "0px 1px 3px rgba(0, 0, 0, 0.08)",         // top nav
-  level2: "0px 4px 16px rgba(0, 0, 0, 0.12)",     // feature cards, modals
-  level3: "0px 8px 24px rgba(0, 0, 0, 0.16)",     // modals, dropdowns
-  level4: "0px 12px 32px rgba(0, 0, 0, 0.2)",     // tooltips, popovers
-  // Input focus glow
-  focusGlow: "0px 0px 12px rgba(15, 119, 204, 0.2)",
-  focusGlowSmall: "0px 0px 8px rgba(15, 119, 204, 0.16)",
-  // Tab bar
-  tabBarBorder: "rgba(255, 255, 255, 0.08)",
+  level1: "0 1px 2px rgba(16, 24, 40, 0.05)",
+  nav: "0 1px 0 rgba(16, 24, 40, 0.06)",
+  level2: "0 4px 12px rgba(16, 24, 40, 0.08)",
+  level3: "0 8px 24px rgba(16, 24, 40, 0.12)",
+  level4: "0 16px 40px rgba(16, 24, 40, 0.16)",
+  // Focus glow — Ecwid green ring
+  focusGlow: "0 0 0 4px rgba(0, 181, 69, 0.18)",
+  focusGlowSmall: "0 0 0 3px rgba(0, 181, 69, 0.16)",
+  tabBarBorder: "rgba(16, 24, 40, 0.08)",
 } as const;
 
 export const breakpoints = {
@@ -175,9 +226,9 @@ export const zIndex = {
 } as const;
 
 export const motion = {
-  fast: "150ms",
-  base: "200ms",
-  slow: "300ms",
+  fast: "180ms",
+  base: "240ms",
+  slow: "360ms",
   ease: "cubic-bezier(0.4, 0, 0.2, 1)",
 } as const;
 

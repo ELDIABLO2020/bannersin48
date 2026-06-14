@@ -67,13 +67,13 @@ export function SizeStep() {
                   className={cn(
                     "rounded-btn border p-sm text-sm font-bold text-center transition-all",
                     active
-                      ? "bg-info-tint border-link text-ink"
-                      : "bg-surface border-line text-ink hover:border-link",
+                      ? "bg-soft-accent border-strong-accent text-ink"
+                      : "bg-surface border-line text-ink hover:border-strong-accent",
                   )}
                 >
                   <span className="block">{s.label}</span>
                   {idx === 6 && (
-                    <Star className="inline h-3 w-3 text-cta fill-current mt-xs" aria-label="Most popular" />
+                    <Star className="inline h-3 w-3 text-strong-accent fill-current mt-xs" aria-label="Most popular" />
                   )}
                 </button>
               );
@@ -95,7 +95,7 @@ export function SizeStep() {
 
         <Card
           className={cn(
-            display.eligible ? "bg-info-tint" : "bg-badge-error-bg",
+            display.eligible ? "bg-soft-accent" : "bg-badge-error-bg",
           )}
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm">
@@ -104,7 +104,7 @@ export function SizeStep() {
                 Requested: <span className="font-normal text-ink-muted">{display.requestedLabel}</span>
               </p>
               <p className="text-body font-bold text-ink mt-xs">
-                Billable: <span className="text-link">{display.billableLabel}</span>{" "}
+                Billable: <span className="text-strong-accent">{display.billableLabel}</span>{" "}
                 <span className="font-normal text-ink-muted">= {billable.sqFt} sq ft</span>
               </p>
             </div>

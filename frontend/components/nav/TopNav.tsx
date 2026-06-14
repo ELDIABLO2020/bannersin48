@@ -32,8 +32,8 @@ export function TopNav() {
       <div className="mx-auto max-w-content flex items-center h-16 px-md lg:px-2xl">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-xs no-underline mr-xl" aria-label="Banners In 48 home">
-          <span className="font-display text-xl font-bold uppercase tracking-tight text-ink">Banners In</span>
-          <span className="rounded-sm bg-cta px-xs font-display text-xl font-bold text-cta-fg">48</span>
+          <span className="font-display text-xl font-bold tracking-tight text-ink">Banners In</span>
+          <span className="rounded-pill bg-strong-accent px-sm py-xs font-display text-sm font-bold text-white">48</span>
         </Link>
 
         {/* Center links */}
@@ -47,8 +47,8 @@ export function TopNav() {
                   onMouseLeave={() => setTemplatesOpen(false)}
                   onFocus={() => setTemplatesOpen(true)}
                   className={cn(
-                    "inline-flex items-center gap-1 px-md py-sm text-body text-ink no-underline rounded-btn",
-                    "hover:bg-info-tint hover:text-link",
+                    "inline-flex items-center gap-1 px-md py-sm text-body text-ink no-underline rounded-btn font-medium",
+                    "hover:bg-soft-accent hover:text-link",
                   )}
                 >
                   {l.label}
@@ -58,8 +58,8 @@ export function TopNav() {
                 <Link
                   href={l.href}
                   className={cn(
-                    "inline-flex items-center gap-1 px-md py-sm text-body text-ink no-underline rounded-btn",
-                    "hover:bg-info-tint hover:text-link",
+                    "inline-flex items-center gap-1 px-md py-sm text-body text-ink no-underline rounded-btn font-medium",
+                    "hover:bg-soft-accent hover:text-link",
                   )}
                 >
                   {l.label}
@@ -70,13 +70,13 @@ export function TopNav() {
                 <div
                   onMouseEnter={() => setTemplatesOpen(true)}
                   onMouseLeave={() => setTemplatesOpen(false)}
-                  className="absolute top-full left-0 mt-1 w-56 bg-surface rounded-btn shadow-elev-3 border border-line py-sm z-dropdown"
+                  className="absolute top-full left-0 mt-1 w-56 bg-surface rounded-card shadow-elev-2 border border-line py-sm z-dropdown"
                 >
                   {USE_CASES.map((s) => (
                     <Link
                       key={s.label}
                       href={s.href}
-                      className="flex items-center justify-between gap-xs px-md py-sm text-body text-ink no-underline hover:bg-info-tint hover:text-link"
+                      className="flex items-center justify-between gap-xs px-md py-sm text-body text-ink no-underline hover:bg-soft-accent hover:text-link"
                     >
                       <span>{s.label}</span>
                     </Link>
@@ -94,7 +94,7 @@ export function TopNav() {
         <div className="hidden lg:flex items-center gap-sm ml-auto">
           <Link
             href="/orders/lookup"
-            className="text-link text-body px-md py-sm hover:underline"
+            className="text-link text-body px-md py-sm hover:underline font-medium"
           >
             Track Order
           </Link>
@@ -125,7 +125,7 @@ export function TopNav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="flex items-center justify-between px-md py-sm text-body text-ink hover:bg-info-tint rounded-btn"
+                className="flex items-center justify-between px-md py-sm text-body text-ink hover:bg-soft-accent rounded-btn"
                 onClick={() => setMobileOpen(false)}
               >
                 {l.label}

@@ -3,48 +3,73 @@ import { colors, radius, spacing, shadow, breakpoints, container, zIndex } from 
 import { cssVars, cssVarName, buildCssVarsString } from "./cssVars";
 
 /**
- * Token integrity tests — guard against silent drift from the design file.
- * Any change here is a deliberate design decision, not an accident.
+ * Token integrity tests — guard against silent drift from the Ecwid design
+ * language. Any change here is a deliberate design decision, not an accident.
  */
-describe("design tokens — design file compliance", () => {
+describe("design tokens — Ecwid design compliance", () => {
   describe("colors", () => {
-    it("uses the Housecall Pro palette verbatim", () => {
-      expect(colors.navyBase).toBe("#13191E");
-      expect(colors.navyDeep).toBe("#002942");
-      expect(colors.navyDark).toBe("#0E2634");
-      expect(colors.surface).toBe("#FFFFFF");
-      expect(colors.surfaceTint).toBe("#F5F5F5");
-      expect(colors.infoTint).toBe("#DEF0FF");
-      expect(colors.ctaPrimary).toBe("#FF9B24");
-      expect(colors.ctaAccent).toBe("#FFB706");
-      expect(colors.ctaActive).toBe("#FCB900");
-      expect(colors.link).toBe("#0F77CC");
-      expect(colors.linkHover).toBe("#0055FF");
-      expect(colors.linkActive).toBe("#002942");
-      expect(colors.textDark).toBe("#212121");
+    it("uses the Ecwid 6-role palette", () => {
+      // Backgrounds
+      expect(colors.lightest).toBe("#FFFFFF");
+      expect(colors.light).toBe("#F8F9FA");
+      expect(colors.softAccent).toBe("#E8F5E9");
+      expect(colors.softAccent2).toBe("#E0F2FE");
+      expect(colors.darkest).toBe("#0A2540");
+
+      // Strong accent (Ecwid green)
+      expect(colors.strongAccent).toBe("#00B545");
+      expect(colors.strongAccentHover).toBe("#009A3B");
+      expect(colors.strongAccentActive).toBe("#007A2E");
+      expect(colors.strongAccentText).toBe("#FFFFFF");
+
+      // CTA role aliases the strong accent
+      expect(colors.ctaPrimary).toBe("#00B545");
+      expect(colors.ctaAccent).toBe("#009A3B");
+      expect(colors.ctaActive).toBe("#007A2E");
+      expect(colors.ctaText).toBe("#FFFFFF");
+
+      // Text
+      expect(colors.dark).toBe("#1F1F1F");
+      expect(colors.darkMuted).toBe("#5F6B7A");
+      expect(colors.textDark).toBe("#1F1F1F");
       expect(colors.textLight).toBe("#FFFFFF");
-      expect(colors.textMedium).toBe("#979797");
-      expect(colors.error).toBe("#CF2E2E");
-      expect(colors.border).toBe("#E0E0E0");
-      expect(colors.borderInput).toBe("#BDBDBD");
+      expect(colors.textMedium).toBe("#5F6B7A");
+
+      // Borders
+      expect(colors.border).toBe("#E5E7EB");
+      expect(colors.borderInput).toBe("#D1D5DB");
+      expect(colors.divider).toBe("#E5E7EB");
+
+      // Status
+      expect(colors.success).toBe("#00B545");
+      expect(colors.warning).toBe("#F5A623");
+      expect(colors.error).toBe("#E5484D");
     });
 
-    it("exposes the badge palette from the design file", () => {
+    it("exposes the Ecwid badge palette", () => {
       expect(colors.badgeSuccessBg).toBe("#E8F5E9");
-      expect(colors.badgeSuccessText).toBe("#2E7D32");
-      expect(colors.badgeWarningBg).toBe("#FFF3E0");
-      expect(colors.badgeWarningText).toBe("#F57C00");
-      expect(colors.badgeErrorBg).toBe("#FFEBEE");
-      expect(colors.badgeErrorText).toBe("#CF2E2E");
+      expect(colors.badgeSuccessText).toBe("#007A2E");
+      expect(colors.badgeWarningBg).toBe("#FFF6E6");
+      expect(colors.badgeWarningText).toBe("#B26A00");
+      expect(colors.badgeErrorBg).toBe("#FEECEC");
+      expect(colors.badgeErrorText).toBe("#C72530");
+    });
+
+    it("exposes the Ecwid timeline markers", () => {
+      expect(colors.timelineDone).toBe("#00B545");
+      expect(colors.timelineCurrent).toBe("#00B545");
+      expect(colors.timelineCurrentRing).toBe("#E8F5E9");
+      expect(colors.timelinePending).toBe("#D1D5DB");
     });
   });
 
   describe("radius scale", () => {
-    it("uses the design file's exclusive radius scale", () => {
-      expect(radius.button).toBe(8);
+    it("uses the friendlier Ecwid radius scale", () => {
+      expect(radius.button).toBe(10);
       expect(radius.featureCard).toBe(16);
-      expect(radius.card).toBe(24);
+      expect(radius.card).toBe(20);
       expect(radius.pill).toBe(100);
+      expect(radius.sm).toBe(6);
     });
   });
 
@@ -66,12 +91,12 @@ describe("design tokens — design file compliance", () => {
   });
 
   describe("shadow scale", () => {
-    it("exposes the four elevation levels plus the focus glow", () => {
-      expect(shadow.level1).toBe("0px 2px 8px rgba(0, 0, 0, 0.08)");
-      expect(shadow.level2).toBe("0px 4px 16px rgba(0, 0, 0, 0.12)");
-      expect(shadow.level3).toBe("0px 8px 24px rgba(0, 0, 0, 0.16)");
-      expect(shadow.level4).toBe("0px 12px 32px rgba(0, 0, 0, 0.2)");
-      expect(shadow.focusGlow).toBe("0px 0px 12px rgba(15, 119, 204, 0.2)");
+    it("exposes the four soft elevation levels plus the green focus glow", () => {
+      expect(shadow.level1).toBe("0 1px 2px rgba(16, 24, 40, 0.05)");
+      expect(shadow.level2).toBe("0 4px 12px rgba(16, 24, 40, 0.08)");
+      expect(shadow.level3).toBe("0 8px 24px rgba(16, 24, 40, 0.12)");
+      expect(shadow.level4).toBe("0 16px 40px rgba(16, 24, 40, 0.16)");
+      expect(shadow.focusGlow).toBe("0 0 0 4px rgba(0, 181, 69, 0.18)");
     });
   });
 
@@ -106,30 +131,35 @@ describe("design tokens — design file compliance", () => {
 describe("cssVars", () => {
   it("covers every public color token", () => {
     const required: Array<keyof typeof colors> = [
-      "navyBase",
-      "navyDeep",
-      "navyDark",
-      "surface",
-      "surfaceTint",
-      "infoTint",
+      "lightest",
+      "light",
+      "softAccent",
+      "strongAccent",
       "ctaPrimary",
       "link",
       "textDark",
       "textLight",
       "error",
+      "darkest",
     ];
     for (const key of required) {
-      const varName = (cssVarName as Record<string, string>)[`bg${key.charAt(0).toUpperCase() + key.slice(1)}`]
-        ?? (cssVarName as Record<string, string>)[key.charAt(0).toLowerCase() + key.slice(1)];
-      expect(varName, `missing CSS var for color token "${key}"`).toBeTruthy();
+      // Some keys are exposed directly (e.g. --color-strong-accent), others via
+      // the legacy background prefix. We accept either.
+      const direct = (cssVarName as Record<string, string>)[key];
+      const prefixed =
+        (cssVarName as Record<string, string>)[`bg${key.charAt(0).toUpperCase() + key.slice(1)}`] ??
+        (cssVarName as Record<string, string>)[key.charAt(0).toLowerCase() + key.slice(1)];
+      expect(direct ?? prefixed, `missing CSS var for color token "${key}"`).toBeTruthy();
     }
   });
 
   it("emits a :root block via buildCssVarsString()", () => {
     const str = buildCssVarsString();
     expect(str).toMatch(/^:root \{/);
-    expect(str).toMatch(/--color-cta-primary: #FF9B24;/);
-    expect(str).toMatch(/--color-link: #0F77CC;/);
+    expect(str).toMatch(/--color-cta-primary: #00B545;/);
+    expect(str).toMatch(/--color-strong-accent: #00B545;/);
+    expect(str).toMatch(/--color-bg-soft-accent: #E8F5E9;/);
+    expect(str).toMatch(/--color-bg-darkest: #0A2540;/);
     expect(str).toMatch(/\}$/);
   });
 

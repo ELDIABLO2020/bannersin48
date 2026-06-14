@@ -81,34 +81,32 @@ export function Hero() {
   return (
     <section
       ref={heroRef}
-      className="relative isolate overflow-hidden bg-navy-base text-white"
+      className="relative isolate overflow-hidden bg-lightest text-ink"
       aria-labelledby="hero-heading"
     >
+      {/* Subtle pale-green radial wash behind the hero copy */}
       <div
-        className="hero-media absolute inset-0 -z-10 bg-cover bg-center opacity-70"
-        style={{ backgroundImage: "url('/images/hero-print-workshop.png')" }}
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_15%,#E8F5E9_0%,transparent_55%),radial-gradient(circle_at_85%_25%,#E0F2FE_0%,transparent_45%)]"
         aria-hidden
       />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(8,22,34,0.98)_0%,rgba(8,22,34,0.9)_36%,rgba(8,22,34,0.48)_68%,rgba(8,22,34,0.2)_100%)]" aria-hidden />
-      <div className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-navy-base to-transparent" aria-hidden />
 
       <div className="mx-auto max-w-hero px-md lg:px-2xl py-3xl lg:py-[96px]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-end min-h-[620px]">
           <div className="lg:col-span-7 max-w-4xl">
-            <p className="hero-kicker text-link text-sm font-bold uppercase mb-md">
+            <p className="hero-kicker text-strong-accent text-sm font-semibold mb-md">
               Fast. Durable. Professional.
             </p>
             <h1
               id="hero-heading"
-              className="hero-headline font-display uppercase text-[52px] sm:text-[72px] lg:text-[96px] leading-[0.9] font-bold"
+              className="hero-headline font-display font-extrabold tracking-tighter text-[clamp(40px,6vw,64px)] leading-[1.02]"
             >
               Custom banners delivered in{" "}
-              <span className="text-cta">48</span>
-              <span className="block text-cta text-[0.56em] leading-none mt-xs">
+              <span className="text-strong-accent">48</span>
+              <span className="block text-strong-accent text-[0.5em] leading-none mt-xs font-bold">
                 business hours
               </span>
             </h1>
-            <p className="hero-subhead text-lg sm:text-xl text-white/[0.86] mt-lg max-w-2xl leading-relaxed">
+            <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-2xl leading-relaxed">
               Premium vinyl banners printed, finished, and shipped fast. Choose your size,
               upload artwork, approve the proof, and keep your event moving.
             </p>
@@ -120,18 +118,18 @@ export function Hero() {
                 </Button>
               </Link>
               <Link href="/order/artwork">
-                <Button variant="secondary-on-dark" size="lg">
+                <Button variant="outline" size="lg">
                   <Upload className="mr-sm h-5 w-5" aria-hidden />
                   Upload artwork
                 </Button>
               </Link>
             </div>
-            <ul className="hero-trust mt-xl grid grid-cols-1 sm:grid-cols-3 gap-md max-w-3xl text-sm text-white/[0.78]">
+            <ul className="hero-trust mt-xl grid grid-cols-1 sm:grid-cols-3 gap-md max-w-3xl text-sm text-ink-muted">
               {PROOF_POINTS.map((item) => {
                 const Icon = item.icon;
                 return (
                   <li key={item.label} className="flex items-center gap-sm">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill border border-white/15 bg-white/[0.08] text-cta">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-soft-accent text-strong-accent">
                       <Icon className="h-4 w-4" aria-hidden />
                     </span>
                     <span className="leading-tight">{item.label}</span>
@@ -142,30 +140,30 @@ export function Hero() {
           </div>
 
           <div className="hero-countdown lg:col-span-5 lg:justify-self-end w-full max-w-lg">
-            <div className="rounded-feature border border-white/15 bg-white/[0.94] p-sm shadow-elev-4 backdrop-blur">
+            <div className="rounded-card border border-line bg-white p-sm shadow-elev-2">
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-sm items-stretch">
-                <div className="rounded-feature bg-surface text-ink p-lg">
-                  <div className="flex items-center gap-sm text-link">
+                <div className="rounded-card bg-surface text-ink p-lg">
+                  <div className="flex items-center gap-sm text-strong-accent">
                     <Clock className="h-5 w-5" aria-hidden />
-                    <p className="text-xs font-bold uppercase">Next production cutoff</p>
+                    <p className="text-xs font-semibold">Next production cutoff</p>
                   </div>
                   <div className="mt-md">
                     <CountdownCard variant="inline" />
                   </div>
                 </div>
-                <div className="rounded-feature bg-info-tint text-ink p-lg sm:w-48">
-                  <p className="text-xs font-bold uppercase text-link">Order path</p>
-                  <ul className="mt-md space-y-sm text-sm font-bold">
+                <div className="rounded-card bg-soft-accent text-ink p-lg sm:w-48">
+                  <p className="text-xs font-semibold text-strong-accent">Order path</p>
+                  <ul className="mt-md space-y-sm text-sm font-semibold">
                     <li className="flex items-center gap-sm">
-                      <FileUp className="h-4 w-4 text-link" aria-hidden />
+                      <FileUp className="h-4 w-4 text-strong-accent" aria-hidden />
                       Upload artwork
                     </li>
                     <li className="flex items-center gap-sm">
-                      <CheckCircle2 className="h-4 w-4 text-link" aria-hidden />
+                      <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
                       Approve proof
                     </li>
                     <li className="flex items-center gap-sm">
-                      <Truck className="h-4 w-4 text-link" aria-hidden />
+                      <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
                       Ships fast
                     </li>
                   </ul>

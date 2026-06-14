@@ -14,11 +14,11 @@ export function OrderTimeline({ status }: { status: OrderStatus }) {
               className={cn(
                 "inline-flex items-center justify-center h-8 w-8 rounded-pill shrink-0",
                 done
-                  ? "bg-link text-white"
+                  ? "bg-strong-accent text-white"
                   : "bg-line text-ink-muted",
                 current && "ring-4",
               )}
-              style={current ? { boxShadow: "0 0 0 4px var(--color-bg-info-tint)" } : undefined}
+              style={current ? { boxShadow: "0 0 0 4px var(--color-bg-soft-accent)" } : undefined}
               aria-hidden
             >
               {done ? <Check className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
@@ -28,7 +28,7 @@ export function OrderTimeline({ status }: { status: OrderStatus }) {
                 {step.label}
               </p>
               {current && (
-                <p className="text-body-sm text-link mt-xs">{ORDER_STATUS_LABELS[status]}</p>
+                <p className="text-body-sm text-strong-accent mt-xs">{ORDER_STATUS_LABELS[status]}</p>
               )}
             </div>
           </li>

@@ -76,7 +76,7 @@ export function FinishingStep() {
         </div>
 
         {polePockets && (
-          <Card className="bg-info-tint">
+          <Card className="bg-soft-accent">
             <h4 className="font-bold text-sm text-ink mb-sm">Pole pocket placement</h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-xs">
               {POLE_POCKET_PLACEMENT_OPTIONS.map((o) => {
@@ -91,8 +91,8 @@ export function FinishingStep() {
                     className={cn(
                       "rounded-btn border p-sm text-sm text-left font-bold",
                       active
-                        ? "bg-surface border-link text-ink"
-                        : "bg-surface border-line text-ink hover:border-link",
+                        ? "bg-surface border-strong-accent text-ink"
+                        : "bg-surface border-line text-ink hover:border-strong-accent",
                     )}
                   >
                     {o.label}
@@ -147,8 +147,8 @@ function ToggleCard({
         className={cn(
           "h-full",
           checked
-            ? "bg-info-tint border border-link"
-            : "hover:border-link hover:border",
+            ? "bg-soft-accent border border-strong-accent"
+            : "hover:border-strong-accent hover:border",
         )}
       >
         <div className="flex items-start justify-between gap-sm">
@@ -156,7 +156,7 @@ function ToggleCard({
           <span
             className={cn(
               "inline-flex h-5 w-9 rounded-pill transition-colors shrink-0 mt-0.5",
-              checked ? "bg-link" : "bg-line",
+              checked ? "bg-strong-accent" : "bg-line",
             )}
             aria-hidden
           >

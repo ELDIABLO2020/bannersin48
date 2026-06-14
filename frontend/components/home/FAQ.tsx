@@ -91,7 +91,7 @@ export function FAQ() {
     <section className="bg-surface-tint" aria-labelledby="faq-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="text-center mb-2xl">
-          <h2 id="faq-h" className="font-display text-section-h2 text-ink leading-section-h2">
+          <h2 id="faq-h" className="font-display font-extrabold tracking-tight text-ink leading-tight text-[clamp(34px,4.5vw,52px)]">
             Frequently asked
           </h2>
         </div>
@@ -99,7 +99,7 @@ export function FAQ() {
           {FAQS.map((f, i) => {
             const isOpen = open === i;
             return (
-              <li key={f.q} className="bg-surface rounded-feature border border-line overflow-hidden">
+              <li key={f.q} className="bg-surface rounded-card border border-line overflow-hidden">
                 <button
                   type="button"
                   className="w-full flex items-center justify-between gap-md p-lg text-left"
@@ -109,7 +109,7 @@ export function FAQ() {
                   <span className="font-bold text-body text-ink">{f.q}</span>
                   <ChevronDown
                     className={cn(
-                      "h-5 w-5 text-link transition-transform shrink-0",
+                      "h-5 w-5 text-strong-accent transition-transform shrink-0",
                       isOpen && "rotate-180",
                     )}
                     aria-hidden

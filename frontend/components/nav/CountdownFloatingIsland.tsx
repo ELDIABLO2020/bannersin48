@@ -51,13 +51,12 @@ export function CountdownFloatingIsland() {
       style={{ bottom: 76 }}
     >
       <div
-        className="rounded-card shadow-elev-2 px-md py-sm text-center text-white"
-        style={{ backgroundColor: "var(--color-bg-navy-deep)" }}
+        className="rounded-card shadow-elev-2 px-md py-sm text-center bg-strong-accent text-white"
         aria-live="polite"
       >
-        <div className="text-[10px] uppercase tracking-wider text-white/60">Order within</div>
+        <div className="text-[10px] uppercase tracking-wider text-white/80">Order within</div>
         <div className="font-display text-base font-bold tabular-nums leading-none">{padded}</div>
-        <div className="text-[10px] text-white/60">Cutoff {cutoffInfo.deliveryDow} 12:00 PM</div>
+        <div className="text-[10px] text-white/80">Cutoff {cutoffInfo.deliveryDow} 12:00 PM</div>
       </div>
     </div>
   );

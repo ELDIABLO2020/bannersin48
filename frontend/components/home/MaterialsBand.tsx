@@ -6,21 +6,22 @@ const MATERIALS = [
     name: "13 oz Vinyl",
     label: "Most ordered",
     description: "Standard indoor and outdoor vinyl for events, retail, contractors, and general signage.",
-    texture: "bg-[linear-gradient(135deg,#0c3d76_0%,#0c3d76_48%,#f8f8f8_49%,#ffffff_100%)]",
+    // Ecwid-tinted vinyl swatch — green base fading to white
+    texture: "bg-[linear-gradient(135deg,#00B545_0%,#00B545_48%,#F8F9FA_49%,#FFFFFF_100%)]",
     points: ["Water resistant", "Strong color", "Great everyday durability"],
   },
   {
     name: "15 oz Premium Vinyl",
     label: undefined,
     description: "A heavier option when the banner needs a more substantial outdoor feel.",
-    texture: "bg-[linear-gradient(135deg,#f5f8fa_0%,#d6dde4_50%,#ffffff_100%)]",
+    texture: "bg-[linear-gradient(135deg,#F8F9FA_0%,#E5E7EB_50%,#FFFFFF_100%)]",
     points: ["Thicker hand feel", "Premium finish", "Outdoor-ready"],
   },
   {
     name: "18 oz Blockout",
     label: undefined,
     description: "Heavy-duty opaque vinyl and the material option for double-sided work.",
-    texture: "bg-[linear-gradient(135deg,#111827_0%,#1f2937_42%,#f5f5f5_43%,#ffffff_100%)]",
+    texture: "bg-[linear-gradient(135deg,#0A2540_0%,#1F2937_42%,#F3F4F6_43%,#FFFFFF_100%)]",
     points: ["Opaque construction", "Double-sided available", "Maximum durability"],
   },
 ] as const;
@@ -28,7 +29,7 @@ const MATERIALS = [
 export function MaterialsBand() {
   return (
     <section
-      className="bg-[linear-gradient(180deg,#ffffff_0%,#eef7ff_100%)]"
+      className="bg-[linear-gradient(180deg,#FFFFFF_0%,#E8F5E9_100%)]"
       aria-labelledby="materials-h"
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
@@ -36,7 +37,7 @@ export function MaterialsBand() {
           <div>
             <h2
               id="materials-h"
-              className="font-display uppercase text-[42px] sm:text-[58px] leading-[0.95] text-ink"
+              className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink"
             >
               Choose the right material
             </h2>
@@ -46,7 +47,7 @@ export function MaterialsBand() {
           </div>
           <Link
             href="/order/vinyl"
-            className="inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
+            className="inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
           >
             Compare materials
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -57,12 +58,12 @@ export function MaterialsBand() {
           {MATERIALS.map((material) => (
             <article
               key={material.name}
-              className="mat-card overflow-hidden rounded-feature border border-line bg-surface shadow-elev-1"
+              className="mat-card overflow-hidden rounded-card border border-line bg-surface shadow-elev-1"
             >
               <div className={`relative h-40 ${material.texture}`}>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.9)_0_3px,transparent_4px),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.9)_0_3px,transparent_4px)]" />
                 {material.label && (
-                  <span className="absolute bottom-md right-md rounded-btn bg-link px-md py-sm text-xs font-bold uppercase text-white">
+                  <span className="absolute bottom-md right-md rounded-pill bg-strong-accent px-md py-sm text-xs font-bold text-white">
                     {material.label}
                   </span>
                 )}
@@ -75,7 +76,7 @@ export function MaterialsBand() {
                 <ul className="mt-md space-y-xs text-sm text-ink">
                   {material.points.map((point) => (
                     <li key={point} className="flex items-center gap-xs">
-                      <CheckCircle2 className="h-4 w-4 text-link" aria-hidden />
+                      <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
                       {point}
                     </li>
                   ))}

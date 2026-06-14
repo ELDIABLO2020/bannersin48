@@ -63,10 +63,10 @@ export function ArtworkUploader() {
           handleFile(e.dataTransfer.files?.[0]);
         }}
         className={`rounded-card border-2 border-dashed p-2xl text-center transition-colors ${
-          dragOver ? "border-link bg-info-tint" : "border-line bg-surface"
+          dragOver ? "border-strong-accent bg-soft-accent" : "border-line bg-surface"
         }`}
       >
-        <Upload className="h-10 w-10 text-link mx-auto mb-md" aria-hidden />
+        <Upload className="h-10 w-10 text-strong-accent mx-auto mb-md" aria-hidden />
         <h3 className="font-bold text-heading-h4 text-ink">Upload your artwork</h3>
         <p className="text-body-sm text-ink-muted mt-xs">
           Drag &amp; drop a file, or

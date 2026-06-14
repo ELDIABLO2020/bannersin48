@@ -106,14 +106,14 @@ export function PriceSummary() {
         <Row label="Total before tax" value={formatUsd(data.total)} bold />
       </dl>
 
-      <div className="mt-lg p-md rounded-feature bg-surface-tint text-center">
+      <div className="mt-lg p-md rounded-card bg-soft-accent text-center">
         <p className="text-xs uppercase tracking-widest text-ink-muted">Order within</p>
-        <p className="font-display text-2xl font-bold tabular-nums leading-none mt-xs">{padded}</p>
+        <p className="font-display text-2xl font-bold tabular-nums leading-none mt-xs text-strong-accent">{padded}</p>
         <p className="text-body-sm text-ink mt-sm flex items-center justify-center gap-xs">
           <Clock className="h-3.5 w-3.5" aria-hidden />
           Cutoff <strong className="text-ink">9:00 PM ET</strong>
         </p>
-        <p className="text-body-sm text-cta font-bold mt-xs">
+        <p className="text-body-sm text-strong-accent font-bold mt-xs">
           Delivery by {cutoff.guaranteedDeliveryDow} at 12:00 PM
         </p>
       </div>

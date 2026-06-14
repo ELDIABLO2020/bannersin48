@@ -2,93 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-bg-navy-base: #13191E;
-  --color-bg-navy-deep: #002942;
-  --color-bg-navy-dark: #0E2634;
-  --color-bg-navy-darkest: #0A2443;
-  --color-bg-surface: #FFFFFF;
-  --color-bg-surface-tint: #F5F5F5;
-  --color-bg-surface-very-light: #ECEFF1;
-  --color-bg-info-tint: #DEF0FF;
-  --color-bg-black: #000000;
+@layer base {
+  :root {
+    /* ── Ecwid 6-role backgrounds ────────────────────────────────────── */
+    --color-bg-lightest: #FFFFFF;
+    --color-bg-light: #F8F9FA;
+    --color-bg-soft-accent: #E8F5E9;
+    --color-bg-soft-accent-2: #E0F2FE;
+    --color-bg-strong-accent: #00B545;
+    --color-bg-darkest: #0A2540;
 
-  --color-cta-primary: #FF9B24;
-  --color-cta-accent: #FFB706;
-  --color-cta-active: #FCB900;
-  --color-cta-text: #13191E;
+    /* ── Legacy background tokens (aliased onto the Ecwid palette) ───── */
+    --color-bg-navy-base: #0A2540;
+    --color-bg-navy-deep: #0A2540;
+    --color-bg-navy-dark: #0A2540;
+    --color-bg-navy-darkest: #0A2540;
+    --color-bg-surface: #FFFFFF;
+    --color-bg-surface-tint: #F8F9FA;
+    --color-bg-surface-very-light: #F3F4F6;
+    --color-bg-info-tint: #E0F2FE;
+    --color-bg-black: #000000;
 
-  --color-link: #0F77CC;
-  --color-link-hover: #0055FF;
-  --color-link-active: #002942;
+    /* ── Strong accent (Ecwid green) — CTAs, links, active states ────── */
+    --color-strong-accent: #00B545;
+    --color-strong-accent-hover: #009A3B;
+    --color-strong-accent-active: #007A2E;
+    --color-strong-accent-text: #FFFFFF;
 
-  --color-text-dark: #212121;
-  --color-text-charcoal: #13181A;
-  --color-text-light: #FFFFFF;
-  --color-text-medium: #979797;
+    --color-cta-primary: #00B545;
+    --color-cta-accent: #009A3B;
+    --color-cta-active: #007A2E;
+    --color-cta-text: #FFFFFF;
 
-  --color-border: #E0E0E0;
-  --color-border-input: #BDBDBD;
-  --color-divider: #BDBDBD;
+    /* ── Link ─────────────────────────────────────────────────────────── */
+    --color-link: #007A2E;
+    --color-link-hover: #009A3B;
+    --color-link-active: #005C23;
 
-  --color-error: #CF2E2E;
+    /* ── Text ─────────────────────────────────────────────────────────── */
+    --color-text-dark: #1F1F1F;
+    --color-text-charcoal: #13181A;
+    --color-text-light: #FFFFFF;
+    --color-text-medium: #5F6B7A;
+    --color-text-on-accent: #FFFFFF;
+    --color-dark: #1F1F1F;
+    --color-dark-muted: #5F6B7A;
+    --color-muted: #5F6B7A;
 
-  --color-badge-success-bg: #E8F5E9;
-  --color-badge-success-text: #2E7D32;
-  --color-badge-warning-bg: #FFF3E0;
-  --color-badge-warning-text: #F57C00;
-  --color-badge-error-bg: #FFEBEE;
-  --color-badge-error-text: #CF2E2E;
+    /* ── Borders & dividers ───────────────────────────────────────────── */
+    --color-border: #E5E7EB;
+    --color-border-input: #D1D5DB;
+    --color-divider: #E5E7EB;
 
-  --radius-none: 0px;
-  --radius-modal: 4px;
-  --radius-button: 8px;
-  --radius-feature: 16px;
-  --radius-card: 24px;
-  --radius-pill: 100px;
+    /* ── Status ───────────────────────────────────────────────────────── */
+    --color-success: #00B545;
+    --color-warning: #F5A623;
+    --color-error: #E5484D;
 
-  --shadow-nav: 0px 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-level-1: 0px 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-level-2: 0px 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-level-3: 0px 8px 24px rgba(0, 0, 0, 0.16);
-  --shadow-level-4: 0px 12px 32px rgba(0, 0, 0, 0.2);
-  --shadow-focus: 0px 0px 12px rgba(15, 119, 204, 0.2);
-  --shadow-focus-small: 0px 0px 8px rgba(15, 119, 204, 0.16);
+    /* ── Badges ───────────────────────────────────────────────────────── */
+    --color-badge-success-bg: #E8F5E9;
+    --color-badge-success-text: #007A2E;
+    --color-badge-warning-bg: #FFF6E6;
+    --color-badge-warning-text: #B26A00;
+    --color-badge-error-bg: #FEECEC;
+    --color-badge-error-text: #C72530;
 
-  --container-content: 1200px;
-  --container-hero: 1440px;
-}
+    /* ── Radius ───────────────────────────────────────────────────────── */
+    --radius-none: 0px;
+    --radius-sm: 6px;
+    --radius-modal: 8px;
+    --radius-button: 10px;
+    --radius-feature: 16px;
+    --radius-card: 20px;
+    --radius-pill: 100px;
 
-* {
-  box-sizing: border-box;
-}
+    /* ── Shadows — soft, low-opacity, layered (Ecwid) ─────────────────── */
+    --shadow-nav: 0 1px 0 rgba(16, 24, 40, 0.06);
+    --shadow-level-1: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --shadow-level-2: 0 4px 12px rgba(16, 24, 40, 0.08);
+    --shadow-level-3: 0 8px 24px rgba(16, 24, 40, 0.12);
+    --shadow-level-4: 0 16px 40px rgba(16, 24, 40, 0.16);
+    --shadow-focus: 0 0 0 4px rgba(0, 181, 69, 0.18);
+    --shadow-focus-small: 0 0 0 3px rgba(0, 181, 69, 0.16);
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--color-text-dark);
-  background-color: var(--color-bg-surface);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "tnum" 0;
-}
+    /* ── Containers ───────────────────────────────────────────────────── */
+    --container-content: 1200px;
+    --container-hero: 1440px;
+  }
 
-a {
-  color: var(--color-link);
-  text-decoration: none;
-}
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-a:hover {
-  text-decoration: underline;
-}
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-inter, "Inter"), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-text-dark);
+    background-color: var(--color-bg-lightest);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01", "tnum" 0;
+  }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
+  a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* Global focus-visible ring — Ecwid green */
+  :focus-visible {
+    outline: 2px solid var(--color-strong-accent);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-inter, "Inter"), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
 }
 
 .tabular-nums {
@@ -135,7 +180,7 @@ button {
 
 /* Serwist offline page styling */
 .serwist-offline-ready {
-  background: var(--color-bg-info-tint);
+  background: var(--color-bg-soft-accent);
   color: var(--color-text-dark);
   padding: 8px 16px;
   border-radius: var(--radius-button);

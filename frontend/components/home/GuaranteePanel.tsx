@@ -21,10 +21,10 @@ export function GuaranteePanel() {
               return (
                 <article
                   key={metric.label}
-                  className="gp-row rounded-feature border border-line bg-surface p-lg text-center shadow-elev-1"
+                  className="gp-row rounded-card border border-line bg-surface p-lg text-center shadow-elev-1"
                 >
-                  <Icon className="mx-auto h-8 w-8 text-link" aria-hidden />
-                  <p className="mt-md font-display text-[34px] uppercase leading-none text-ink">
+                  <Icon className="mx-auto h-8 w-8 text-strong-accent" aria-hidden />
+                  <p className="mt-md font-display font-extrabold tracking-tight text-[32px] leading-none text-ink">
                     {metric.value}
                   </p>
                   <p className="mt-sm text-sm text-ink-muted">{metric.label}</p>
@@ -33,11 +33,11 @@ export function GuaranteePanel() {
             })}
           </div>
 
-          <aside className="gp-row rounded-feature border border-cta bg-[linear-gradient(135deg,#fff7ed,#ffffff)] p-xl shadow-elev-2">
-            <BadgeCheck className="h-12 w-12 text-cta" aria-hidden />
+          <aside className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,#E8F5E9,#FFFFFF)] p-xl shadow-elev-2">
+            <BadgeCheck className="h-12 w-12 text-strong-accent" aria-hidden />
             <h2
               id="guarantee-h"
-              className="mt-md font-display uppercase text-[38px] leading-none text-ink"
+              className="mt-md font-display font-extrabold tracking-tight text-[34px] leading-tight text-ink"
             >
               Our 48-hour guarantee
             </h2>
@@ -47,7 +47,7 @@ export function GuaranteePanel() {
             </p>
             <Link
               href="/guarantee"
-              className="mt-lg inline-flex items-center gap-xs text-sm font-bold uppercase text-link no-underline hover:underline"
+              className="mt-lg inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
             >
               Learn about the guarantee
               <ArrowRight className="h-4 w-4" aria-hidden />

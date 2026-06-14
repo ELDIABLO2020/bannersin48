@@ -31,8 +31,8 @@ export function MaterialStep() {
                 className={cn(
                   "h-full transition-all",
                   active
-                    ? "bg-info-tint border border-link"
-                    : "hover:border-link hover:border",
+                    ? "bg-soft-accent border border-strong-accent"
+                    : "hover:border-strong-accent hover:border",
                 )}
               >
                 <div className="flex items-start justify-between gap-sm">
@@ -44,7 +44,7 @@ export function MaterialStep() {
                     <Badge variant="info">Double-sided</Badge>
                   )}
                 </div>
-                <p className="text-heading-h4 font-bold text-cta mt-md">
+                <p className="text-heading-h4 font-bold text-strong-accent mt-md">
                   {formatUsdFromMajor(m.ratePerSqFt)}
                   <span className="text-body-sm font-normal text-ink-muted"> / sq ft</span>
                 </p>

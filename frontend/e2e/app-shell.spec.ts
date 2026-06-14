@@ -21,7 +21,7 @@ test.describe("M3: app shell", () => {
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body.name).toBe("Banners In 48");
-    expect(body.theme_color.toUpperCase()).toBe("#13191E");
+    expect(body.theme_color.toUpperCase()).toBe("#FFFFFF");
     expect(body.display).toBe("standalone");
   });
 
