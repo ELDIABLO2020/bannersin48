@@ -4,55 +4,54 @@
 
 @layer base {
   :root {
-    /* ── Ecwid 6-role backgrounds ────────────────────────────────────── */
+    /* ── HCP-inspired backgrounds ─────────────────────────────────────── */
     --color-bg-lightest: #FFFFFF;
     --color-bg-light: #F8F9FA;
-    --color-bg-soft-accent: #E8F5E9;
-    --color-bg-soft-accent-2: #E0F2FE;
-    --color-bg-strong-accent: #00B545;
-    --color-bg-darkest: #0A2540;
+    --color-bg-soft-accent: #eef1f3;
+    --color-bg-soft-accent-2: #f5f7f8;
+    --color-bg-strong-accent: #fbbf21;
+    --color-bg-darkest: #002a42;
 
-    /* ── Legacy background tokens (aliased onto the Ecwid palette) ───── */
-    --color-bg-navy-base: #0A2540;
-    --color-bg-navy-deep: #0A2540;
-    --color-bg-navy-dark: #0A2540;
-    --color-bg-navy-darkest: #0A2540;
+    --color-bg-navy-base: #002a42;
+    --color-bg-navy-deep: #002a42;
+    --color-bg-navy-dark: #131b1f;
+    --color-bg-navy-darkest: #002a42;
     --color-bg-surface: #FFFFFF;
     --color-bg-surface-tint: #F8F9FA;
     --color-bg-surface-very-light: #F3F4F6;
-    --color-bg-info-tint: #E0F2FE;
+    --color-bg-info-tint: #f5f7f8;
     --color-bg-black: #000000;
 
-    /* ── Strong accent (Ecwid green) — CTAs, links, active states ────── */
-    --color-strong-accent: #00B545;
-    --color-strong-accent-hover: #009A3B;
-    --color-strong-accent-active: #007A2E;
-    --color-strong-accent-text: #FFFFFF;
+    /* ── Strong accent (HCP gold) ─────────────────────────────────────── */
+    --color-strong-accent: #fbbf21;
+    --color-strong-accent-hover: #e5a91a;
+    --color-strong-accent-active: #c99212;
+    --color-strong-accent-text: #131b1f;
 
-    --color-cta-primary: #00B545;
-    --color-cta-accent: #009A3B;
-    --color-cta-active: #007A2E;
-    --color-cta-text: #FFFFFF;
+    --color-cta-primary: #fbbf21;
+    --color-cta-accent: #e5a91a;
+    --color-cta-active: #c99212;
+    --color-cta-text: #131b1f;
 
     /* ── Link ─────────────────────────────────────────────────────────── */
-    --color-link: #007A2E;
-    --color-link-hover: #009A3B;
-    --color-link-active: #005C23;
+    --color-link: #002a42;
+    --color-link-hover: #001a2e;
+    --color-link-active: #001220;
 
     /* ── Text ─────────────────────────────────────────────────────────── */
-    --color-text-dark: #1F1F1F;
-    --color-text-charcoal: #13181A;
+    --color-text-dark: #43423e;
+    --color-text-charcoal: #131b1f;
     --color-text-light: #FFFFFF;
-    --color-text-medium: #5F6B7A;
-    --color-text-on-accent: #FFFFFF;
-    --color-dark: #1F1F1F;
-    --color-dark-muted: #5F6B7A;
-    --color-muted: #5F6B7A;
+    --color-text-medium: #5f6b7a;
+    --color-text-on-accent: #131b1f;
+    --color-dark: #43423e;
+    --color-dark-muted: #5f6b7a;
+    --color-muted: #5f6b7a;
 
     /* ── Borders & dividers ───────────────────────────────────────────── */
-    --color-border: #E5E7EB;
-    --color-border-input: #D1D5DB;
-    --color-divider: #E5E7EB;
+    --color-border: #b0bfbc;
+    --color-border-input: #b0bfbc;
+    --color-divider: #b0bfbc;
 
     /* ── Status ───────────────────────────────────────────────────────── */
     --color-success: #00B545;
@@ -73,17 +72,17 @@
     --radius-modal: 8px;
     --radius-button: 10px;
     --radius-feature: 16px;
-    --radius-card: 20px;
+    --radius-card: 16px;
     --radius-pill: 100px;
 
-    /* ── Shadows — soft, low-opacity, layered (Ecwid) ─────────────────── */
+    /* ── Shadows ──────────────────────────────────────────────────────── */
     --shadow-nav: 0 1px 0 rgba(16, 24, 40, 0.06);
     --shadow-level-1: 0 1px 2px rgba(16, 24, 40, 0.05);
     --shadow-level-2: 0 4px 12px rgba(16, 24, 40, 0.08);
     --shadow-level-3: 0 8px 24px rgba(16, 24, 40, 0.12);
     --shadow-level-4: 0 16px 40px rgba(16, 24, 40, 0.16);
-    --shadow-focus: 0 0 0 4px rgba(0, 181, 69, 0.18);
-    --shadow-focus-small: 0 0 0 3px rgba(0, 181, 69, 0.16);
+    --shadow-focus: 0 0 0 4px rgba(251, 191, 33, 0.2);
+    --shadow-focus-small: 0 0 0 3px rgba(251, 191, 33, 0.18);
 
     /* ── Containers ───────────────────────────────────────────────────── */
     --container-content: 1200px;
@@ -124,7 +123,6 @@
     cursor: pointer;
   }
 
-  /* Global focus-visible ring — Ecwid green */
   :focus-visible {
     outline: 2px solid var(--color-strong-accent);
     outline-offset: 2px;
@@ -162,13 +160,12 @@
   }
 }
 
-/* Hide desktop nav on small screens, show mobile tab bar */
 @media (max-width: 1023px) {
   .desktop-nav {
     display: none;
   }
   main {
-    padding-bottom: 80px; /* leave room for the mobile tab bar */
+    padding-bottom: 80px;
   }
 }
 
@@ -178,7 +175,6 @@
   }
 }
 
-/* Serwist offline page styling */
 .serwist-offline-ready {
   background: var(--color-bg-soft-accent);
   color: var(--color-text-dark);

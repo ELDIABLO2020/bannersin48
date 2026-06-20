@@ -118,7 +118,7 @@ export function PopularSizes() {
                   }`}
                 >
                   {idx === 0 && (
-                    <span className="absolute -top-sm left-lg rounded-sm bg-strong-accent px-sm py-xs text-[11px] font-bold uppercase text-white">
+                    <span className="absolute -top-sm left-lg rounded-sm bg-strong-accent px-sm py-xs text-[11px] font-bold uppercase text-strong-accent-text">
                       Quick pick
                     </span>
                   )}
@@ -137,7 +137,7 @@ export function PopularSizes() {
                         </p>
                       </>
                     )}
-                    <span className="mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn bg-strong-accent px-md py-sm text-sm font-bold text-white transition-colors group-hover:bg-strong-accent-hover">
+                    <span className="mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn bg-strong-accent px-md py-sm text-sm font-bold text-strong-accent-text transition-colors group-hover:bg-strong-accent-hover">
                       {isCustom ? "Get a quote" : "Order now"}
                       <ArrowRight className="h-4 w-4" aria-hidden />
                     </span>

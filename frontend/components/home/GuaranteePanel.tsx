@@ -33,7 +33,7 @@ export function GuaranteePanel() {
             })}
           </div>
 
-          <aside className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,#E8F5E9,#FFFFFF)] p-xl shadow-elev-2">
+          <aside className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,#fef3c7,#FFFFFF)] p-xl shadow-elev-2">
             <BadgeCheck className="h-12 w-12 text-strong-accent" aria-hidden />
             <h2
               id="guarantee-h"
@@ -47,7 +47,7 @@ export function GuaranteePanel() {
             </p>
             <Link
               href="/guarantee"
-              className="mt-lg inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
+              className="mt-lg inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
             >
               Learn about the guarantee
               <ArrowRight className="h-4 w-4" aria-hidden />

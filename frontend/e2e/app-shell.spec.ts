@@ -1,19 +1,19 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("M3: app shell", () => {
-  test("desktop shows top nav, hides tab bar", async ({ page }) => {
+  test("desktop shows top nav, hides tab bar", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop only");
     await page.goto("/");
     await expect(page.getByRole("banner", { name: /banners in 48 home/i })).toBeVisible();
     await expect(page.getByRole("navigation", { name: /primary mobile navigation/i })).toBeHidden();
-    await expect(page.getByRole("link", { name: "Order a Banner" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Order now" }).first()).toBeVisible();
   });
 
-  test("mobile shows bottom tab bar, hides top nav links", async ({ page }) => {
+  test("mobile shows bottom tab bar", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-webkit", "Mobile only");
     await page.goto("/");
     await expect(page.getByRole("navigation", { name: /primary mobile navigation/i })).toBeVisible();
-    // Top nav center links are hidden < lg
-    const orderButton = page.getByRole("link", { name: "Order a Banner" });
-    await expect(orderButton).toBeVisible();
+    await expect(page.getByRole("link", { name: "Order now" }).first()).toBeVisible();
   });
 
   test("manifest is served and references the PWA theme", async ({ request }) => {

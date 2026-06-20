@@ -53,7 +53,7 @@ export function HowItWorks() {
             return (
               <li key={step.n} className="hw-step relative">
                 <div className="relative z-10 flex h-full flex-col rounded-card border border-line bg-surface p-lg shadow-elev-1">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-card bg-strong-accent text-white shadow-elev-2">
+                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-card bg-strong-accent text-strong-accent-text shadow-elev-2">
                     <Icon className="h-8 w-8" aria-hidden />
                   </div>
                   <div className="mt-lg flex items-start gap-sm">

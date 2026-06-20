@@ -28,12 +28,12 @@ export function TopNav() {
   const [templatesOpen, setTemplatesOpen] = useState(false);
 
   return (
-    <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav">
+    <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav" aria-label="Banners In 48 home">
       <div className="mx-auto max-w-content flex items-center h-16 px-md lg:px-2xl">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-xs no-underline mr-xl" aria-label="Banners In 48 home">
           <span className="font-display text-xl font-bold tracking-tight text-ink">Banners In</span>
-          <span className="rounded-pill bg-strong-accent px-sm py-xs font-display text-sm font-bold text-white">48</span>
+          <span className="rounded-pill bg-strong-accent px-sm py-xs font-display text-sm font-bold text-strong-accent-text">48</span>
         </Link>
 
         {/* Center links */}
@@ -102,7 +102,7 @@ export function TopNav() {
             <Button variant="secondary" size="md">Log In</Button>
           </Link>
           <Link href="/order/vinyl">
-            <Button variant="cta" size="md">Order a Banner</Button>
+            <Button variant="cta" size="md">Order now</Button>
           </Link>
         </div>
 
@@ -146,7 +146,7 @@ export function TopNav() {
             </Link>
             <Link href="/order/vinyl" onClick={() => setMobileOpen(false)}>
               <Button variant="cta" size="block" className="w-full">
-                Order a Banner
+                Order now
               </Button>
             </Link>
           </nav>

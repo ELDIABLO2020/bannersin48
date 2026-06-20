@@ -17,7 +17,7 @@ export function BottomTabBar() {
   const pathname = usePathname();
   return (
     <nav
-      className="mobile-tab-bar fixed bottom-0 inset-x-0 bg-surface border-t z-tab-bar"
+      className="mobile-tab-bar fixed bottom-0 inset-x-0 bg-darkest border-t z-tab-bar"
       style={{ borderTopColor: "var(--color-border)" }}
       aria-label="Primary mobile navigation"
     >
@@ -34,7 +34,7 @@ export function BottomTabBar() {
                 href={tab.href}
                 className={cn(
                   "flex flex-col items-center justify-center min-h-[56px] py-sm no-underline relative",
-                  active ? "text-strong-accent" : "text-ink-muted hover:text-ink",
+                  active ? "text-strong-accent" : "text-white/70 hover:text-white",
                 )}
                 aria-current={active ? "page" : undefined}
               >

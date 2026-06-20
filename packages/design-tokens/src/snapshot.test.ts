@@ -2,51 +2,41 @@ import { describe, it, expect } from "vitest";
 import { colors, radius, spacing, shadow, breakpoints, container, zIndex } from "./tokens";
 import { cssVars, cssVarName, buildCssVarsString } from "./cssVars";
 
-/**
- * Token integrity tests — guard against silent drift from the Ecwid design
- * language. Any change here is a deliberate design decision, not an accident.
- */
-describe("design tokens — Ecwid design compliance", () => {
+describe("design tokens — HCP design compliance", () => {
   describe("colors", () => {
-    it("uses the Ecwid 6-role palette", () => {
-      // Backgrounds
+    it("uses the HCP-inspired palette", () => {
       expect(colors.lightest).toBe("#FFFFFF");
       expect(colors.light).toBe("#F8F9FA");
-      expect(colors.softAccent).toBe("#E8F5E9");
-      expect(colors.softAccent2).toBe("#E0F2FE");
-      expect(colors.darkest).toBe("#0A2540");
+      expect(colors.softAccent).toBe("#eef1f3");
+      expect(colors.softAccent2).toBe("#f5f7f8");
+      expect(colors.darkest).toBe("#002a42");
 
-      // Strong accent (Ecwid green)
-      expect(colors.strongAccent).toBe("#00B545");
-      expect(colors.strongAccentHover).toBe("#009A3B");
-      expect(colors.strongAccentActive).toBe("#007A2E");
-      expect(colors.strongAccentText).toBe("#FFFFFF");
+      expect(colors.strongAccent).toBe("#fbbf21");
+      expect(colors.strongAccentHover).toBe("#e5a91a");
+      expect(colors.strongAccentActive).toBe("#c99212");
+      expect(colors.strongAccentText).toBe("#131b1f");
 
-      // CTA role aliases the strong accent
-      expect(colors.ctaPrimary).toBe("#00B545");
-      expect(colors.ctaAccent).toBe("#009A3B");
-      expect(colors.ctaActive).toBe("#007A2E");
-      expect(colors.ctaText).toBe("#FFFFFF");
+      expect(colors.ctaPrimary).toBe("#fbbf21");
+      expect(colors.ctaAccent).toBe("#e5a91a");
+      expect(colors.ctaActive).toBe("#c99212");
+      expect(colors.ctaText).toBe("#131b1f");
 
-      // Text
-      expect(colors.dark).toBe("#1F1F1F");
-      expect(colors.darkMuted).toBe("#5F6B7A");
-      expect(colors.textDark).toBe("#1F1F1F");
+      expect(colors.dark).toBe("#43423e");
+      expect(colors.darkMuted).toBe("#5f6b7a");
+      expect(colors.textDark).toBe("#43423e");
       expect(colors.textLight).toBe("#FFFFFF");
-      expect(colors.textMedium).toBe("#5F6B7A");
+      expect(colors.textMedium).toBe("#5f6b7a");
 
-      // Borders
-      expect(colors.border).toBe("#E5E7EB");
-      expect(colors.borderInput).toBe("#D1D5DB");
-      expect(colors.divider).toBe("#E5E7EB");
+      expect(colors.border).toBe("#b0bfbc");
+      expect(colors.borderInput).toBe("#b0bfbc");
+      expect(colors.divider).toBe("#b0bfbc");
 
-      // Status
       expect(colors.success).toBe("#00B545");
       expect(colors.warning).toBe("#F5A623");
       expect(colors.error).toBe("#E5484D");
     });
 
-    it("exposes the Ecwid badge palette", () => {
+    it("exposes badge palette", () => {
       expect(colors.badgeSuccessBg).toBe("#E8F5E9");
       expect(colors.badgeSuccessText).toBe("#007A2E");
       expect(colors.badgeWarningBg).toBe("#FFF6E6");
@@ -55,19 +45,19 @@ describe("design tokens — Ecwid design compliance", () => {
       expect(colors.badgeErrorText).toBe("#C72530");
     });
 
-    it("exposes the Ecwid timeline markers", () => {
+    it("exposes timeline markers", () => {
       expect(colors.timelineDone).toBe("#00B545");
-      expect(colors.timelineCurrent).toBe("#00B545");
-      expect(colors.timelineCurrentRing).toBe("#E8F5E9");
-      expect(colors.timelinePending).toBe("#D1D5DB");
+      expect(colors.timelineCurrent).toBe("#fbbf21");
+      expect(colors.timelineCurrentRing).toBe("#fef3c7");
+      expect(colors.timelinePending).toBe("#b0bfbc");
     });
   });
 
   describe("radius scale", () => {
-    it("uses the friendlier Ecwid radius scale", () => {
+    it("uses HCP-inspired radius scale", () => {
       expect(radius.button).toBe(10);
       expect(radius.featureCard).toBe(16);
-      expect(radius.card).toBe(20);
+      expect(radius.card).toBe(16);
       expect(radius.pill).toBe(100);
       expect(radius.sm).toBe(6);
     });
@@ -91,12 +81,12 @@ describe("design tokens — Ecwid design compliance", () => {
   });
 
   describe("shadow scale", () => {
-    it("exposes the four soft elevation levels plus the green focus glow", () => {
+    it("exposes elevation levels plus gold focus glow", () => {
       expect(shadow.level1).toBe("0 1px 2px rgba(16, 24, 40, 0.05)");
       expect(shadow.level2).toBe("0 4px 12px rgba(16, 24, 40, 0.08)");
       expect(shadow.level3).toBe("0 8px 24px rgba(16, 24, 40, 0.12)");
       expect(shadow.level4).toBe("0 16px 40px rgba(16, 24, 40, 0.16)");
-      expect(shadow.focusGlow).toBe("0 0 0 4px rgba(0, 181, 69, 0.18)");
+      expect(shadow.focusGlow).toBe("0 0 0 4px rgba(251, 191, 33, 0.2)");
     });
   });
 
@@ -143,8 +133,6 @@ describe("cssVars", () => {
       "darkest",
     ];
     for (const key of required) {
-      // Some keys are exposed directly (e.g. --color-strong-accent), others via
-      // the legacy background prefix. We accept either.
       const direct = (cssVarName as Record<string, string>)[key];
       const prefixed =
         (cssVarName as Record<string, string>)[`bg${key.charAt(0).toUpperCase() + key.slice(1)}`] ??
@@ -156,10 +144,10 @@ describe("cssVars", () => {
   it("emits a :root block via buildCssVarsString()", () => {
     const str = buildCssVarsString();
     expect(str).toMatch(/^:root \{/);
-    expect(str).toMatch(/--color-cta-primary: #00B545;/);
-    expect(str).toMatch(/--color-strong-accent: #00B545;/);
-    expect(str).toMatch(/--color-bg-soft-accent: #E8F5E9;/);
-    expect(str).toMatch(/--color-bg-darkest: #0A2540;/);
+    expect(str).toMatch(/--color-cta-primary: #fbbf21;/);
+    expect(str).toMatch(/--color-strong-accent: #fbbf21;/);
+    expect(str).toMatch(/--color-bg-soft-accent: #eef1f3;/);
+    expect(str).toMatch(/--color-bg-darkest: #002a42;/);
     expect(str).toMatch(/\}$/);
   });
 

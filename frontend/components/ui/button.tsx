@@ -9,23 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Ecwid-green primary CTA
         cta:
-          "bg-strong-accent text-white hover:bg-strong-accent-hover active:bg-strong-accent-active active:scale-[.98] rounded-btn",
-        // Ecwid-style secondary CTA — white bg, green border
+          "bg-strong-accent text-strong-accent-text hover:bg-strong-accent-hover active:bg-strong-accent-active active:scale-[.98] rounded-btn",
         outline:
-          "bg-white text-strong-accent border border-strong-accent rounded-btn hover:bg-soft-accent active:bg-soft-accent-2",
-        // Light secondary — transparent, green text, hover tint
+          "bg-white text-link border border-link rounded-btn hover:bg-soft-accent active:bg-soft-accent-2",
         secondary:
           "bg-transparent text-link border border-link rounded-btn hover:bg-soft-accent active:bg-soft-accent-2",
         ghost:
           "bg-transparent text-link rounded-none px-0 hover:text-link-hover hover:underline active:text-link-active",
         pill:
           "bg-link text-white rounded-pill hover:bg-link-hover active:bg-link-active",
-        // Kept for backwards compatibility. Resolves to the outline variant since
-        // there are no longer any dark hero overlays. New code should use `outline`.
         "secondary-on-dark":
-          "bg-white text-strong-accent border border-strong-accent rounded-btn hover:bg-soft-accent",
+          "bg-white text-link border border-link rounded-btn hover:bg-soft-accent",
       },
       size: {
         sm: "h-9 px-md text-sm",

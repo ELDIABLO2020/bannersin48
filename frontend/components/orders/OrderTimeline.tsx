@@ -14,7 +14,7 @@ export function OrderTimeline({ status }: { status: OrderStatus }) {
               className={cn(
                 "inline-flex items-center justify-center h-8 w-8 rounded-pill shrink-0",
                 done
-                  ? "bg-strong-accent text-white"
+                  ? "bg-strong-accent text-strong-accent-text"
                   : "bg-line text-ink-muted",
                 current && "ring-4",
               )}

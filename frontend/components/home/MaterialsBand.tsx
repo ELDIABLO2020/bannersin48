@@ -7,7 +7,7 @@ const MATERIALS = [
     label: "Most ordered",
     description: "Standard indoor and outdoor vinyl for events, retail, contractors, and general signage.",
     // Ecwid-tinted vinyl swatch — green base fading to white
-    texture: "bg-[linear-gradient(135deg,#00B545_0%,#00B545_48%,#F8F9FA_49%,#FFFFFF_100%)]",
+    texture: "bg-[linear-gradient(135deg,#002a42_0%,#002a42_48%,#eef1f3_49%,#FFFFFF_100%)]",
     points: ["Water resistant", "Strong color", "Great everyday durability"],
   },
   {
@@ -21,7 +21,7 @@ const MATERIALS = [
     name: "18 oz Blockout",
     label: undefined,
     description: "Heavy-duty opaque vinyl and the material option for double-sided work.",
-    texture: "bg-[linear-gradient(135deg,#0A2540_0%,#1F2937_42%,#F3F4F6_43%,#FFFFFF_100%)]",
+    texture: "bg-[linear-gradient(135deg,#131b1f_0%,#43423e_42%,#eef1f3_43%,#FFFFFF_100%)]",
     points: ["Opaque construction", "Double-sided available", "Maximum durability"],
   },
 ] as const;
@@ -29,7 +29,7 @@ const MATERIALS = [
 export function MaterialsBand() {
   return (
     <section
-      className="bg-[linear-gradient(180deg,#FFFFFF_0%,#E8F5E9_100%)]"
+      className="bg-[linear-gradient(180deg,#FFFFFF_0%,#eef1f3_100%)]"
       aria-labelledby="materials-h"
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
@@ -47,7 +47,7 @@ export function MaterialsBand() {
           </div>
           <Link
             href="/order/vinyl"
-            className="inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
+            className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
           >
             Compare materials
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -63,7 +63,7 @@ export function MaterialsBand() {
               <div className={`relative h-40 ${material.texture}`}>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.9)_0_3px,transparent_4px),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.9)_0_3px,transparent_4px)]" />
                 {material.label && (
-                  <span className="absolute bottom-md right-md rounded-pill bg-strong-accent px-md py-sm text-xs font-bold text-white">
+                  <span className="absolute bottom-md right-md rounded-pill bg-strong-accent px-md py-sm text-xs font-bold text-strong-accent-text">
                     {material.label}
                   </span>
                 )}

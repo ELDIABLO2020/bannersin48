@@ -2,7 +2,7 @@
  * CSS custom property names for the design tokens.
  * The root layout writes these to :root via a style tag.
  *
- * Ecwid-style: every semantic role is exposed as a CSS variable so
+ * HCP-inspired: every semantic role is exposed as a CSS variable so
  * components can read them at runtime (e.g. inline styles for the
  * floating countdown island and StatusHeroCard).
  */
@@ -10,7 +10,7 @@
 import { colors, radius, shadow, spacing, breakpoints, container, zIndex } from "./tokens";
 
 export const cssVarName = {
-  // ── Ecwid 6-role backgrounds ───────────────────────────────────────────
+  // ── Backgrounds ────────────────────────────────────────────────────────
   bgLightest: "--color-bg-lightest",
   bgLight: "--color-bg-light",
   bgSoftAccent: "--color-bg-soft-accent",
@@ -35,7 +35,7 @@ export const cssVarName = {
   strongAccentActive: "--color-strong-accent-active",
   strongAccentText: "--color-strong-accent-text",
 
-  // CTA role (legacy alias — points to the Ecwid green accent)
+  // CTA role
   ctaPrimary: "--color-cta-primary",
   ctaAccent: "--color-cta-accent",
   ctaActive: "--color-cta-active",
@@ -125,7 +125,7 @@ export const cssVarName = {
 } as const;
 
 export const cssVars: Record<string, string> = {
-  // Ecwid 6-role backgrounds
+  // Backgrounds
   [cssVarName.bgLightest]: colors.lightest,
   [cssVarName.bgLight]: colors.light,
   [cssVarName.bgSoftAccent]: colors.softAccent,

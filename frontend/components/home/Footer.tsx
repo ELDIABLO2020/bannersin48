@@ -48,6 +48,22 @@ export function Footer() {
     <footer className="bg-darkest text-white">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link href="/" className="flex items-center gap-xs no-underline mb-md" aria-label="Banners In 48 home">
+              <span className="font-display text-xl font-bold tracking-tight text-white">Banners In</span>
+              <span className="rounded-pill bg-strong-accent px-sm py-xs font-display text-sm font-bold text-strong-accent-text">48</span>
+            </Link>
+            <p className="text-sm text-white/70 mb-md">
+              Custom vinyl banners printed and shipped in 48 business hours.
+            </p>
+            <p className="text-sm text-white/70">
+              <span className="text-white font-semibold">Get in touch:</span>
+              <br />
+              <a href="mailto:support@bannersin48.com" className="text-strong-accent hover:underline no-underline">
+                support@bannersin48.com
+              </a>
+            </p>
+          </div>
           {COLUMNS.map((col) => (
             <div key={col.title}>
               <h3 className="font-bold text-body mb-md text-white">{col.title}</h3>

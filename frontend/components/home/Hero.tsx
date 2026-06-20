@@ -3,11 +3,12 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Clock, FileUp, ShieldCheck, Truck, Upload } from "lucide-react";
+import { CheckCircle2, Clock, FileUp, ShieldCheck, Truck, Upload } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/gsap/registry";
 import { CountdownCard } from "./CountdownCard";
+import { EmailCtaForm } from "@/components/marketing/EmailCtaForm";
 
 const PROOF_POINTS = [
   { icon: CheckCircle2, label: "High-resolution vinyl printing" },
@@ -47,10 +48,10 @@ export function Hero() {
       );
 
       tl.fromTo(
-        heroRef.current.querySelector(".hero-actions"),
+        heroRef.current.querySelector(".hero-email"),
         reduced ? {} : { opacity: 0, y: 16 },
         { opacity: 1, y: 0, duration: 0.5 },
-        0.35,
+        0.3,
       );
 
       tl.fromTo(
@@ -60,7 +61,6 @@ export function Hero() {
         0.45,
       );
 
-      // Countdown card fades in from below with a slight delay
       tl.fromTo(
         heroRef.current.querySelector(".hero-countdown"),
         reduced ? {} : { opacity: 0, y: 32 },
@@ -84,41 +84,37 @@ export function Hero() {
       className="relative isolate overflow-hidden bg-lightest text-ink"
       aria-labelledby="hero-heading"
     >
-      {/* Subtle pale-green radial wash behind the hero copy */}
       <div
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_15%,#E8F5E9_0%,transparent_55%),radial-gradient(circle_at_85%_25%,#E0F2FE_0%,transparent_45%)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_15%,#eef1f3_0%,transparent_55%),radial-gradient(circle_at_85%_25%,#fef3c7_0%,transparent_45%)]"
         aria-hidden
       />
 
       <div className="mx-auto max-w-hero px-md lg:px-2xl pt-md-lg pb-2xl lg:pt-xl lg:pb-3xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-end min-h-[620px]">
-          <div className="lg:col-span-7 max-w-4xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-center min-h-[560px]">
+          <div className="lg:col-span-6 max-w-2xl">
             <p className="hero-kicker text-strong-accent text-sm font-semibold mb-md">
               Fast. Durable. Professional.
             </p>
             <h1
               id="hero-heading"
-              className="hero-headline font-display font-extrabold tracking-tighter text-[clamp(40px,6vw,64px)] leading-[1.02]"
+              className="hero-headline font-display font-extrabold tracking-tighter text-[clamp(40px,6vw,64px)] leading-[1.02] text-ink"
             >
-              Custom banners delivered in{" "}
+              Everything to print and ship your banner in{" "}
               <span className="text-strong-accent">48</span>
               <span className="block text-strong-accent text-[0.5em] leading-none mt-xs font-bold">
                 business hours
               </span>
             </h1>
-            <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-2xl leading-relaxed">
+            <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-xl leading-relaxed">
               Premium vinyl banners printed, finished, and shipped fast. Choose your size,
               upload artwork, approve the proof, and keep your event moving.
             </p>
-            <div className="hero-actions mt-xl flex flex-col sm:flex-row gap-sm">
-              <Link href="/order/vinyl">
-                <Button variant="cta" size="lg">
-                  Order a banner
-                  <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
-                </Button>
-              </Link>
+            <div className="hero-email mt-xl max-w-lg">
+              <EmailCtaForm buttonLabel="Start your order" />
+            </div>
+            <div className="hero-actions mt-md flex flex-col sm:flex-row gap-sm">
               <Link href="/order/artwork">
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="md">
                   <Upload className="mr-sm h-5 w-5" aria-hidden />
                   Upload artwork
                 </Button>
@@ -139,34 +135,55 @@ export function Hero() {
             </ul>
           </div>
 
-          <div className="hero-countdown lg:col-span-5 lg:justify-self-end w-full max-w-lg">
-            <div className="rounded-card border border-line bg-white p-sm shadow-elev-2">
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-sm items-stretch">
-                <div className="rounded-card bg-surface text-ink p-lg">
-                  <div className="flex items-center gap-sm text-strong-accent">
-                    <Clock className="h-5 w-5" aria-hidden />
-                    <p className="text-xs font-semibold">Next production cutoff</p>
+          <div className="lg:col-span-6 flex flex-col gap-lg">
+            <div
+              className="hero-media rounded-card border border-line bg-soft-accent shadow-elev-2 p-lg aspect-[4/3] flex items-center justify-center"
+              aria-hidden
+            >
+              <div className="w-full max-w-md">
+                <div className="rounded-modal bg-darkest p-xl shadow-elev-3">
+                  <div className="h-32 rounded-sm bg-strong-accent flex items-center justify-center">
+                    <span className="font-display font-extrabold text-2xl text-strong-accent-text tracking-tight">
+                      YOUR BANNER HERE
+                    </span>
                   </div>
-                  <div className="mt-md">
-                    <CountdownCard variant="inline" />
+                  <div className="mt-md flex gap-sm justify-center">
+                    <span className="h-2 w-16 rounded-pill bg-white/30" />
+                    <span className="h-2 w-8 rounded-pill bg-strong-accent" />
                   </div>
                 </div>
-                <div className="rounded-card bg-soft-accent text-ink p-lg sm:w-48">
-                  <p className="text-xs font-semibold text-strong-accent">Order path</p>
-                  <ul className="mt-md space-y-sm text-sm font-semibold">
-                    <li className="flex items-center gap-sm">
-                      <FileUp className="h-4 w-4 text-strong-accent" aria-hidden />
-                      Upload artwork
-                    </li>
-                    <li className="flex items-center gap-sm">
-                      <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
-                      Approve proof
-                    </li>
-                    <li className="flex items-center gap-sm">
-                      <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
-                      Ships fast
-                    </li>
-                  </ul>
+              </div>
+            </div>
+
+            <div className="hero-countdown w-full max-w-lg lg:max-w-none">
+              <div className="rounded-card border border-line bg-white p-sm shadow-elev-2">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-sm items-stretch">
+                  <div className="rounded-card bg-surface text-ink p-lg">
+                    <div className="flex items-center gap-sm text-strong-accent">
+                      <Clock className="h-5 w-5" aria-hidden />
+                      <p className="text-xs font-semibold">Next production cutoff</p>
+                    </div>
+                    <div className="mt-md">
+                      <CountdownCard variant="inline" />
+                    </div>
+                  </div>
+                  <div className="rounded-card bg-soft-accent text-ink p-lg sm:w-48">
+                    <p className="text-xs font-semibold text-link">Order path</p>
+                    <ul className="mt-md space-y-sm text-sm font-semibold">
+                      <li className="flex items-center gap-sm">
+                        <FileUp className="h-4 w-4 text-strong-accent" aria-hidden />
+                        Upload artwork
+                      </li>
+                      <li className="flex items-center gap-sm">
+                        <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
+                        Approve proof
+                      </li>
+                      <li className="flex items-center gap-sm">
+                        <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
+                        Ships fast
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
