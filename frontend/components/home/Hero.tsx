@@ -85,7 +85,7 @@ export function Hero() {
       aria-labelledby="hero-heading"
     >
       <div
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_15%,#eef1f3_0%,transparent_55%),radial-gradient(circle_at_85%_25%,#fef3c7_0%,transparent_45%)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_15%,var(--color-bg-soft-accent)_0%,transparent_55%),radial-gradient(circle_at_85%_25%,var(--color-bg-gold-tint)_0%,transparent_45%)]"
         aria-hidden
       />
 

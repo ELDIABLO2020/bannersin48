@@ -12,7 +12,7 @@ const PILLARS = [
     description:
       "Pick a size, choose your material, and upload artwork without wading through extra steps.",
     icon: Clock,
-    mockClass: "bg-[linear-gradient(135deg,#002a42_0%,#004d7a_100%)]",
+    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-navy-deep)_0%,var(--color-bg-navy-mid)_100%)]",
     mockLabel: "Size & quantity",
   },
   {
@@ -22,7 +22,7 @@ const PILLARS = [
     description:
       "13 oz matte, 15 oz gloss, and mesh options with grommets, pole pockets, or hems.",
     icon: Layers,
-    mockClass: "bg-[linear-gradient(135deg,#eef1f3_0%,#b0bfbc_100%)]",
+    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-soft-accent)_0%,var(--color-border)_100%)]",
     mockLabel: "Material options",
   },
   {
@@ -32,7 +32,7 @@ const PILLARS = [
     description:
       "We send a proof for approval so you know exactly what ships to your door.",
     icon: FileCheck2,
-    mockClass: "bg-[linear-gradient(135deg,#fef3c7_0%,#fbbf21_100%)]",
+    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-gold-tint)_0%,var(--color-strong-accent)_100%)]",
     mockLabel: "Proof approval",
   },
   {
@@ -42,7 +42,7 @@ const PILLARS = [
     description:
       "Order by 9 PM ET and get FedEx delivery across the US and Canada on our production schedule.",
     icon: Truck,
-    mockClass: "bg-[linear-gradient(135deg,#002a42_0%,#131b1f_100%)]",
+    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-navy-deep)_0%,var(--color-bg-navy-dark)_100%)]",
     mockLabel: "Delivery tracking",
   },
 ] as const;

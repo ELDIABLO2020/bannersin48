@@ -23,7 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         className={cn(
           "w-full bg-surface text-ink placeholder:text-ink-muted",
           "rounded-btn border border-line-input px-md",
-          "focus:outline-none focus:border-strong-accent focus:shadow-focus",
+          "focus:outline-none focus:border-link focus:shadow-focus",
           "disabled:bg-surface-tint disabled:text-ink-muted disabled:cursor-not-allowed",
           sizeClasses[inputSize],
           invalid && "border-danger focus:border-danger focus:shadow-none",

@@ -2,10 +2,8 @@
  * Tailwind CSS preset derived from design tokens.
  * Consumed by frontend/tailwind.config.ts.
  *
- * Ecwid-style: semantic utility names point at the new Ecwid palette.
- * Legacy utility names (`bg-navy-base`, `bg-info-tint`, etc.) are
- * preserved where possible to keep downstream components compiling
- * while the re-skin rolls out.
+ * HCP palette: semantic utility names point at the Housecall Pro color system.
+ * Legacy utility names (`bg-navy-base`, `bg-info-tint`, etc.) are preserved
  */
 
 import type { Config } from "tailwindcss";
@@ -19,15 +17,14 @@ export const tailwindPreset: Partial<Config> = {
   theme: {
     extend: {
       colors: {
-        // ── Ecwid 6-role backgrounds ──────────────────────────────────────
+        // ── HCP backgrounds ───────────────────────────────────────────────
         lightest: colors.lightest,
         light: colors.light,
         "soft-accent": colors.softAccent,
         "soft-accent-2": colors.softAccent2,
         darkest: colors.darkest,
 
-        // Strong accent (Ecwid green) — exposed both as `strong-accent` and
-        // as `cta` so existing components keep compiling.
+        // Strong accent (HCP gold)
         "strong-accent": {
           DEFAULT: colors.strongAccent,
           hover: colors.strongAccentHover,
@@ -41,19 +38,21 @@ export const tailwindPreset: Partial<Config> = {
           fg: colors.ctaText,
         },
 
-        // Legacy background utilities — kept as aliases so downstream
-        // components continue to compile. They now resolve to Ecwid values.
+        // Legacy background utilities — aliases for downstream components.
         "navy-base": colors.navyBase,
         "navy-deep": colors.navyDeep,
         "navy-dark": colors.navyDark,
         "navy-darkest": colors.navyDarkest,
+        "navy-mid": colors.navyMid,
+        "gold-tint": colors.goldTint,
+        "border-on-dark": colors.borderOnDark,
         surface: colors.surface,
         "surface-tint": colors.surfaceTint,
         "surface-very-light": colors.surfaceVeryLight,
         "info-tint": colors.infoTint,
         black: colors.black,
 
-        // Links — Ecwid-green based for cohesion
+        // Links — HCP blue
         link: {
           DEFAULT: colors.link,
           hover: colors.linkHover,
@@ -76,6 +75,7 @@ export const tailwindPreset: Partial<Config> = {
         // Lines & dividers
         line: {
           DEFAULT: colors.border,
+          subtle: colors.borderSubtle,
           input: colors.borderInput,
           divider: colors.divider,
         },

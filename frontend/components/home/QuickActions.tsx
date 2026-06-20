@@ -27,7 +27,7 @@ const ACTIONS = [
 export function QuickActions() {
   return (
     <section
-      className="bg-[linear-gradient(180deg,#E8F5E9_0%,#FFFFFF_100%)]"
+      className="bg-[linear-gradient(180deg,var(--color-badge-success-bg)_0%,var(--color-bg-lightest)_100%)]"
       aria-labelledby="quick-actions-h"
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
@@ -45,7 +45,7 @@ export function QuickActions() {
             </p>
             <Link
               href="/order/vinyl"
-              className="mt-xl inline-flex items-center gap-sm rounded-btn bg-strong-accent px-2xl py-sm font-bold text-white no-underline hover:bg-strong-accent-hover"
+              className="mt-xl inline-flex items-center gap-sm rounded-btn bg-strong-accent px-2xl py-sm font-bold text-strong-accent-text no-underline hover:bg-strong-accent-hover"
             >
               Start an order
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -103,11 +103,11 @@ export function QuickActions() {
             </div>
             <div className="relative min-h-[260px] bg-soft-accent-2 p-lg">
               <div
-                className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_20%_20%,#00B545_0%,transparent_35%),radial-gradient(circle_at_90%_10%,#0F77CC_0%,transparent_28%)]"
+                className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_20%_20%,var(--color-success)_0%,transparent_35%),radial-gradient(circle_at_90%_10%,var(--color-link)_0%,transparent_28%)]"
                 aria-hidden
               />
               <div className="relative mx-auto flex h-full max-w-lg items-center">
-                <div className="w-full rotate-[-2deg] rounded-sm border-4 border-white/80 bg-[linear-gradient(135deg,#FFFFFF,#E8F5E9_55%,#00B545_56%,#007A2E)] p-lg shadow-elev-3">
+                <div className="w-full rotate-[-2deg] rounded-sm border-4 border-white/80 bg-[linear-gradient(135deg,var(--color-bg-lightest),var(--color-badge-success-bg)_55%,var(--color-success)_56%,var(--color-badge-success-text))] p-lg shadow-elev-3">
                   <div className="rounded-sm border border-black/10 bg-white/90 p-xl text-ink">
                     <p className="text-sm font-bold uppercase text-strong-accent">Grand opening</p>
                     <p className="mt-sm font-display font-extrabold tracking-tight text-[34px] leading-tight">

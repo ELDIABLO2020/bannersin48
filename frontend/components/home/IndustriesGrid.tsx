@@ -6,37 +6,37 @@ const INDUSTRIES = [
   {
     href: "/order/vinyl?use=contractor",
     label: "Contractor",
-    tint: "bg-[linear-gradient(135deg,#43423e,#002a42)]",
+    tint: "bg-[linear-gradient(135deg,var(--color-dark),var(--color-bg-navy-deep))]",
     labelClass: "text-white",
   },
   {
     href: "/order/vinyl?use=restaurant",
     label: "Restaurant",
-    tint: "bg-[linear-gradient(135deg,#b0bfbc,#eef1f3)]",
+    tint: "bg-[linear-gradient(135deg,var(--color-border),var(--color-bg-soft-accent))]",
     labelClass: "text-ink",
   },
   {
     href: "/order/vinyl?use=school",
     label: "School & Sports",
-    tint: "bg-[linear-gradient(135deg,#002a42,#004d7a)]",
+    tint: "bg-[linear-gradient(135deg,var(--color-bg-navy-deep),var(--color-bg-navy-mid))]",
     labelClass: "text-white",
   },
   {
     href: "/order/vinyl?use=events",
     label: "Events",
-    tint: "bg-[linear-gradient(135deg,#fbbf21,#fef3c7)]",
+    tint: "bg-[linear-gradient(135deg,var(--color-strong-accent),var(--color-bg-gold-tint))]",
     labelClass: "text-ink",
   },
   {
     href: "/order/vinyl?use=business",
     label: "Business",
-    tint: "bg-[linear-gradient(135deg,#131b1f,#43423e)]",
+    tint: "bg-[linear-gradient(135deg,var(--color-bg-navy-dark),var(--color-dark))]",
     labelClass: "text-white",
   },
   {
     href: "/order/vinyl?use=real-estate",
     label: "Real Estate",
-    tint: "bg-[linear-gradient(135deg,#eef1f3,#b0bfbc)]",
+    tint: "bg-[linear-gradient(135deg,var(--color-bg-soft-accent),var(--color-border))]",
     labelClass: "text-ink",
   },
 ] as const;

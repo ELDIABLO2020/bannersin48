@@ -4,69 +4,57 @@
 
 @layer base {
   :root {
-    /* ── HCP-inspired backgrounds ─────────────────────────────────────── */
+    /* AUTO-GENERATED :root START */
     --color-bg-lightest: #FFFFFF;
-    --color-bg-light: #F8F9FA;
-    --color-bg-soft-accent: #eef1f3;
-    --color-bg-soft-accent-2: #f5f7f8;
-    --color-bg-strong-accent: #fbbf21;
-    --color-bg-darkest: #002a42;
-
-    --color-bg-navy-base: #002a42;
-    --color-bg-navy-deep: #002a42;
-    --color-bg-navy-dark: #131b1f;
-    --color-bg-navy-darkest: #002a42;
+    --color-bg-light: #F5F5F5;
+    --color-bg-soft-accent: #ECEFF1;
+    --color-bg-soft-accent-2: #F5F5F5;
+    --color-bg-strong-accent: #FF9B24;
+    --color-bg-darkest: #13191E;
+    --color-bg-navy-base: #13191E;
+    --color-bg-navy-deep: #002942;
+    --color-bg-navy-dark: #0E2634;
+    --color-bg-navy-darkest: #0A2443;
     --color-bg-surface: #FFFFFF;
-    --color-bg-surface-tint: #F8F9FA;
-    --color-bg-surface-very-light: #F3F4F6;
-    --color-bg-info-tint: #f5f7f8;
+    --color-bg-surface-tint: #F5F5F5;
+    --color-bg-surface-very-light: #ECEFF1;
+    --color-bg-info-tint: #DEF0FF;
     --color-bg-black: #000000;
-
-    /* ── Strong accent (HCP gold) ─────────────────────────────────────── */
-    --color-strong-accent: #fbbf21;
-    --color-strong-accent-hover: #e5a91a;
-    --color-strong-accent-active: #c99212;
-    --color-strong-accent-text: #131b1f;
-
-    --color-cta-primary: #fbbf21;
-    --color-cta-accent: #e5a91a;
-    --color-cta-active: #c99212;
-    --color-cta-text: #131b1f;
-
-    /* ── Link ─────────────────────────────────────────────────────────── */
-    --color-link: #002a42;
-    --color-link-hover: #001a2e;
-    --color-link-active: #001220;
-
-    /* ── Text ─────────────────────────────────────────────────────────── */
-    --color-text-dark: #43423e;
-    --color-text-charcoal: #131b1f;
+    --color-bg-navy-mid: #0E2634;
+    --color-bg-gold-tint: #FFF3E0;
+    --color-strong-accent: #FF9B24;
+    --color-strong-accent-hover: #FFB706;
+    --color-strong-accent-active: #FCB900;
+    --color-strong-accent-text: #13191E;
+    --color-cta-primary: #FF9B24;
+    --color-cta-accent: #FFB706;
+    --color-cta-active: #FCB900;
+    --color-cta-text: #13191E;
+    --color-link: #0F77CC;
+    --color-link-hover: #0055FF;
+    --color-link-active: #002942;
+    --color-text-dark: #212121;
+    --color-text-charcoal: #13181A;
     --color-text-light: #FFFFFF;
-    --color-text-medium: #5f6b7a;
-    --color-text-on-accent: #131b1f;
-    --color-dark: #43423e;
-    --color-dark-muted: #5f6b7a;
-    --color-muted: #5f6b7a;
-
-    /* ── Borders & dividers ───────────────────────────────────────────── */
-    --color-border: #b0bfbc;
-    --color-border-input: #b0bfbc;
-    --color-divider: #b0bfbc;
-
-    /* ── Status ───────────────────────────────────────────────────────── */
+    --color-text-medium: #979797;
+    --color-text-on-accent: #13191E;
+    --color-dark: #212121;
+    --color-dark-muted: #979797;
+    --color-muted: #979797;
+    --color-border: #BDBDBD;
+    --color-border-subtle: #E0E0E0;
+    --color-border-input: #E0E0E0;
+    --color-divider: #BDBDBD;
+    --color-border-on-dark: rgba(255,255,255,0.15);
     --color-success: #00B545;
-    --color-warning: #F5A623;
-    --color-error: #E5484D;
-
-    /* ── Badges ───────────────────────────────────────────────────────── */
+    --color-warning: #F57C00;
+    --color-error: #CF2E2E;
     --color-badge-success-bg: #E8F5E9;
-    --color-badge-success-text: #007A2E;
-    --color-badge-warning-bg: #FFF6E6;
-    --color-badge-warning-text: #B26A00;
-    --color-badge-error-bg: #FEECEC;
-    --color-badge-error-text: #C72530;
-
-    /* ── Radius ───────────────────────────────────────────────────────── */
+    --color-badge-success-text: #2E7D32;
+    --color-badge-warning-bg: #FFF3E0;
+    --color-badge-warning-text: #F57C00;
+    --color-badge-error-bg: #FFEBEE;
+    --color-badge-error-text: #CF2E2E;
     --radius-none: 0px;
     --radius-sm: 6px;
     --radius-modal: 8px;
@@ -74,19 +62,37 @@
     --radius-feature: 16px;
     --radius-card: 16px;
     --radius-pill: 100px;
-
-    /* ── Shadows ──────────────────────────────────────────────────────── */
     --shadow-nav: 0 1px 0 rgba(16, 24, 40, 0.06);
     --shadow-level-1: 0 1px 2px rgba(16, 24, 40, 0.05);
     --shadow-level-2: 0 4px 12px rgba(16, 24, 40, 0.08);
     --shadow-level-3: 0 8px 24px rgba(16, 24, 40, 0.12);
     --shadow-level-4: 0 16px 40px rgba(16, 24, 40, 0.16);
-    --shadow-focus: 0 0 0 4px rgba(251, 191, 33, 0.2);
-    --shadow-focus-small: 0 0 0 3px rgba(251, 191, 33, 0.18);
-
-    /* ── Containers ───────────────────────────────────────────────────── */
+    --shadow-focus: 0 0 0 4px rgba(15, 119, 204, 0.2);
+    --shadow-focus-small: 0 0 0 3px rgba(15, 119, 204, 0.16);
+    --space-micro: 4px;
+    --space-xs: 8px;
+    --space-sm: 12px;
+    --space-md: 16px;
+    --space-md-lg: 20px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 40px;
+    --space-3xl: 64px;
+    --space-4xl: 80px;
     --container-content: 1200px;
     --container-hero: 1440px;
+    --bp-mobile: 320px;
+    --bp-tablet: 600px;
+    --bp-desktop: 1024px;
+    --bp-desktop-lg: 1400px;
+    --z-tab-bar: 40;
+    --z-dropdown: 50;
+    --z-sticky: 60;
+    --z-modal-backdrop: 80;
+    --z-modal: 90;
+    --z-toast: 100;
+    --z-tooltip: 110;
+    /* AUTO-GENERATED :root END */
   }
 
   *,
@@ -124,7 +130,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-strong-accent);
+    outline: 2px solid var(--color-link);
     outline-offset: 2px;
   }
 

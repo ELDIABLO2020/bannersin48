@@ -7,21 +7,21 @@ const MATERIALS = [
     label: "Most ordered",
     description: "Standard indoor and outdoor vinyl for events, retail, contractors, and general signage.",
     // Ecwid-tinted vinyl swatch — green base fading to white
-    texture: "bg-[linear-gradient(135deg,#002a42_0%,#002a42_48%,#eef1f3_49%,#FFFFFF_100%)]",
+    texture: "bg-[linear-gradient(135deg,var(--color-bg-navy-deep)_0%,var(--color-bg-navy-deep)_48%,var(--color-bg-soft-accent)_49%,var(--color-bg-lightest)_100%)]",
     points: ["Water resistant", "Strong color", "Great everyday durability"],
   },
   {
     name: "15 oz Premium Vinyl",
     label: undefined,
     description: "A heavier option when the banner needs a more substantial outdoor feel.",
-    texture: "bg-[linear-gradient(135deg,#F8F9FA_0%,#E5E7EB_50%,#FFFFFF_100%)]",
+    texture: "bg-[linear-gradient(135deg,var(--color-bg-surface-tint)_0%,var(--color-bg-surface-very-light)_50%,var(--color-bg-lightest)_100%)]",
     points: ["Thicker hand feel", "Premium finish", "Outdoor-ready"],
   },
   {
     name: "18 oz Blockout",
     label: undefined,
     description: "Heavy-duty opaque vinyl and the material option for double-sided work.",
-    texture: "bg-[linear-gradient(135deg,#131b1f_0%,#43423e_42%,#eef1f3_43%,#FFFFFF_100%)]",
+    texture: "bg-[linear-gradient(135deg,var(--color-bg-navy-dark)_0%,var(--color-dark)_42%,var(--color-bg-soft-accent)_43%,var(--color-bg-lightest)_100%)]",
     points: ["Opaque construction", "Double-sided available", "Maximum durability"],
   },
 ] as const;
@@ -29,7 +29,7 @@ const MATERIALS = [
 export function MaterialsBand() {
   return (
     <section
-      className="bg-[linear-gradient(180deg,#FFFFFF_0%,#eef1f3_100%)]"
+      className="bg-[linear-gradient(180deg,var(--color-bg-lightest)_0%,var(--color-bg-soft-accent)_100%)]"
       aria-labelledby="materials-h"
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">

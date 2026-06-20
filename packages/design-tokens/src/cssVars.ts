@@ -28,6 +28,8 @@ export const cssVarName = {
   bgSurfaceVeryLight: "--color-bg-surface-very-light",
   bgInfoTint: "--color-bg-info-tint",
   bgBlack: "--color-bg-black",
+  bgNavyMid: "--color-bg-navy-mid",
+  bgGoldTint: "--color-bg-gold-tint",
 
   // ── Strong Accent (CTA) ────────────────────────────────────────────────
   strongAccent: "--color-strong-accent",
@@ -58,8 +60,10 @@ export const cssVarName = {
 
   // ── Borders ────────────────────────────────────────────────────────────
   border: "--color-border",
+  borderSubtle: "--color-border-subtle",
   borderInput: "--color-border-input",
   divider: "--color-divider",
+  borderOnDark: "--color-border-on-dark",
 
   // ── Status ─────────────────────────────────────────────────────────────
   success: "--color-success",
@@ -143,6 +147,8 @@ export const cssVars: Record<string, string> = {
   [cssVarName.bgSurfaceVeryLight]: colors.surfaceVeryLight,
   [cssVarName.bgInfoTint]: colors.infoTint,
   [cssVarName.bgBlack]: colors.black,
+  [cssVarName.bgNavyMid]: colors.navyMid,
+  [cssVarName.bgGoldTint]: colors.goldTint,
 
   // Strong accent
   [cssVarName.strongAccent]: colors.strongAccent,
@@ -173,8 +179,10 @@ export const cssVars: Record<string, string> = {
 
   // Borders
   [cssVarName.border]: colors.border,
+  [cssVarName.borderSubtle]: colors.borderSubtle,
   [cssVarName.borderInput]: colors.borderInput,
   [cssVarName.divider]: colors.divider,
+  [cssVarName.borderOnDark]: colors.borderOnDark,
 
   // Status
   [cssVarName.success]: colors.success,

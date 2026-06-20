@@ -51,7 +51,7 @@ export function FlagshipBand() {
             aria-hidden
           >
             <div className="w-full rounded-card bg-white p-lg shadow-elev-2">
-              <div className="h-40 rounded-sm bg-[linear-gradient(135deg,#002a42,#fbbf21)] flex items-center justify-center">
+              <div className="h-40 rounded-sm bg-[linear-gradient(135deg,var(--color-bg-navy-deep),var(--color-strong-accent))] flex items-center justify-center">
                 <span className="text-white font-display font-extrabold text-2xl tracking-tight">
                   YOUR BANNER
                 </span>

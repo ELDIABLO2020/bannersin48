@@ -33,7 +33,7 @@ export function GuaranteePanel() {
             })}
           </div>
 
-          <aside className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,#fef3c7,#FFFFFF)] p-xl shadow-elev-2">
+          <aside className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,var(--color-bg-gold-tint),var(--color-bg-lightest))] p-xl shadow-elev-2">
             <BadgeCheck className="h-12 w-12 text-strong-accent" aria-hidden />
             <h2
               id="guarantee-h"

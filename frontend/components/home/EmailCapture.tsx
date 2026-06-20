@@ -9,7 +9,7 @@ export function EmailCapture() {
       aria-labelledby="capture-h"
     >
       <div
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_50%,#fef3c7_0%,transparent_55%)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_50%,var(--color-bg-gold-tint)_0%,transparent_55%)]"
         aria-hidden
       />
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">

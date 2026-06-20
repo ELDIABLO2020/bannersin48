@@ -18,7 +18,7 @@ export function BottomTabBar() {
   return (
     <nav
       className="mobile-tab-bar fixed bottom-0 inset-x-0 bg-darkest border-t z-tab-bar"
-      style={{ borderTopColor: "var(--color-border)" }}
+      style={{ borderTopColor: "var(--color-border-on-dark)" }}
       aria-label="Primary mobile navigation"
     >
       <ul className="grid grid-cols-5">

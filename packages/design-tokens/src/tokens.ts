@@ -1,12 +1,12 @@
 /**
  * Banners In 48 design tokens.
  *
- * HCP-inspired design language:
- *  - Pure white + cool gray panels (#eef1f3)
- *  - Gold accent (#fbbf21) for CTAs with dark text on gold
- *  - Navy/charcoal (#002a42, #131b1f) for dark bands and links
- *  - Inter typography, sentence-case headlines, moderate rounding
- *  - Soft, low-opacity, layered shadows
+ * Transcribed from www.housecallpro.com-DESIGN.md (Housecall Pro design system):
+ *  - Navy base #13191E, deep navy #002942, dark navy #0E2634, darkest #0A2443
+ *  - CTA gold #FF9B24 (hover #FFB706, active #FCB900), text on gold #13191E
+ *  - Link/interactive blue #0F77CC (hover #0055FF, active #002942)
+ *  - Info tint #DEF0FF, neutrals #212121 / #979797 / #ECEFF1 / #F5F5F5
+ *  - Borders #BDBDBD (dividers), #E0E0E0 (inputs/cards)
  *
  * Components reference semantic names — never raw hex.
  */
@@ -14,75 +14,79 @@
 export const colors = {
   // ── Backgrounds ────────────────────────────────────────────────────────
   lightest: "#FFFFFF",
-  light: "#F8F9FA",
+  light: "#F5F5F5",
   surface: "#FFFFFF",
-  surfaceTint: "#F8F9FA",
-  surfaceVeryLight: "#F3F4F6",
+  surfaceTint: "#F5F5F5",
+  surfaceVeryLight: "#ECEFF1",
   black: "#000000",
 
-  // soft accents — cool gray washes (HCP panel surfaces)
-  softAccent: "#eef1f3",
-  softAccent2: "#f5f7f8",
-  infoTint: "#f5f7f8",
+  softAccent: "#ECEFF1",
+  softAccent2: "#F5F5F5",
+  infoTint: "#DEF0FF",
 
   // ── Strong Accent (HCP gold) — CTAs, highlights ────────────────────────
-  strongAccent: "#fbbf21",
-  strongAccentHover: "#e5a91a",
-  strongAccentActive: "#c99212",
-  strongAccentText: "#131b1f",
+  strongAccent: "#FF9B24",
+  strongAccentHover: "#FFB706",
+  strongAccentActive: "#FCB900",
+  strongAccentText: "#13191E",
 
-  ctaPrimary: "#fbbf21",
-  ctaAccent: "#e5a91a",
-  ctaActive: "#c99212",
-  ctaText: "#131b1f",
+  ctaPrimary: "#FF9B24",
+  ctaAccent: "#FFB706",
+  ctaActive: "#FCB900",
+  ctaText: "#13191E",
 
-  // ── Interactive (links) — navy based ─────────────────────────────────
-  link: "#002a42",
-  linkHover: "#001a2e",
-  linkActive: "#001220",
+  // ── Interactive (links) — HCP blue ─────────────────────────────────────
+  link: "#0F77CC",
+  linkHover: "#0055FF",
+  linkActive: "#002942",
+  linkElectric: "#0055FF",
 
   // ── Dark text & footer backgrounds ─────────────────────────────────────
-  dark: "#43423e",
-  darkMuted: "#5f6b7a",
-  darkest: "#002a42",
+  dark: "#212121",
+  darkMuted: "#979797",
+  darkest: "#13191E",
 
-  textDark: "#43423e",
-  textCharcoal: "#131b1f",
+  textDark: "#212121",
+  textCharcoal: "#13181A",
   textLight: "#FFFFFF",
-  textMedium: "#5f6b7a",
+  textMedium: "#979797",
   textOnDark: "#FFFFFF",
-  textOnAccent: "#131b1f",
-  muted: "#5f6b7a",
+  textOnAccent: "#13191E",
+  muted: "#979797",
 
-  navyBase: "#002a42",
-  navyDeep: "#002a42",
-  navyDark: "#131b1f",
-  navyDarkest: "#002a42",
+  navyBase: "#13191E",
+  navyDeep: "#002942",
+  navyDark: "#0E2634",
+  navyDarkest: "#0A2443",
+  navyMid: "#0E2634",
+
+  goldTint: "#FFF3E0",
+  borderOnDark: "rgba(255,255,255,0.15)",
 
   // ── Borders & dividers ─────────────────────────────────────────────────
-  border: "#b0bfbc",
-  borderInput: "#b0bfbc",
-  divider: "#b0bfbc",
+  border: "#BDBDBD",
+  borderSubtle: "#E0E0E0",
+  borderInput: "#E0E0E0",
+  divider: "#BDBDBD",
 
-  // ── Semantic / status (green reserved for success only) ──────────────
+  // ── Semantic / status ──────────────────────────────────────────────────
   success: "#00B545",
-  warning: "#F5A623",
-  error: "#E5484D",
+  warning: "#F57C00",
+  error: "#CF2E2E",
 
   badgeSuccessBg: "#E8F5E9",
-  badgeSuccessText: "#007A2E",
-  badgeWarningBg: "#FFF6E6",
-  badgeWarningText: "#B26A00",
-  badgeErrorBg: "#FEECEC",
-  badgeErrorText: "#C72530",
+  badgeSuccessText: "#2E7D32",
+  badgeWarningBg: "#FFF3E0",
+  badgeWarningText: "#F57C00",
+  badgeErrorBg: "#FFEBEE",
+  badgeErrorText: "#CF2E2E",
 
   // ── Timeline markers ───────────────────────────────────────────────────
-  timelineDone: "#00B545",
-  timelineCurrent: "#fbbf21",
-  timelineCurrentRing: "#fef3c7",
-  timelinePending: "#b0bfbc",
+  timelineDone: "#0F77CC",
+  timelineCurrent: "#0F77CC",
+  timelineCurrentRing: "#DEF0FF",
+  timelinePending: "#BDBDBD",
 } as const;
-
 
 export const typography = {
   fontFamily: {
@@ -157,9 +161,9 @@ export const shadow = {
   level2: "0 4px 12px rgba(16, 24, 40, 0.08)",
   level3: "0 8px 24px rgba(16, 24, 40, 0.12)",
   level4: "0 16px 40px rgba(16, 24, 40, 0.16)",
-  focusGlow: "0 0 0 4px rgba(251, 191, 33, 0.2)",
-  focusGlowSmall: "0 0 0 3px rgba(251, 191, 33, 0.18)",
-  tabBarBorder: "rgba(16, 24, 40, 0.08)",
+  focusGlow: "0 0 0 4px rgba(15, 119, 204, 0.2)",
+  focusGlowSmall: "0 0 0 3px rgba(15, 119, 204, 0.16)",
+  tabBarBorder: "rgba(255, 255, 255, 0.15)",
 } as const;
 
 export const breakpoints = {

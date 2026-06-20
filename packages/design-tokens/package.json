@@ -12,7 +12,8 @@
     "./css-vars": "./src/cssVars.ts"
   },
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "npm run sync-css && tsc --noEmit",
+    "sync-css": "npx tsx scripts/sync-globals-css.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"

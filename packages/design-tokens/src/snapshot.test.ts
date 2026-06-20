@@ -4,52 +4,65 @@ import { cssVars, cssVarName, buildCssVarsString } from "./cssVars";
 
 describe("design tokens — HCP design compliance", () => {
   describe("colors", () => {
-    it("uses the HCP-inspired palette", () => {
+    it("uses the live HCP palette (audited Jun 2026)", () => {
       expect(colors.lightest).toBe("#FFFFFF");
-      expect(colors.light).toBe("#F8F9FA");
-      expect(colors.softAccent).toBe("#eef1f3");
-      expect(colors.softAccent2).toBe("#f5f7f8");
-      expect(colors.darkest).toBe("#002a42");
+      expect(colors.light).toBe("#F5F5F5");
+      expect(colors.softAccent).toBe("#ECEFF1");
+      expect(colors.softAccent2).toBe("#F5F5F5");
+      expect(colors.infoTint).toBe("#DEF0FF");
+      expect(colors.darkest).toBe("#13191E");
 
-      expect(colors.strongAccent).toBe("#fbbf21");
-      expect(colors.strongAccentHover).toBe("#e5a91a");
-      expect(colors.strongAccentActive).toBe("#c99212");
-      expect(colors.strongAccentText).toBe("#131b1f");
+      expect(colors.strongAccent).toBe("#FF9B24");
+      expect(colors.strongAccentHover).toBe("#FFB706");
+      expect(colors.strongAccentActive).toBe("#FCB900");
+      expect(colors.strongAccentText).toBe("#13191E");
 
-      expect(colors.ctaPrimary).toBe("#fbbf21");
-      expect(colors.ctaAccent).toBe("#e5a91a");
-      expect(colors.ctaActive).toBe("#c99212");
-      expect(colors.ctaText).toBe("#131b1f");
+      expect(colors.ctaPrimary).toBe("#FF9B24");
+      expect(colors.ctaAccent).toBe("#FFB706");
+      expect(colors.ctaActive).toBe("#FCB900");
+      expect(colors.ctaText).toBe("#13191E");
 
-      expect(colors.dark).toBe("#43423e");
-      expect(colors.darkMuted).toBe("#5f6b7a");
-      expect(colors.textDark).toBe("#43423e");
+      expect(colors.link).toBe("#0F77CC");
+      expect(colors.linkHover).toBe("#0055FF");
+      expect(colors.linkActive).toBe("#002942");
+
+      expect(colors.navyBase).toBe("#13191E");
+      expect(colors.navyDeep).toBe("#002942");
+      expect(colors.navyDark).toBe("#0E2634");
+      expect(colors.navyMid).toBe("#0E2634");
+      expect(colors.goldTint).toBe("#FFF3E0");
+      expect(colors.borderOnDark).toBe("rgba(255,255,255,0.15)");
+
+      expect(colors.dark).toBe("#212121");
+      expect(colors.darkMuted).toBe("#979797");
+      expect(colors.textDark).toBe("#212121");
       expect(colors.textLight).toBe("#FFFFFF");
-      expect(colors.textMedium).toBe("#5f6b7a");
+      expect(colors.textMedium).toBe("#979797");
 
-      expect(colors.border).toBe("#b0bfbc");
-      expect(colors.borderInput).toBe("#b0bfbc");
-      expect(colors.divider).toBe("#b0bfbc");
+      expect(colors.border).toBe("#BDBDBD");
+      expect(colors.borderSubtle).toBe("#E0E0E0");
+      expect(colors.borderInput).toBe("#E0E0E0");
+      expect(colors.divider).toBe("#BDBDBD");
 
       expect(colors.success).toBe("#00B545");
-      expect(colors.warning).toBe("#F5A623");
-      expect(colors.error).toBe("#E5484D");
+      expect(colors.warning).toBe("#F57C00");
+      expect(colors.error).toBe("#CF2E2E");
     });
 
     it("exposes badge palette", () => {
       expect(colors.badgeSuccessBg).toBe("#E8F5E9");
-      expect(colors.badgeSuccessText).toBe("#007A2E");
-      expect(colors.badgeWarningBg).toBe("#FFF6E6");
-      expect(colors.badgeWarningText).toBe("#B26A00");
-      expect(colors.badgeErrorBg).toBe("#FEECEC");
-      expect(colors.badgeErrorText).toBe("#C72530");
+      expect(colors.badgeSuccessText).toBe("#2E7D32");
+      expect(colors.badgeWarningBg).toBe("#FFF3E0");
+      expect(colors.badgeWarningText).toBe("#F57C00");
+      expect(colors.badgeErrorBg).toBe("#FFEBEE");
+      expect(colors.badgeErrorText).toBe("#CF2E2E");
     });
 
     it("exposes timeline markers", () => {
-      expect(colors.timelineDone).toBe("#00B545");
-      expect(colors.timelineCurrent).toBe("#fbbf21");
-      expect(colors.timelineCurrentRing).toBe("#fef3c7");
-      expect(colors.timelinePending).toBe("#b0bfbc");
+      expect(colors.timelineDone).toBe("#0F77CC");
+      expect(colors.timelineCurrent).toBe("#0F77CC");
+      expect(colors.timelineCurrentRing).toBe("#DEF0FF");
+      expect(colors.timelinePending).toBe("#BDBDBD");
     });
   });
 
@@ -81,12 +94,12 @@ describe("design tokens — HCP design compliance", () => {
   });
 
   describe("shadow scale", () => {
-    it("exposes elevation levels plus gold focus glow", () => {
+    it("exposes elevation levels plus blue focus glow", () => {
       expect(shadow.level1).toBe("0 1px 2px rgba(16, 24, 40, 0.05)");
       expect(shadow.level2).toBe("0 4px 12px rgba(16, 24, 40, 0.08)");
       expect(shadow.level3).toBe("0 8px 24px rgba(16, 24, 40, 0.12)");
       expect(shadow.level4).toBe("0 16px 40px rgba(16, 24, 40, 0.16)");
-      expect(shadow.focusGlow).toBe("0 0 0 4px rgba(251, 191, 33, 0.2)");
+      expect(shadow.focusGlow).toBe("0 0 0 4px rgba(15, 119, 204, 0.2)");
     });
   });
 
@@ -131,6 +144,9 @@ describe("cssVars", () => {
       "textLight",
       "error",
       "darkest",
+      "navyMid",
+      "goldTint",
+      "borderOnDark",
     ];
     for (const key of required) {
       const direct = (cssVarName as Record<string, string>)[key];
@@ -144,10 +160,11 @@ describe("cssVars", () => {
   it("emits a :root block via buildCssVarsString()", () => {
     const str = buildCssVarsString();
     expect(str).toMatch(/^:root \{/);
-    expect(str).toMatch(/--color-cta-primary: #fbbf21;/);
-    expect(str).toMatch(/--color-strong-accent: #fbbf21;/);
-    expect(str).toMatch(/--color-bg-soft-accent: #eef1f3;/);
-    expect(str).toMatch(/--color-bg-darkest: #002a42;/);
+    expect(str).toMatch(/--color-cta-primary: #FF9B24;/);
+    expect(str).toMatch(/--color-strong-accent: #FF9B24;/);
+    expect(str).toMatch(/--color-bg-soft-accent: #ECEFF1;/);
+    expect(str).toMatch(/--color-bg-darkest: #13191E;/);
+    expect(str).toMatch(/--color-link: #0F77CC;/);
     expect(str).toMatch(/\}$/);
   });
 
