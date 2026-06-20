@@ -33,7 +33,7 @@ export function AnnouncementStrip() {
 
   return (
     <div className="bg-darkest text-white text-sm">
-      <div className="mx-auto max-w-content px-md lg:px-2xl h-9 flex items-center justify-center gap-md">
+      <div className="mx-auto max-w-content px-md lg:px-2xl h-[50px] flex items-center justify-center gap-md">
         <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
         <p className="text-center font-medium">
           <span className="hidden sm:inline">Order by 9:00 PM ET &rarr; delivered by noon in 48 business hours. US & Canada.</span>
