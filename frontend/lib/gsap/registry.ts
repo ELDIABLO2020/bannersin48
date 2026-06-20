@@ -15,8 +15,8 @@ export const prefersReducedMotion = (): boolean => {
 
 /**
  * Scroll-triggered animation presets.
- * Ecwid aesthetic: short slide distance (~12-16px), slower durations (0.55-0.7s),
- * subtle ease. Each preset respects prefers-reduced-motion.
+ * Subtle motion: short slide distance (~12–16px), ~0.55–0.7s durations.
+ * Each preset respects prefers-reduced-motion.
  */
 
 export interface RevealOptions {
@@ -30,7 +30,7 @@ export interface RevealOptions {
   delay?: number;
 }
 
-/** Fade + slide up — the primary section reveal (Ecwid: subtle 12px slide) */
+/** Fade + slide up — the primary section reveal */
 export function fadeUpIn(options: RevealOptions): gsap.core.Timeline {
   const reduced = prefersReducedMotion();
   return gsap.timeline({
@@ -64,7 +64,7 @@ export function fadeIn(options: RevealOptions): gsap.core.Timeline {
   );
 }
 
-/** Slide in from left (Ecwid: subtle 16px slide) */
+/** Slide in from left */
 export function slideInLeft(options: RevealOptions): gsap.core.Timeline {
   const reduced = prefersReducedMotion();
   return gsap.timeline({
@@ -81,7 +81,7 @@ export function slideInLeft(options: RevealOptions): gsap.core.Timeline {
   );
 }
 
-/** Slide in from right (Ecwid: subtle 16px slide) */
+/** Slide in from right */
 export function slideInRight(options: RevealOptions): gsap.core.Timeline {
   const reduced = prefersReducedMotion();
   return gsap.timeline({

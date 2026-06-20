@@ -6,7 +6,7 @@ const MATERIALS = [
     name: "13 oz Vinyl",
     label: "Most ordered",
     description: "Standard indoor and outdoor vinyl for events, retail, contractors, and general signage.",
-    // Ecwid-tinted vinyl swatch — green base fading to white
+    // Navy-to-neutral vinyl swatch gradient (decorative texture, not brand color)
     texture: "bg-[linear-gradient(135deg,var(--color-bg-navy-deep)_0%,var(--color-bg-navy-deep)_48%,var(--color-bg-soft-accent)_49%,var(--color-bg-lightest)_100%)]",
     points: ["Water resistant", "Strong color", "Great everyday durability"],
   },

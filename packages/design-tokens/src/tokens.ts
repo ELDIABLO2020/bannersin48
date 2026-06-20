@@ -69,7 +69,8 @@ export const colors = {
   borderInput: "#E0E0E0",
   divider: "#BDBDBD",
 
-  // ── Semantic / status ──────────────────────────────────────────────────
+  // ── Semantic / status (NOT brand accent — never use for CTAs or nav) ───
+  // success / badgeSuccess* are validation & order-status only (#00B545 ≠ strongAccent).
   success: "#00B545",
   warning: "#F57C00",
   error: "#CF2E2E",

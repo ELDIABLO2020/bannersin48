@@ -52,4 +52,5 @@ Recommended environment variables:
 
 - [`bannersin48-final-website-structured-plan.md`](bannersin48-final-website-structured-plan.md) — product spec
 - [`phase1-build-test-plan.md`](phase1-build-test-plan.md) — engineering plan
-- [`www.housecallpro.com-DESIGN.md`](www.housecallpro.com-DESIGN.md) — design system reference
+- [`www.housecallpro.com-DESIGN.md`](www.housecallpro.com-DESIGN.md) — **canonical design system** (navy + gold CTAs + blue links). Implemented in [`packages/design-tokens/src/tokens.ts`](packages/design-tokens/src/tokens.ts).
+- [`docs/archive/ecwid-redesign-structured-refactoring-plan.md`](docs/archive/ecwid-redesign-structured-refactoring-plan.md) — deprecated; do not use for styling
