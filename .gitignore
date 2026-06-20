@@ -7,8 +7,14 @@ packages/*/node_modules/
 frontend/.next/
 frontend/out/
 frontend/coverage/
+backend/dist/
 packages/*/dist/
 packages/*/build/
+*.tsbuildinfo
+
+# Serwist PWA (regenerated on next build)
+frontend/public/sw.js
+frontend/public/swe-worker-*.js
 
 # Env files
 .env
