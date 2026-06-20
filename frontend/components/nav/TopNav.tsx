@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,20 +24,27 @@ const USE_CASES: ReadonlyArray<{ href: string; label: string }> = [
   { href: "/order/vinyl?use=real-estate", label: "Real Estate" },
 ];
 
+function navLinkClass(active: boolean) {
+  return cn(
+    "inline-flex items-center gap-1 px-md py-sm text-body text-ink no-underline font-medium font-body border-b-2 border-transparent",
+    "hover:bg-soft-accent hover:text-link",
+    active && "text-link border-link",
+  );
+}
+
 export function TopNav() {
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
 
   return (
     <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav" aria-label="Banners In 48 home">
       <div className="mx-auto max-w-content flex items-center h-16 px-md lg:px-2xl">
-        {/* Brand */}
         <Link href="/" className="flex items-center gap-xs no-underline mr-xl" aria-label="Banners In 48 home">
-          <span className="font-display text-xl font-bold tracking-tight text-ink">Banners In</span>
-          <span className="rounded-pill bg-strong-accent px-sm py-xs font-display text-sm font-bold text-strong-accent-text">48</span>
+          <span className="font-display text-xl tracking-tight text-ink uppercase">Banners In</span>
+          <span className="rounded-pill bg-strong-accent px-sm py-xs font-display text-sm text-strong-accent-text">48</span>
         </Link>
 
-        {/* Center links */}
         <nav className="hidden lg:flex items-center gap-xs flex-1">
           {CENTER_LINKS.map((l) => (
             <div key={l.href} className="relative">
@@ -46,22 +54,13 @@ export function TopNav() {
                   onMouseEnter={() => setTemplatesOpen(true)}
                   onMouseLeave={() => setTemplatesOpen(false)}
                   onFocus={() => setTemplatesOpen(true)}
-                  className={cn(
-                    "inline-flex items-center gap-1 px-md py-sm text-body text-ink no-underline rounded-btn font-medium",
-                    "hover:bg-soft-accent hover:text-link",
-                  )}
+                  className={navLinkClass(pathname.startsWith("/order/vinyl"))}
                 >
                   {l.label}
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
               ) : (
-                <Link
-                  href={l.href}
-                  className={cn(
-                    "inline-flex items-center gap-1 px-md py-sm text-body text-ink no-underline rounded-btn font-medium",
-                    "hover:bg-soft-accent hover:text-link",
-                  )}
-                >
+                <Link href={l.href} className={navLinkClass(pathname === l.href || pathname.startsWith(`${l.href}/`))}>
                   {l.label}
                 </Link>
               )}
@@ -76,12 +75,12 @@ export function TopNav() {
                     <Link
                       key={s.label}
                       href={s.href}
-                      className="flex items-center justify-between gap-xs px-md py-sm text-body text-ink no-underline hover:bg-soft-accent hover:text-link"
+                      className="flex items-center justify-between gap-xs px-md py-sm text-body text-ink no-underline hover:bg-soft-accent hover:text-link font-body"
                     >
                       <span>{s.label}</span>
                     </Link>
                   ))}
-                  <p className="px-md pt-xs text-xs text-ink-muted border-t border-line mt-xs">
+                  <p className="px-md pt-xs text-xs text-ink-muted border-t border-line mt-xs font-body">
                     Use-case quick starts
                   </p>
                 </div>
@@ -90,11 +89,10 @@ export function TopNav() {
           ))}
         </nav>
 
-        {/* Right side */}
         <div className="hidden lg:flex items-center gap-sm ml-auto">
           <Link
             href="/orders/lookup"
-            className="text-link text-body px-md py-sm hover:underline font-medium"
+            className="text-link text-body px-md py-sm hover:underline font-medium font-body"
           >
             Track Order
           </Link>
@@ -106,7 +104,6 @@ export function TopNav() {
           </Link>
         </div>
 
-        {/* Mobile toggle */}
         <button
           type="button"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -117,7 +114,6 @@ export function TopNav() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-line bg-surface shadow-elev-2">
           <nav className="px-md py-md flex flex-col gap-xs">
@@ -125,7 +121,7 @@ export function TopNav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="flex items-center justify-between px-md py-sm text-body text-ink hover:bg-soft-accent rounded-btn"
+                className="flex items-center justify-between px-md py-sm text-body text-ink hover:bg-soft-accent rounded-btn font-body"
                 onClick={() => setMobileOpen(false)}
               >
                 {l.label}
@@ -134,7 +130,7 @@ export function TopNav() {
             <div className="border-t border-line my-sm" />
             <Link
               href="/orders/lookup"
-              className="px-md py-sm text-link"
+              className="px-md py-sm text-link font-body"
               onClick={() => setMobileOpen(false)}
             >
               Track Order

@@ -19,6 +19,8 @@ const buttonVariants = cva(
           "bg-transparent text-link rounded-none px-0 hover:text-link-hover hover:underline active:text-link-active",
         pill:
           "bg-link text-white rounded-pill hover:bg-link-hover active:bg-link-active",
+        "cta-attached":
+          "bg-strong-accent text-strong-accent-text hover:bg-strong-accent-hover active:bg-strong-accent-active active:scale-[.98] rounded-l-none rounded-r-pill border-0",
         "secondary-on-dark":
           "bg-white text-link border border-link rounded-btn hover:bg-soft-accent",
       },
@@ -26,6 +28,7 @@ const buttonVariants = cva(
         sm: "h-9 px-md text-sm",
         md: "h-11 px-md text-body",
         lg: "h-12 px-2xl text-body",
+        attached: "h-12 sm:h-[54px] px-lg text-sm sm:text-body",
         block: "h-12 w-full px-2xl text-body",
       },
     },

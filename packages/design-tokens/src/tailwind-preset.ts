@@ -129,6 +129,8 @@ export const tailwindPreset: Partial<Config> = {
         feature: `${radius.featureCard}px`,
         card: `${radius.card}px`,
         pill: `${radius.pill}px`,
+        "l-pill": `${radius.pill}px 0 0 ${radius.pill}px`,
+        "r-pill": `0 ${radius.pill}px ${radius.pill}px 0`,
       },
       boxShadow: {
         nav: shadow.nav,

@@ -24,7 +24,7 @@ export function GuaranteePanel() {
                   className="gp-row rounded-card border border-line bg-surface p-lg text-center shadow-elev-1"
                 >
                   <Icon className="mx-auto h-8 w-8 text-strong-accent" aria-hidden />
-                  <p className="mt-md font-display font-extrabold tracking-tight text-[32px] leading-none text-ink">
+                  <p className="mt-md font-display text-[clamp(32px,4vw,48px)] leading-none text-ink tabular-nums uppercase">
                     {metric.value}
                   </p>
                   <p className="mt-sm text-sm text-ink-muted">{metric.label}</p>
@@ -37,7 +37,7 @@ export function GuaranteePanel() {
             <BadgeCheck className="h-12 w-12 text-strong-accent" aria-hidden />
             <h2
               id="guarantee-h"
-              className="mt-md font-display font-extrabold tracking-tight text-[34px] leading-tight text-ink"
+              className="mt-md font-display tracking-tight text-[34px] leading-tight text-ink uppercase"
             >
               Our 48-hour guarantee
             </h2>

@@ -9,11 +9,11 @@ export function ContactBand() {
           <div>
             <h2
               id="contact-h"
-              className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05]"
+              className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] uppercase"
             >
               Get in touch
             </h2>
-            <p className="mt-md text-body text-white/80 max-w-lg">
+            <p className="mt-md text-body text-white/80 max-w-lg font-body">
               Questions about artwork, sizing, or delivery? Our support team is here to help before
               you place your order.
             </p>
@@ -25,8 +25,8 @@ export function ContactBand() {
             >
               <Mail className="h-8 w-8 text-strong-accent shrink-0" aria-hidden />
               <div>
-                <p className="text-sm font-semibold text-white/70">Email support</p>
-                <p className="text-body font-bold text-white">support@bannersin48.com</p>
+                <p className="text-sm font-semibold text-white/70 font-body">Email support</p>
+                <p className="text-body font-bold text-white font-body">support@bannersin48.com</p>
               </div>
             </a>
             <Link
@@ -35,8 +35,8 @@ export function ContactBand() {
             >
               <MessageCircle className="h-8 w-8 text-strong-accent shrink-0" aria-hidden />
               <div>
-                <p className="text-sm font-semibold text-white/70">Live chat</p>
-                <p className="text-body font-bold text-white">Chat with us</p>
+                <p className="text-sm font-semibold text-white/70 font-body">Live chat</p>
+                <p className="text-body font-bold text-white font-body">Chat with us</p>
               </div>
             </Link>
           </div>

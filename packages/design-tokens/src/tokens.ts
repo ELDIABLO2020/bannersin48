@@ -91,9 +91,9 @@ export const colors = {
 
 export const typography = {
   fontFamily: {
-    display: ['"Inter"', "system-ui", "sans-serif"],
-    body: ['"Inter"', "system-ui", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "sans-serif"],
-    input: ['"Inter"', "system-ui", "sans-serif"],
+    display: ['var(--font-bebas-neue)', '"Bebas Neue"', "Impact", "Haettenschweiler", "Arial Narrow Bold", "sans-serif"],
+    body: ['var(--font-open-sans)', '"Open Sans"', "system-ui", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "sans-serif"],
+    input: ['var(--font-open-sans)', '"Open Sans"', "system-ui", "sans-serif"],
   },
   fontWeight: {
     regular: 400,

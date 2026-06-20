@@ -17,11 +17,11 @@ export function EmailCapture() {
           <div className="ec-copy max-w-2xl">
             <h2
               id="capture-h"
-              className="font-display font-extrabold tracking-tight text-[clamp(34px,5vw,58px)] leading-[1.05] text-ink"
+              className="font-display tracking-tight text-[clamp(34px,5vw,68px)] leading-[1.05] text-ink uppercase"
             >
               Your banner, at its best
             </h2>
-            <p className="mt-md max-w-2xl text-body text-ink-muted">
+            <p className="mt-md max-w-2xl text-body text-ink-muted font-body">
               Order now, upload your artwork, and keep your project moving with a clear cutoff
               window and delivery promise.
             </p>

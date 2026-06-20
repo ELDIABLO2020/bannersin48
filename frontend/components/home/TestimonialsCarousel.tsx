@@ -14,7 +14,7 @@ export function TestimonialsCarousel() {
         <div className="flex flex-col gap-md md:flex-row md:items-end md:justify-between mb-2xl">
           <h2
             id="testimonials-carousel-h"
-            className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink"
+            className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
           >
             Hear from Banners In 48 customers
           </h2>

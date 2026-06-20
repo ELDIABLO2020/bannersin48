@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Clock, FileCheck2, Layers, Truck } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
+import { placeholders, type PlaceholderKey } from "@/content/placeholders";
 
 const PILLARS = [
   {
@@ -12,8 +14,7 @@ const PILLARS = [
     description:
       "Pick a size, choose your material, and upload artwork without wading through extra steps.",
     icon: Clock,
-    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-navy-deep)_0%,var(--color-bg-navy-mid)_100%)]",
-    mockLabel: "Size & quantity",
+    imageKey: "pillarOrder" as PlaceholderKey,
   },
   {
     id: "materials",
@@ -22,8 +23,7 @@ const PILLARS = [
     description:
       "13 oz matte, 15 oz gloss, and mesh options with grommets, pole pockets, or hems.",
     icon: Layers,
-    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-soft-accent)_0%,var(--color-border)_100%)]",
-    mockLabel: "Material options",
+    imageKey: "pillarMaterials" as PlaceholderKey,
   },
   {
     id: "proof",
@@ -32,8 +32,7 @@ const PILLARS = [
     description:
       "We send a proof for approval so you know exactly what ships to your door.",
     icon: FileCheck2,
-    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-gold-tint)_0%,var(--color-strong-accent)_100%)]",
-    mockLabel: "Proof approval",
+    imageKey: "pillarProof" as PlaceholderKey,
   },
   {
     id: "deliver",
@@ -42,8 +41,7 @@ const PILLARS = [
     description:
       "Order by 9 PM ET and get FedEx delivery across the US and Canada on our production schedule.",
     icon: Truck,
-    mockClass: "bg-[linear-gradient(135deg,var(--color-bg-navy-deep)_0%,var(--color-bg-navy-dark)_100%)]",
-    mockLabel: "Delivery tracking",
+    imageKey: "pillarDeliver" as PlaceholderKey,
   },
 ] as const;
 
@@ -51,6 +49,7 @@ export function FeaturePillars() {
   const [active, setActive] = useState<string>(PILLARS[0].id);
   const current = PILLARS.find((p) => p.id === active) ?? PILLARS[0];
   const Icon = current.icon;
+  const image = placeholders[current.imageKey];
 
   return (
     <section className="bg-soft-accent" aria-labelledby="pillars-h">
@@ -58,11 +57,11 @@ export function FeaturePillars() {
         <div className="text-center max-w-3xl mx-auto mb-2xl">
           <h2
             id="pillars-h"
-            className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink"
+            className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
           >
             Grow your visibility, not your wait time
           </h2>
-          <p className="mt-md text-body text-ink-muted">
+          <p className="mt-md text-body text-ink-muted font-body">
             From upload to delivery, every step is built for banners you need on a deadline.
           </p>
         </div>
@@ -74,7 +73,7 @@ export function FeaturePillars() {
               type="button"
               onClick={() => setActive(pillar.id)}
               className={cn(
-                "px-lg py-sm rounded-pill text-sm font-semibold transition-colors",
+                "px-lg py-sm rounded-pill text-sm font-semibold transition-colors font-body",
                 active === pillar.id
                   ? "bg-darkest text-white"
                   : "bg-surface text-ink border border-line hover:bg-white",
@@ -90,26 +89,19 @@ export function FeaturePillars() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-feature bg-strong-accent text-strong-accent-text mb-md">
               <Icon className="h-6 w-6" aria-hidden />
             </div>
-            <h3 className="font-display font-extrabold text-[clamp(28px,3vw,36px)] tracking-tight text-ink">
+            <h3 className="font-display text-[clamp(28px,3vw,36px)] tracking-tight text-ink uppercase">
               {current.title}
             </h3>
-            <p className="mt-md text-body text-ink-muted max-w-lg">{current.description}</p>
+            <p className="mt-md text-body text-ink-muted max-w-lg font-body">{current.description}</p>
           </div>
-          <div
-            className={cn(
-              "rounded-card shadow-elev-3 aspect-[4/3] flex items-center justify-center p-xl",
-              current.mockClass,
-            )}
-            aria-hidden
-          >
-            <div className="rounded-modal bg-white/95 shadow-elev-2 p-lg w-full max-w-sm">
-              <p className="text-xs font-semibold text-ink-muted uppercase tracking-wide">
-                {current.mockLabel}
-              </p>
-              <div className="mt-md h-32 rounded-sm bg-soft-accent border border-line flex items-center justify-center text-sm text-ink-muted">
-                Product UI preview
-              </div>
-            </div>
+          <div className="relative rounded-card shadow-elev-3 overflow-hidden aspect-[4/3] border border-line bg-surface">
+            <PlaceholderImage
+              src={image.src}
+              alt={image.alt}
+              width={image.width}
+              height={image.height}
+              sizes="(max-width: 1024px) 100vw, 560px"
+            />
           </div>
         </div>
       </div>

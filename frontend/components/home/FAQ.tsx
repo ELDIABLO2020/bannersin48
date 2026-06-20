@@ -91,7 +91,7 @@ export function FAQ() {
     <section className="bg-surface-tint" aria-labelledby="faq-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="text-center mb-2xl">
-          <h2 id="faq-h" className="font-display font-extrabold tracking-tight text-ink leading-tight text-[clamp(34px,4.5vw,52px)]">
+          <h2 id="faq-h" className="font-display tracking-tight text-ink leading-tight text-[clamp(34px,4.5vw,68px)] uppercase">
             Frequently asked
           </h2>
         </div>

@@ -13,11 +13,11 @@ export function SocialProofBand() {
         <div className="text-center mb-2xl">
           <h2
             id="social-proof-h"
-            className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink"
+            className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
           >
             Trusted for fast, professional banners
           </h2>
-          <p className="mt-md text-body text-ink-muted max-w-2xl mx-auto">
+          <p className="mt-md text-body text-ink-muted max-w-2xl mx-auto font-body">
             Built for contractors, retailers, schools, and event teams who need signage on a deadline.
           </p>
         </div>
@@ -27,13 +27,13 @@ export function SocialProofBand() {
             return (
               <article
                 key={stat.label}
-                className="rounded-card border border-line bg-soft-accent p-xl text-center"
+                className="rounded-card border border-line bg-lightest p-xl text-center shadow-elev-1"
               >
                 <Icon className="mx-auto h-8 w-8 text-strong-accent" aria-hidden />
-                <p className="mt-md font-display font-extrabold text-[clamp(32px,4vw,48px)] leading-none text-ink tabular-nums">
+                <p className="mt-md font-display text-[clamp(36px,5vw,56px)] leading-none text-ink tabular-nums uppercase">
                   {stat.value}
                 </p>
-                <p className="mt-sm text-sm text-ink-muted">{stat.label}</p>
+                <p className="mt-sm text-sm text-ink-muted font-body">{stat.label}</p>
               </article>
             );
           })}

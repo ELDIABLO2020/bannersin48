@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "audit:hcp-design": "node scripts/audit-hcp-design.mjs"
   },
   "dependencies": {
     "@bannersin48/api-client": "*",

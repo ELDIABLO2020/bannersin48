@@ -86,7 +86,7 @@ export function PopularSizes() {
           <div>
             <h2
               id="popular-sizes-h"
-              className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink"
+              className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink uppercase"
             >
               Popular sizes &amp; pricing
             </h2>

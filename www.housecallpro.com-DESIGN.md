@@ -453,7 +453,7 @@ Generous whitespace reduces cognitive load and creates breathing room for critic
 
 3. **Apply 24px padding inside all cards and large containers**; use 12px–20px for inputs and compact components; maintain proportional spacing ratios.
 
-4. **Use Open Sans for all body, UI, and navigation text at 16px base size**; use Headline Gothic only for display/hero headlines at 68px+ to maintain hierarchy and prevent visual noise.
+4. **Use Open Sans for all body, UI, and navigation text at 16px base size**; use Headline Gothic only for display/hero headlines at 68px+ to maintain hierarchy and prevent visual noise. *Banners In 48 implementation uses **Bebas Neue** (Google Fonts) as the licensed Headline Gothic substitute.*
 
 5. **Set border-radius to `8px` for standard buttons, `100px 0px 0px 100px` for input left-side, and `0px 100px 100px 0px` for attached CTA buttons**—this combination creates cohesive form groups.
 

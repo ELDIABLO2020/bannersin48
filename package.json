@@ -17,6 +17,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "e2e": "npm run e2e -w frontend",
+    "audit:hcp-design": "npm run audit:hcp-design -w frontend",
     "clean": "rimraf packages/*/dist packages/*/.turbo frontend/.next"
   },
   "devDependencies": {

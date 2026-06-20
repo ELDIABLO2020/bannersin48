@@ -37,7 +37,7 @@ export function HowItWorks() {
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="text-center">
-          <h2 id="how-h" className="font-display font-extrabold tracking-tight text-[clamp(36px,5vw,58px)] leading-[1.05] text-ink">
+          <h2 id="how-h" className="font-display tracking-tight text-[clamp(36px,5vw,58px)] leading-[1.05] text-ink uppercase">
             How it works
           </h2>
           <p className="mt-sm text-ink-muted">Simple process. Professional results.</p>

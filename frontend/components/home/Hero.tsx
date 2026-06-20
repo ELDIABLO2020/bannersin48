@@ -9,6 +9,8 @@ import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/gsap/registry";
 import { CountdownCard } from "./CountdownCard";
 import { EmailCtaForm } from "@/components/marketing/EmailCtaForm";
+import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
+import { placeholders } from "@/content/placeholders";
 
 const PROOF_POINTS = [
   { icon: CheckCircle2, label: "High-resolution vinyl printing" },
@@ -18,6 +20,7 @@ const PROOF_POINTS = [
 
 export function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
+  const heroImage = placeholders.hero;
 
   useGSAP(
     () => {
@@ -89,23 +92,23 @@ export function Hero() {
         aria-hidden
       />
 
-      <div className="mx-auto max-w-hero px-md lg:px-2xl pt-md-lg pb-2xl lg:pt-xl lg:pb-3xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-center min-h-[560px]">
+      <div className="mx-auto max-w-hero px-md lg:px-2xl pt-4xl pb-3xl lg:pb-4xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-center min-h-[520px]">
           <div className="lg:col-span-6 max-w-2xl">
-            <p className="hero-kicker text-strong-accent text-sm font-semibold mb-md">
+            <p className="hero-kicker text-strong-accent text-sm font-semibold mb-md font-body">
               Fast. Durable. Professional.
             </p>
             <h1
               id="hero-heading"
-              className="hero-headline font-display font-extrabold tracking-tighter text-[clamp(40px,6vw,64px)] leading-[1.02] text-ink"
+              className="hero-headline font-display tracking-tight text-[clamp(40px,7vw,83px)] leading-[1.02] text-ink uppercase"
             >
               Everything to print and ship your banner in{" "}
               <span className="text-strong-accent">48</span>
-              <span className="block text-strong-accent text-[0.5em] leading-none mt-xs font-bold">
+              <span className="block text-strong-accent text-[0.45em] leading-none mt-xs">
                 business hours
               </span>
             </h1>
-            <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-xl leading-relaxed">
+            <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-xl leading-relaxed font-body">
               Premium vinyl banners printed, finished, and shipped fast. Choose your size,
               upload artwork, approve the proof, and keep your event moving.
             </p>
@@ -120,7 +123,7 @@ export function Hero() {
                 </Button>
               </Link>
             </div>
-            <ul className="hero-trust mt-xl grid grid-cols-1 sm:grid-cols-3 gap-md max-w-3xl text-sm text-ink-muted">
+            <ul className="hero-trust mt-xl grid grid-cols-1 sm:grid-cols-3 gap-md max-w-3xl text-sm text-ink-muted font-body">
               {PROOF_POINTS.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -137,22 +140,16 @@ export function Hero() {
 
           <div className="lg:col-span-6 flex flex-col gap-lg">
             <div
-              className="hero-media rounded-card border border-line bg-soft-accent shadow-elev-2 p-lg aspect-[4/3] flex items-center justify-center"
-              aria-hidden
+              className="hero-media relative rounded-card border border-line bg-soft-accent shadow-elev-3 overflow-hidden aspect-[4/3]"
             >
-              <div className="w-full max-w-md">
-                <div className="rounded-modal bg-darkest p-xl shadow-elev-3">
-                  <div className="h-32 rounded-sm bg-strong-accent flex items-center justify-center">
-                    <span className="font-display font-extrabold text-2xl text-strong-accent-text tracking-tight">
-                      YOUR BANNER HERE
-                    </span>
-                  </div>
-                  <div className="mt-md flex gap-sm justify-center">
-                    <span className="h-2 w-16 rounded-pill bg-white/30" />
-                    <span className="h-2 w-8 rounded-pill bg-strong-accent" />
-                  </div>
-                </div>
-              </div>
+              <PlaceholderImage
+                src={heroImage.src}
+                alt={heroImage.alt}
+                width={heroImage.width}
+                height={heroImage.height}
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </div>
 
             <div className="hero-countdown w-full max-w-lg lg:max-w-none">
@@ -161,15 +158,15 @@ export function Hero() {
                   <div className="rounded-card bg-surface text-ink p-lg">
                     <div className="flex items-center gap-sm text-strong-accent">
                       <Clock className="h-5 w-5" aria-hidden />
-                      <p className="text-xs font-semibold">Next production cutoff</p>
+                      <p className="text-xs font-semibold font-body">Next production cutoff</p>
                     </div>
                     <div className="mt-md">
                       <CountdownCard variant="inline" />
                     </div>
                   </div>
                   <div className="rounded-card bg-soft-accent text-ink p-lg sm:w-48">
-                    <p className="text-xs font-semibold text-link">Order path</p>
-                    <ul className="mt-md space-y-sm text-sm font-semibold">
+                    <p className="text-xs font-semibold text-link font-body">Order path</p>
+                    <ul className="mt-md space-y-sm text-sm font-semibold font-body">
                       <li className="flex items-center gap-sm">
                         <FileUp className="h-4 w-4 text-strong-accent" aria-hidden />
                         Upload artwork

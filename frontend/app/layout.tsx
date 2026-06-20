@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Bebas_Neue, Open_Sans } from "next/font/google";
 import { Providers } from "./providers";
 import { TopNav } from "@/components/nav/TopNav";
 import { BottomTabBar } from "@/components/nav/BottomTabBar";
@@ -8,11 +8,19 @@ import { Footer } from "@/components/home/Footer";
 import { CountdownFloatingIsland } from "@/components/nav/CountdownFloatingIsland";
 import "./globals.css";
 
-const inter = Inter({
+const openSans = Open_Sans({
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-inter",
+  weight: ["400", "700"],
+  variable: "--font-open-sans",
+  preload: true,
+});
+
+const bebasNeue = Bebas_Neue({
+  subsets: ["latin"],
+  display: "swap",
+  weight: "400",
+  variable: "--font-bebas-neue",
   preload: true,
 });
 
@@ -71,7 +79,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${openSans.variable} ${bebasNeue.variable}`}>
       <body className="min-h-screen flex flex-col font-body">
         <Providers>
           <AnnouncementStrip />
