@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { colors, radius, spacing, shadow, breakpoints, container, zIndex } from "./tokens";
 import { cssVars, cssVarName, buildCssVarsString } from "./cssVars";
+import { tailwindPreset } from "./tailwind-preset";
 
 describe("design tokens — HCP design compliance", () => {
   describe("colors", () => {
@@ -128,6 +129,15 @@ describe("design tokens — HCP design compliance", () => {
       expect(zIndex.modal).toBe(90);
       expect(zIndex.tooltip).toBe(110);
     });
+  });
+});
+
+describe("tailwind preset", () => {
+  it("exposes z-index utilities wired to CSS vars", () => {
+    const presetZ = tailwindPreset.theme?.extend?.zIndex as Record<string, string>;
+    expect(presetZ.sticky).toBe("var(--z-sticky)");
+    expect(presetZ.dropdown).toBe("var(--z-dropdown)");
+    expect(presetZ["tab-bar"]).toBe("var(--z-tab-bar)");
   });
 });
 

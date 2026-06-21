@@ -174,6 +174,15 @@ export const tailwindPreset: Partial<Config> = {
         tablet: "24px",
         mobile: "16px",
       },
+      zIndex: {
+        "tab-bar": "var(--z-tab-bar)",
+        dropdown: "var(--z-dropdown)",
+        sticky: "var(--z-sticky)",
+        "modal-backdrop": "var(--z-modal-backdrop)",
+        modal: "var(--z-modal)",
+        toast: "var(--z-toast)",
+        tooltip: "var(--z-tooltip)",
+      },
       keyframes: {
         "fade-in": {
           "0%": { opacity: "0" },
