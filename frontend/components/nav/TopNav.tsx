@@ -99,8 +99,8 @@ export function TopNav() {
               href="/login"
               className={cn(
                 "inline-flex items-center justify-center shrink-0 no-underline",
-                "h-12 sm:h-[54px] rounded-l-pill rounded-r-none border border-line-input border-r-0 px-lg",
-                "bg-surface text-ink font-input text-sm sm:text-body font-medium",
+                "h-11 rounded-l-pill rounded-r-none border border-line-input border-r-0 px-md",
+                "bg-surface text-ink font-input text-sm font-medium",
                 "hover:bg-soft-accent hover:text-link transition-colors",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent focus-visible:ring-offset-2",
               )}
@@ -108,9 +108,9 @@ export function TopNav() {
               Log In
             </Link>
             <Link href="/order/vinyl" className="shrink-0">
-              <Button variant="cta-attached" size="attached">
+              <Button variant="cta-attached" size="attached" className="h-11 px-md text-sm">
                 Order now
-                <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
+                <ArrowRight className="ml-xs h-4 w-4" aria-hidden />
               </Button>
             </Link>
           </div>
