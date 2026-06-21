@@ -95,7 +95,7 @@ export function Hero() {
       <div className="mx-auto max-w-hero px-md lg:px-2xl pt-4xl pb-3xl lg:pb-4xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-center min-h-[520px]">
           <div className="lg:col-span-6 max-w-2xl">
-            <p className="hero-kicker text-strong-accent text-sm font-semibold mb-md font-body">
+            <p className="hero-kicker text-strong-accent text-2xl font-semibold mb-md font-body">
               Fast. Durable. Professional.
             </p>
             <h1
