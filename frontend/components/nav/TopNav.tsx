@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
@@ -40,10 +41,7 @@ export function TopNav() {
   return (
     <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav" aria-label="Banners In 48 home">
       <div className="mx-auto max-w-content flex items-center h-16 px-md lg:px-2xl">
-        <Link href="/" className="flex items-center gap-xs no-underline mr-xl" aria-label="Banners In 48 home">
-          <span className="font-display text-xl tracking-tight text-ink uppercase">Banners In</span>
-          <span className="rounded-pill bg-strong-accent px-sm py-xs font-display text-sm text-strong-accent-text">48</span>
-        </Link>
+        <BrandLogo className="mr-xl" priority />
 
         <nav className="hidden lg:flex items-center gap-xs flex-1">
           {CENTER_LINKS.map((l) => (
