@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Mail, MessageCircle } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 export function ContactBand() {
   return (
     <section className="bg-darkest text-white" aria-labelledby="contact-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
           <div>
             <h2
               id="contact-h"
@@ -40,7 +41,7 @@ export function ContactBand() {
               </div>
             </Link>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

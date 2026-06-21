@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders, type PlaceholderKey } from "@/content/placeholders";
 
@@ -38,7 +39,7 @@ export function MaterialsBand() {
       aria-labelledby="materials-h"
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
+        <ScrollReveal className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
           <div>
             <h2
               id="materials-h"
@@ -57,9 +58,9 @@ export function MaterialsBand() {
             Compare materials
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
+        <ScrollReveal className="grid grid-cols-1 md:grid-cols-3 gap-lg">
           {MATERIALS.map((material) => {
             const image = placeholders[material.imageKey];
             return (
@@ -98,7 +99,7 @@ export function MaterialsBand() {
               </article>
             );
           })}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

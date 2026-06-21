@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, FileText, HelpCircle, LayoutTemplate } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders, type PlaceholderKey } from "@/content/placeholders";
 
@@ -44,7 +45,7 @@ export function ResourcesBand() {
   return (
     <section className="bg-soft-accent" aria-labelledby="resources-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="text-center mb-2xl">
+        <ScrollReveal className="text-center mb-2xl">
           <h2
             id="resources-h"
             className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
@@ -54,8 +55,8 @@ export function ResourcesBand() {
           <p className="mt-md text-body text-ink-muted max-w-2xl mx-auto font-body">
             Guidelines, templates, and answers so your artwork is ready for production.
           </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+        </ScrollReveal>
+        <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
           {RESOURCES.map((r) => {
             const Icon = r.icon;
             const image = placeholders[r.imageKey];
@@ -88,7 +89,7 @@ export function ResourcesBand() {
               </Link>
             );
           })}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

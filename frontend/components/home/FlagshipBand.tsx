@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Clock, FileCheck2, Truck } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders } from "@/content/placeholders";
@@ -16,7 +17,7 @@ export function FlagshipBand() {
   return (
     <section className="bg-soft-accent" aria-labelledby="flagship-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
           <div>
             <p className="text-strong-accent font-semibold text-sm mb-md font-body">48-hour production</p>
             <h2
@@ -65,7 +66,7 @@ export function FlagshipBand() {
               <span className="text-strong-accent font-semibold">In production</span>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

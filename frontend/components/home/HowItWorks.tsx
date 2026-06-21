@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, FileUp, Printer, Ruler, Truck } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 const STEPS = [
   {
@@ -36,14 +37,18 @@ export function HowItWorks() {
       aria-labelledby="how-h"
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="text-center">
+        <ScrollReveal className="text-center">
           <h2 id="how-h" className="font-display tracking-tight text-[clamp(36px,5vw,58px)] leading-[1.05] text-ink uppercase">
             How it works
           </h2>
           <p className="mt-sm text-ink-muted">Simple process. Professional results.</p>
-        </div>
+        </ScrollReveal>
 
-        <ol className="relative mt-2xl grid grid-cols-1 gap-lg md:grid-cols-4">
+        <ScrollReveal
+          as="ol"
+          className="relative mt-2xl grid grid-cols-1 gap-lg md:grid-cols-4"
+          selector=".hw-step"
+        >
           <span
             className="absolute left-[12.5%] right-[12.5%] top-10 hidden border-t border-dashed border-line md:block"
             aria-hidden
@@ -69,9 +74,9 @@ export function HowItWorks() {
               </li>
             );
           })}
-        </ol>
+        </ScrollReveal>
 
-        <div className="mt-2xl rounded-card border border-strong-accent/30 bg-soft-accent p-lg">
+        <ScrollReveal className="mt-2xl rounded-card border border-strong-accent/30 bg-soft-accent p-lg">
           <div className="flex flex-col gap-md md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-strong-accent">Production promise</p>
@@ -85,7 +90,7 @@ export function HowItWorks() {
               Proof approval starts the clock
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

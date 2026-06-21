@@ -1,4 +1,5 @@
 import { Clock3, MapPinned, Truck } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 const STATS = [
   { icon: Clock3, value: "9 PM ET", label: "daily order cutoff" },
@@ -10,7 +11,7 @@ export function SocialProofBand() {
   return (
     <section className="bg-surface border-y border-line" aria-labelledby="social-proof-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="text-center mb-2xl">
+        <ScrollReveal className="text-center mb-2xl">
           <h2
             id="social-proof-h"
             className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
@@ -20,8 +21,8 @@ export function SocialProofBand() {
           <p className="mt-md text-body text-ink-muted max-w-2xl mx-auto font-body">
             Built for contractors, retailers, schools, and event teams who need signage on a deadline.
           </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-lg">
+        </ScrollReveal>
+        <ScrollReveal className="grid grid-cols-1 sm:grid-cols-3 gap-lg">
           {STATS.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -37,7 +38,7 @@ export function SocialProofBand() {
               </article>
             );
           })}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

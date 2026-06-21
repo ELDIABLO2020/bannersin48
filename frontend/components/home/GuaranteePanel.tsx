@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Clock3, FileCheck2, MapPinned, Truck } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 const METRICS = [
   { icon: Clock3, value: "9 PM ET", label: "daily order cutoff" },
@@ -14,7 +15,10 @@ export function GuaranteePanel() {
   return (
     <section className="bg-surface" aria-labelledby="guarantee-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="grid grid-cols-1 gap-lg lg:grid-cols-[1fr_420px]">
+        <ScrollReveal
+          className="grid grid-cols-1 gap-lg lg:grid-cols-[1fr_420px]"
+          selector=".gp-row"
+        >
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
             {METRICS.map((metric) => {
               const Icon = metric.icon;
@@ -53,7 +57,7 @@ export function GuaranteePanel() {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </aside>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import { getFeaturedTestimonial } from "@/content/testimonials";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders } from "@/content/placeholders";
 
@@ -12,7 +13,7 @@ export function FeaturedTestimonial() {
   return (
     <section className="bg-darkest text-white" aria-labelledby="featured-testimonial-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
           <div className="relative rounded-card aspect-video overflow-hidden border border-white/15 shadow-elev-3">
             <PlaceholderImage
               src={imageSrc}
@@ -46,7 +47,7 @@ export function FeaturedTestimonial() {
               </div>
             )}
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

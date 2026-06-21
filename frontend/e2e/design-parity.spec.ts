@@ -59,4 +59,22 @@ test.describe("M4: HCP design parity", () => {
     const fontFamily = await h1.evaluate((el) => getComputedStyle(el).fontFamily.toLowerCase());
     expect(fontFamily).toContain("bebas");
   });
+
+  test("reduced motion keeps GSAP reveal content visible", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const reveals = page.locator("[data-gsap-reveal]");
+    expect(await reveals.count()).toBeGreaterThan(0);
+    await expect(page.getByRole("heading", { name: /popular sizes/i })).toBeVisible();
+
+    const hiddenRevealCount = await reveals.evaluateAll((elements) =>
+      elements.filter((el) => {
+        const style = getComputedStyle(el);
+        return style.opacity === "0" || style.visibility === "hidden";
+      }).length,
+    );
+
+    expect(hiddenRevealCount).toBe(0);
+  });
 });

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders, type PlaceholderKey } from "@/content/placeholders";
 
@@ -20,7 +21,7 @@ export function IndustriesGrid() {
   return (
     <section className="bg-soft-accent" aria-labelledby="industries-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="flex flex-col gap-md md:flex-row md:items-end md:justify-between mb-2xl">
+        <ScrollReveal className="flex flex-col gap-md md:flex-row md:items-end md:justify-between mb-2xl">
           <div>
             <h2
               id="industries-h"
@@ -39,8 +40,8 @@ export function IndustriesGrid() {
             View all use cases
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-md">
+        </ScrollReveal>
+        <ScrollReveal className="grid grid-cols-2 md:grid-cols-3 gap-md">
           {INDUSTRIES.map((ind) => {
             const image = placeholders[ind.imageKey];
             return (
@@ -65,7 +66,7 @@ export function IndustriesGrid() {
               </Link>
             );
           })}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

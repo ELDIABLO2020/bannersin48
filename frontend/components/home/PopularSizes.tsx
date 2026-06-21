@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { formatUsd } from "@/lib/utils/format";
 import { ArrowRight, BadgeCheck, Truck } from "lucide-react";
 
@@ -82,7 +83,7 @@ export function PopularSizes() {
   return (
     <section className="bg-surface" aria-labelledby="popular-sizes-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
+        <ScrollReveal className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
           <div>
             <h2
               id="popular-sizes-h"
@@ -101,9 +102,9 @@ export function PopularSizes() {
             View all sizes
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md">
+        <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md">
           {sizes.map((s, idx) => {
             const isCustom = s.label.toLowerCase() === "custom";
             return (
@@ -146,9 +147,9 @@ export function PopularSizes() {
               </Link>
             );
           })}
-        </div>
+        </ScrollReveal>
 
-        <div className="mt-xl flex flex-col gap-sm text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-center">
+        <ScrollReveal className="mt-xl flex flex-col gap-sm text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-center">
           <span className="inline-flex items-center justify-center gap-xs">
             <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
             Delivery promise shown before checkout
@@ -158,7 +159,7 @@ export function PopularSizes() {
             <BadgeCheck className="h-4 w-4 text-strong-accent" aria-hidden />
             Proof approval starts production
           </span>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

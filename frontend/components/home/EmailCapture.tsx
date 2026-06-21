@@ -1,6 +1,7 @@
 "use client";
 
 import { EmailCtaForm } from "@/components/marketing/EmailCtaForm";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 export function EmailCapture() {
   return (
@@ -13,7 +14,7 @@ export function EmailCapture() {
         aria-hidden
       />
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="grid grid-cols-1 gap-xl lg:grid-cols-[1fr_auto] lg:items-center">
+        <ScrollReveal className="grid grid-cols-1 gap-xl lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="ec-copy max-w-2xl">
             <h2
               id="capture-h"
@@ -29,7 +30,7 @@ export function EmailCapture() {
           <div className="ec-actions w-full max-w-md lg:max-w-lg">
             <EmailCtaForm buttonLabel="Start your order" />
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

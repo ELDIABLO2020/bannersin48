@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { getCarouselTestimonials } from "@/content/testimonials";
 
 export function TestimonialsCarousel() {
@@ -11,7 +12,7 @@ export function TestimonialsCarousel() {
   return (
     <section className="bg-surface" aria-labelledby="testimonials-carousel-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="flex flex-col gap-md md:flex-row md:items-end md:justify-between mb-2xl">
+        <ScrollReveal className="flex flex-col gap-md md:flex-row md:items-end md:justify-between mb-2xl">
           <h2
             id="testimonials-carousel-h"
             className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
@@ -25,8 +26,8 @@ export function TestimonialsCarousel() {
             View all testimonials
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        </ScrollReveal>
+        <ScrollReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
           {items.map((t) => (
             <article
               key={t.id}
@@ -57,7 +58,7 @@ export function TestimonialsCarousel() {
               )}
             </article>
           ))}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

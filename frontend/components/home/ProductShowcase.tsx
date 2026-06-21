@@ -1,4 +1,5 @@
 import { EmailCtaForm } from "@/components/marketing/EmailCtaForm";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders } from "@/content/placeholders";
 
@@ -9,7 +10,7 @@ export function ProductShowcase() {
   return (
     <section className="bg-surface" aria-labelledby="showcase-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="text-center mb-2xl">
+        <ScrollReveal className="text-center mb-2xl">
           <h2
             id="showcase-h"
             className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
@@ -19,9 +20,9 @@ export function ProductShowcase() {
           <p className="mt-md text-body text-ink-muted max-w-2xl mx-auto font-body">
             Trusted by contractors, schools, and events for durable vinyl signage that ships fast.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="relative mx-auto max-w-4xl mb-2xl min-h-[320px] md:min-h-[420px]">
+        <ScrollReveal className="relative mx-auto max-w-4xl mb-2xl min-h-[320px] md:min-h-[420px]">
           <div className="relative rounded-card shadow-elev-3 bg-soft-accent border border-line overflow-hidden aspect-[16/10]">
             <div className="absolute inset-[8%] md:inset-[10%] lg:left-[6%] lg:right-[28%] lg:top-[8%] lg:bottom-[8%]">
               <PlaceholderImage
@@ -43,11 +44,11 @@ export function ProductShowcase() {
               />
             </div>
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="max-w-xl mx-auto">
+        <ScrollReveal className="max-w-xl mx-auto">
           <EmailCtaForm buttonLabel="Start your order" />
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );
