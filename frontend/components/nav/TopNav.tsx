@@ -40,7 +40,7 @@ export function TopNav() {
 
   return (
     <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav" aria-label="Banners In 48 home">
-      <div className="mx-auto max-w-content flex items-center h-16 px-md lg:px-2xl">
+      <div className="mx-auto max-w-hero flex items-center h-16 px-md lg:px-2xl">
         <BrandLogo className="mr-xl" priority />
 
         <nav className="hidden lg:flex items-center gap-xs flex-1">
