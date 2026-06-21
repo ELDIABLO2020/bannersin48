@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
@@ -94,12 +94,26 @@ export function TopNav() {
           >
             Track Order
           </Link>
-          <Link href="/login">
-            <Button variant="secondary" size="md">Log In</Button>
-          </Link>
-          <Link href="/order/vinyl">
-            <Button variant="cta" size="md">Order now</Button>
-          </Link>
+          <div className="flex items-stretch">
+            <Link
+              href="/login"
+              className={cn(
+                "inline-flex items-center justify-center shrink-0 no-underline",
+                "h-12 sm:h-[54px] rounded-l-pill rounded-r-none border border-line-input border-r-0 px-lg",
+                "bg-surface text-ink font-input text-sm sm:text-body font-medium",
+                "hover:bg-soft-accent hover:text-link transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent focus-visible:ring-offset-2",
+              )}
+            >
+              Log In
+            </Link>
+            <Link href="/order/vinyl" className="shrink-0">
+              <Button variant="cta-attached" size="attached">
+                Order now
+                <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <button
@@ -133,16 +147,27 @@ export function TopNav() {
             >
               Track Order
             </Link>
-            <Link href="/login" onClick={() => setMobileOpen(false)}>
-              <Button variant="secondary" size="block" className="w-full">
+            <div className="flex items-stretch">
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "inline-flex flex-1 items-center justify-center no-underline",
+                  "h-12 sm:h-[54px] rounded-l-pill rounded-r-none border border-line-input border-r-0 px-lg",
+                  "bg-surface text-ink font-input text-sm sm:text-body font-medium",
+                  "hover:bg-soft-accent hover:text-link transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent focus-visible:ring-offset-2",
+                )}
+              >
                 Log In
-              </Button>
-            </Link>
-            <Link href="/order/vinyl" onClick={() => setMobileOpen(false)}>
-              <Button variant="cta" size="block" className="w-full">
-                Order now
-              </Button>
-            </Link>
+              </Link>
+              <Link href="/order/vinyl" onClick={() => setMobileOpen(false)} className="shrink-0">
+                <Button variant="cta-attached" size="attached">
+                  Order now
+                  <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
+                </Button>
+              </Link>
+            </div>
           </nav>
         </div>
       )}
