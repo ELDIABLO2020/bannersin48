@@ -93,7 +93,7 @@ export function Hero() {
       />
 
       <div className="mx-auto max-w-hero px-md lg:px-2xl pt-4xl pb-3xl lg:pb-4xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-center min-h-[520px]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-start min-h-[520px]">
           <div className="lg:col-span-6 max-w-2xl">
             <p className="hero-kicker text-strong-accent text-2xl font-semibold mb-md font-body">
               Fast. Durable. Professional.
@@ -138,7 +138,7 @@ export function Hero() {
             </ul>
           </div>
 
-          <div className="lg:col-span-6 flex flex-col gap-lg">
+          <div className="lg:col-span-6">
             <div
               className="hero-media relative rounded-card border border-line bg-soft-accent shadow-elev-3 overflow-hidden aspect-[4/3]"
             >
@@ -151,36 +151,36 @@ export function Hero() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
+          </div>
 
-            <div className="hero-countdown w-full max-w-lg lg:max-w-none">
-              <div className="rounded-card border border-line bg-white p-sm shadow-elev-2">
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-sm items-stretch">
-                  <div className="rounded-card bg-surface text-ink p-lg">
-                    <div className="flex items-center gap-sm text-strong-accent">
-                      <Clock className="h-5 w-5" aria-hidden />
-                      <p className="text-xs font-semibold font-body">Next production cutoff</p>
-                    </div>
-                    <div className="mt-md">
-                      <CountdownCard variant="inline" />
-                    </div>
+          <div className="hero-countdown lg:col-span-12">
+            <div className="rounded-card border border-line bg-white p-sm shadow-elev-2">
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-sm items-stretch">
+                <div className="rounded-card bg-surface text-ink p-lg">
+                  <div className="flex items-center gap-sm text-strong-accent">
+                    <Clock className="h-5 w-5" aria-hidden />
+                    <p className="text-xs font-semibold font-body">Next production cutoff</p>
                   </div>
-                  <div className="rounded-card bg-soft-accent text-ink p-lg sm:w-48">
-                    <p className="text-xs font-semibold text-link font-body">Order path</p>
-                    <ul className="mt-md space-y-sm text-sm font-semibold font-body">
-                      <li className="flex items-center gap-sm">
-                        <FileUp className="h-4 w-4 text-strong-accent" aria-hidden />
-                        Upload artwork
-                      </li>
-                      <li className="flex items-center gap-sm">
-                        <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
-                        Approve proof
-                      </li>
-                      <li className="flex items-center gap-sm">
-                        <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
-                        Ships fast
-                      </li>
-                    </ul>
+                  <div className="mt-md">
+                    <CountdownCard variant="inline" />
                   </div>
+                </div>
+                <div className="rounded-card bg-soft-accent text-ink p-lg">
+                  <p className="text-xs font-semibold text-link font-body">Order path</p>
+                  <ul className="mt-md space-y-sm text-sm font-semibold font-body">
+                    <li className="flex items-center gap-sm">
+                      <FileUp className="h-4 w-4 text-strong-accent" aria-hidden />
+                      Upload artwork
+                    </li>
+                    <li className="flex items-center gap-sm">
+                      <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
+                      Approve proof
+                    </li>
+                    <li className="flex items-center gap-sm">
+                      <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
+                      Ships fast
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
