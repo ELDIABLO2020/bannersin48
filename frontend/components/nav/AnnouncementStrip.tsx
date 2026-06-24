@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Truck } from "lucide-react";
 import { getApiClient } from "@/lib/api/client";
@@ -33,6 +35,22 @@ export function AnnouncementStrip() {
 
   return (
     <div className="bg-darkest text-white text-sm">
+      <div className="lg:hidden mx-auto max-w-content px-md pt-sm pb-xs flex justify-center bg-white">
+        <Link
+          href="/"
+          className="inline-flex shrink-0 items-center no-underline"
+          aria-label="Banners In 48 home"
+        >
+          <Image
+            src="/images/logo-mobile-header.png"
+            alt="Banners In 48"
+            width={500}
+            height={150}
+            priority
+            className="h-9 w-auto"
+          />
+        </Link>
+      </div>
       <div className="mx-auto max-w-content px-md lg:px-2xl h-[50px] flex items-center justify-center gap-md">
         <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
         <p className="text-center font-medium">
