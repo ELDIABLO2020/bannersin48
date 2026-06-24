@@ -6,7 +6,8 @@ import { useCart, cartTotals } from "@/lib/stores/cart";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
-import { Trash2, ChevronRight, ShoppingBag } from "lucide-react";
+import { ChevronRight, ShoppingBag } from "lucide-react";
+import { CartLineRow } from "@/components/cart/CartLineRow";
 
 export default function CartPage() {
   const lines = useCart((s) => s.lines);
@@ -51,46 +52,12 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
           <div className="lg:col-span-8 space-y-md">
             {lines.map((l) => (
-              <Card key={l.id} className="bg-surface">
-                <div className="flex items-start justify-between gap-md">
-                  <div>
-                    <p className="font-bold text-ink">
-                      {l.product === "retractable"
-                        ? "Retractable Banner (33.5\" × 80\")"
-                        : `${l.display.requestedLabel} (${l.material.replaceAll("_", " ")})`}
-                    </p>
-                    <p className="text-body-sm text-ink-muted mt-xs">
-                      Requested: {l.display.requestedLabel} · Billable: {l.display.billableLabel}
-                      {l.billableSqFt > 0 && ` · ${l.billableSqFt} sq ft`}
-                    </p>
-                    <p className="text-body-sm text-ink-muted mt-xs">
-                      Finishing: {finishLabel(l.finishing)}
-                    </p>
-                    <div className="flex items-center gap-sm mt-md">
-                      <label className="text-body-sm text-ink-muted">Qty</label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={10}
-                        value={l.quantity}
-                        onChange={(e) => updateLine(l.id, { quantity: Math.max(1, Math.min(10, parseInt(e.target.value) || 1)) })}
-                        className="w-16 h-9 rounded-pill border border-line-input px-sm text-ink text-center"
-                      />
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-heading-h4 font-bold text-ink">{formatUsd(l.totalBeforeTax)}</p>
-                    <p className="text-body-sm text-ink-muted">incl. {formatUsd(l.shipping)} shipping</p>
-                    <button
-                      type="button"
-                      className="mt-sm text-body-sm text-danger inline-flex items-center gap-xs hover:underline"
-                      onClick={() => removeLine(l.id)}
-                    >
-                      <Trash2 className="h-3 w-3" aria-hidden /> Remove
-                    </button>
-                  </div>
-                </div>
-              </Card>
+              <CartLineRow
+                key={l.id}
+                line={l}
+                onRemove={removeLine}
+                onUpdateQty={(id, quantity) => updateLine(id, { quantity })}
+              />
             ))}
           </div>
 
@@ -132,12 +99,4 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
       <dd className="tabular-nums">{value}</dd>
     </div>
   );
-}
-
-function finishLabel(f: { welding: boolean; grommets: boolean; windSlits: boolean; polePockets: boolean; polePocketPlacement?: string }) {
-  const parts: string[] = [];
-  parts.push(f.polePockets ? `Pole pockets${f.polePocketPlacement ? ` (${f.polePocketPlacement})` : ""}` : "Welded");
-  parts.push(f.polePockets ? "— (pockets)" : f.grommets ? "Grommets" : "No grommets");
-  if (f.windSlits) parts.push("Wind slits");
-  return parts.join(" · ");
 }

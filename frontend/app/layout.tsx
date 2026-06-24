@@ -6,6 +6,7 @@ import { BottomTabBar } from "@/components/nav/BottomTabBar";
 import { AnnouncementStrip } from "@/components/nav/AnnouncementStrip";
 import { Footer } from "@/components/home/Footer";
 import { CountdownFloatingIsland } from "@/components/nav/CountdownFloatingIsland";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 import "./globals.css";
 
 const openSans = Open_Sans({
@@ -88,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <BottomTabBar />
           <CountdownFloatingIsland />
+          <CartDrawer />
         </Providers>
       </body>
     </html>

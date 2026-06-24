@@ -8,8 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
 import { formatCountdown } from "@/lib/utils/time";
-import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/stores/cart";
+import { useCartDrawer } from "@/lib/stores/cart-drawer";
 import { Clock, ShoppingCart } from "lucide-react";
 
 export function PriceSummary() {
@@ -20,7 +20,7 @@ export function PriceSummary() {
   const quantity = useConfigurator((s) => s.quantity);
   const artworkId = useConfigurator((s) => s.artworkId);
   const addLine = useCart((s) => s.addLine);
-  const router = useRouter();
+  const openDrawer = useCartDrawer((s) => s.open);
 
   // Debounce quote calls (250ms)
   const [debounced, setDebounced] = useState({ material, size, finishing, quantity });
@@ -89,7 +89,7 @@ export function PriceSummary() {
         billableLabel: `${line.billableDims.widthFt}' × ${line.billableDims.heightFt}'`,
       },
     });
-    router.push("/cart");
+    openDrawer();
   }
 
   return (

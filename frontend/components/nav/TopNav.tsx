@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, X, ShoppingCart } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
+import { useCart } from "@/lib/stores/cart";
+import { useCartDrawer } from "@/lib/stores/cart-drawer";
 
 const CENTER_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: "/order/vinyl", label: "Banners" },
@@ -37,6 +39,8 @@ export function TopNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const lineCount = useCart((s) => s.lines.reduce((n, l) => n + l.quantity, 0));
+  const toggleDrawer = useCartDrawer((s) => s.toggle);
 
   return (
     <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav" aria-label="Banners In 48 home">
@@ -114,6 +118,22 @@ export function TopNav() {
               </Button>
             </Link>
           </div>
+          <button
+            type="button"
+            onClick={toggleDrawer}
+            aria-label={`Open cart${lineCount > 0 ? `, ${lineCount} item${lineCount === 1 ? "" : "s"}` : ""}`}
+            className="relative inline-flex items-center justify-center h-11 w-11 rounded-pill text-ink hover:bg-soft-accent hover:text-link transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent focus-visible:ring-offset-2"
+          >
+            <ShoppingCart className="h-5 w-5" aria-hidden />
+            {lineCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-strong-accent text-white text-xs font-bold flex items-center justify-center"
+                aria-hidden="true"
+              >
+                {lineCount}
+              </span>
+            )}
+          </button>
         </div>
 
         <button
@@ -140,6 +160,24 @@ export function TopNav() {
               </Link>
             ))}
             <div className="border-t border-line my-sm" />
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                toggleDrawer();
+              }}
+              className="flex items-center justify-between w-full px-md py-sm text-ink hover:bg-soft-accent rounded-btn font-body"
+            >
+              <span className="flex items-center gap-sm">
+                <ShoppingCart className="h-5 w-5" aria-hidden />
+                Cart
+              </span>
+              {lineCount > 0 && (
+                <span className="min-w-[20px] h-5 px-1 rounded-full bg-strong-accent text-white text-xs font-bold flex items-center justify-center">
+                  {lineCount}
+                </span>
+              )}
+            </button>
             <Link
               href="/orders/lookup"
               className="px-md py-sm text-link font-body"
