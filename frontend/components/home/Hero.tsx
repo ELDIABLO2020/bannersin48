@@ -109,8 +109,9 @@ export function Hero() {
               </span>
             </h1>
             <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-xl leading-relaxed font-body">
-              Premium vinyl banners printed, finished, and shipped fast. Choose your size,
-              upload artwork, approve the proof, and keep your event moving.
+              Premium Vinyl Banners Printed, Finished, Shipped and Delivered in 48 Hours
+              Guaranteed. Choose your size, upload artwork, approve proof, and keep your event
+              moving.
             </p>
             <div className="hero-email mt-xl max-w-lg">
               <EmailCtaForm buttonLabel="Start your order" />
