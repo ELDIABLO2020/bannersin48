@@ -399,7 +399,7 @@ function AllSizesGrid() {
               Custom
             </h3>
             <p className="mt-sm text-body-sm text-ink-light/80">
-              Any size up to {MAX_BILLABLE_FT}' × {MAX_BILLABLE_FT}'.
+              Any size up to {MAX_BILLABLE_FT}&rsquo; × {MAX_BILLABLE_FT}&rsquo;.
             </p>
             <div className="mt-auto pt-lg">
               <p className="text-heading-h4 font-bold text-strong-accent">Built to fit</p>
@@ -470,7 +470,7 @@ function RetractableSection() {
               BI48-019 · Retractable banner
             </p>
             <h3 className="font-display text-2xl font-bold text-ink mt-xs">
-              {RETRACTABLE.widthIn}" × {RETRACTABLE.heightIn}"
+              {RETRACTABLE.widthIn}&rdquo; × {RETRACTABLE.heightIn}&rdquo;
             </h3>
             <ul className="mt-md space-y-xs text-body text-ink-muted">
               <li className="flex items-center gap-sm">
