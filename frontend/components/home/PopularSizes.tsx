@@ -114,8 +114,12 @@ export function PopularSizes() {
                 className="ps-card group block no-underline"
               >
                 <article
-                  className={`relative flex min-h-[240px] flex-col rounded-card border bg-surface p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2 ${
-                    idx === 0 ? "border-strong-accent ring-1 ring-strong-accent" : "border-line hover:border-strong-accent"
+                  className={`relative flex min-h-[240px] flex-col rounded-card border p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2 ${
+                    isCustom
+                      ? "border-navy-deep bg-navy-base"
+                      : idx === 0
+                        ? "border-strong-accent bg-surface ring-1 ring-strong-accent"
+                        : "border-line bg-surface hover:border-strong-accent"
                   }`}
                 >
                   {idx === 0 && (
@@ -123,13 +127,28 @@ export function PopularSizes() {
                       Quick pick
                     </span>
                   )}
-                  <h3 className="font-display font-extrabold tracking-tight text-[28px] leading-none text-ink">
+                  {isCustom && (
+                    <span className="absolute -top-sm left-lg rounded-sm bg-strong-accent px-sm py-xs text-[11px] font-bold uppercase text-strong-accent-text">
+                      Made to order
+                    </span>
+                  )}
+                  <h3
+                    className={`font-display font-extrabold tracking-tight text-[28px] leading-none ${
+                      isCustom ? "text-ink-light" : "text-ink"
+                    }`}
+                  >
                     {getLabel(s)}
                   </h3>
-                  <p className="mt-md min-h-[44px] text-sm text-ink-muted">{s.note}</p>
+                  <p
+                    className={`mt-md min-h-[44px] text-sm ${
+                      isCustom ? "text-ink-light/80" : "text-ink-muted"
+                    }`}
+                  >
+                    {s.note}
+                  </p>
                   <div className="mt-auto pt-lg">
                     {isCustom ? (
-                      <p className="text-heading-h4 font-bold text-ink">Built to fit</p>
+                      <p className="text-heading-h4 font-bold text-strong-accent">Built to fit</p>
                     ) : (
                       <>
                         <p className="text-sm text-ink-muted">{s.sqFt} sq ft</p>
@@ -138,7 +157,13 @@ export function PopularSizes() {
                         </p>
                       </>
                     )}
-                    <span className="mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn bg-strong-accent px-md py-sm text-sm font-bold text-strong-accent-text transition-colors group-hover:bg-strong-accent-hover">
+                    <span
+                      className={`mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn px-md py-sm text-sm font-bold transition-colors ${
+                        isCustom
+                          ? "bg-lightest text-navy-base group-hover:bg-ink-light"
+                          : "bg-strong-accent text-strong-accent-text group-hover:bg-strong-accent-hover"
+                      }`}
+                    >
                       {isCustom ? "Get a quote" : "Order now"}
                       <ArrowRight className="h-4 w-4" aria-hidden />
                     </span>
