@@ -30,9 +30,9 @@
     --color-cta-accent: #FFB706;
     --color-cta-active: #FCB900;
     --color-cta-text: #13191E;
-    --color-link: #0F77CC;
-    --color-link-hover: #0055FF;
-    --color-link-active: #002942;
+    --color-link: #13191E;
+    --color-link-hover: #13191E;
+    --color-link-active: #13191E;
     --color-text-dark: #212121;
     --color-text-charcoal: #13181A;
     --color-text-light: #FFFFFF;
@@ -67,8 +67,8 @@
     --shadow-level-2: 0 4px 12px rgba(16, 24, 40, 0.08);
     --shadow-level-3: 0 8px 24px rgba(16, 24, 40, 0.12);
     --shadow-level-4: 0 16px 40px rgba(16, 24, 40, 0.16);
-    --shadow-focus: 0 0 0 4px rgba(15, 119, 204, 0.2);
-    --shadow-focus-small: 0 0 0 3px rgba(15, 119, 204, 0.16);
+    --shadow-focus: 0 0 0 4px rgba(19, 25, 30, 0.2);
+    --shadow-focus-small: 0 0 0 3px rgba(19, 25, 30, 0.16);
     --space-micro: 4px;
     --space-xs: 8px;
     --space-sm: 12px;
