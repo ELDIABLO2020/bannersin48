@@ -23,9 +23,9 @@ describe("design tokens — HCP design compliance", () => {
       expect(colors.ctaActive).toBe("#FCB900");
       expect(colors.ctaText).toBe("#13191E");
 
-      expect(colors.link).toBe("#0F77CC");
-      expect(colors.linkHover).toBe("#0055FF");
-      expect(colors.linkActive).toBe("#002942");
+      expect(colors.link).toBe("#13191E");
+      expect(colors.linkHover).toBe("#13191E");
+      expect(colors.linkActive).toBe("#13191E");
 
       expect(colors.navyBase).toBe("#13191E");
       expect(colors.navyDeep).toBe("#002942");
@@ -60,8 +60,8 @@ describe("design tokens — HCP design compliance", () => {
     });
 
     it("exposes timeline markers", () => {
-      expect(colors.timelineDone).toBe("#0F77CC");
-      expect(colors.timelineCurrent).toBe("#0F77CC");
+      expect(colors.timelineDone).toBe("#13191E");
+      expect(colors.timelineCurrent).toBe("#13191E");
       expect(colors.timelineCurrentRing).toBe("#DEF0FF");
       expect(colors.timelinePending).toBe("#BDBDBD");
     });
@@ -100,7 +100,7 @@ describe("design tokens — HCP design compliance", () => {
       expect(shadow.level2).toBe("0 4px 12px rgba(16, 24, 40, 0.08)");
       expect(shadow.level3).toBe("0 8px 24px rgba(16, 24, 40, 0.12)");
       expect(shadow.level4).toBe("0 16px 40px rgba(16, 24, 40, 0.16)");
-      expect(shadow.focusGlow).toBe("0 0 0 4px rgba(15, 119, 204, 0.2)");
+      expect(shadow.focusGlow).toBe("0 0 0 4px rgba(19, 25, 30, 0.2)");
     });
   });
 
@@ -174,7 +174,7 @@ describe("cssVars", () => {
     expect(str).toMatch(/--color-strong-accent: #FF9B24;/);
     expect(str).toMatch(/--color-bg-soft-accent: #ECEFF1;/);
     expect(str).toMatch(/--color-bg-darkest: #13191E;/);
-    expect(str).toMatch(/--color-link: #0F77CC;/);
+    expect(str).toMatch(/--color-link: #13191E;/);
     expect(str).toMatch(/\}$/);
   });
 

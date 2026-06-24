@@ -35,10 +35,10 @@ export const colors = {
   ctaActive: "#FCB900",
   ctaText: "#13191E",
 
-  // ── Interactive (links) — HCP blue ─────────────────────────────────────
-  link: "#0F77CC",
-  linkHover: "#0055FF",
-  linkActive: "#002942",
+  // ── Interactive (links) ────────────────────────────────────────────────
+  link: "#13191E",
+  linkHover: "#13191E",
+  linkActive: "#13191E",
   linkElectric: "#0055FF",
 
   // ── Dark text & footer backgrounds ─────────────────────────────────────
@@ -83,8 +83,8 @@ export const colors = {
   badgeErrorText: "#CF2E2E",
 
   // ── Timeline markers ───────────────────────────────────────────────────
-  timelineDone: "#0F77CC",
-  timelineCurrent: "#0F77CC",
+  timelineDone: "#13191E",
+  timelineCurrent: "#13191E",
   timelineCurrentRing: "#DEF0FF",
   timelinePending: "#BDBDBD",
 } as const;
@@ -162,8 +162,8 @@ export const shadow = {
   level2: "0 4px 12px rgba(16, 24, 40, 0.08)",
   level3: "0 8px 24px rgba(16, 24, 40, 0.12)",
   level4: "0 16px 40px rgba(16, 24, 40, 0.16)",
-  focusGlow: "0 0 0 4px rgba(15, 119, 204, 0.2)",
-  focusGlowSmall: "0 0 0 3px rgba(15, 119, 204, 0.16)",
+  focusGlow: "0 0 0 4px rgba(19, 25, 30, 0.2)",
+  focusGlowSmall: "0 0 0 3px rgba(19, 25, 30, 0.16)",
   tabBarBorder: "rgba(255, 255, 255, 0.15)",
 } as const;
 
