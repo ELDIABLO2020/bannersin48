@@ -1,46 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-
-const COLUMNS = [
-  {
-    title: "Products",
-    items: [
-      { href: "/order/vinyl", label: "Vinyl Banners" },
-      { href: "/order/retractable", label: "Retractable Banners" },
-      { href: "/sizes", label: "All Sizes & Pricing" },
-      { href: "/order/artwork", label: "Upload Artwork" },
-      { href: "/help", label: "Artwork Guidelines" },
-    ],
-  },
-  {
-    title: "Company",
-    items: [
-      { href: "/about", label: "About Us" },
-      { href: "/reviews", label: "Reviews" },
-      { href: "/guarantee", label: "Delivery Guarantee" },
-      { href: "/quality", label: "Production & Quality" },
-    ],
-  },
-  {
-    title: "Support",
-    items: [
-      { href: "/help", label: "Help Center" },
-      { href: "/faq", label: "FAQs" },
-      { href: "/orders/lookup", label: "Track Your Order" },
-      { href: "/chat", label: "Chat With Us" },
-      { href: "mailto:support@bannersin48.com", label: "Email Support" },
-    ],
-  },
-  {
-    title: "Account",
-    items: [
-      { href: "/login", label: "Log In" },
-      { href: "/register", label: "Create Account" },
-      { href: "/dashboard", label: "Reorder" },
-      { href: "/tax-exempt", label: "Tax-Exempt Program" },
-    ],
-  },
-] as const;
+import { SITE_NAVIGATION_GROUPS } from "@/components/nav/siteNavigation";
 
 const PAYMENT_METHODS = ["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "PayPal"];
 
@@ -62,7 +22,7 @@ export function Footer() {
               </a>
             </p>
           </div>
-          {COLUMNS.map((col) => (
+          {SITE_NAVIGATION_GROUPS.map((col) => (
             <div key={col.title}>
               <h3 className="font-bold text-body mb-md text-white">{col.title}</h3>
               <ul className="space-y-xs">
