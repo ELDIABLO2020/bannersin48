@@ -30,12 +30,14 @@ export const tailwindPreset: Partial<Config> = {
           hover: colors.strongAccentHover,
           active: colors.strongAccentActive,
           fg: colors.strongAccentText,
+          text: colors.strongAccentText,
         },
         cta: {
           DEFAULT: colors.ctaPrimary,
           hover: colors.ctaAccent,
           active: colors.ctaActive,
           fg: colors.ctaText,
+          text: colors.ctaText,
         },
 
         // Legacy background utilities — aliases for downstream components.
