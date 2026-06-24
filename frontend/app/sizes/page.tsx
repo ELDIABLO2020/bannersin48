@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -55,6 +56,30 @@ const FINISHING_ADDONS = [
   },
 ];
 
+const MATERIAL_GUIDE = [
+  {
+    name: "13 oz vinyl",
+    image: "/images/placeholders/material-13oz.jpg",
+    alt: "13 oz matte vinyl banner material with a finished grommet",
+    price: `${formatUsd(MATERIAL_RATES.VINYL_13OZ_SINGLE)} / sq ft`,
+    description: "The everyday choice for events, retail, contractors, and general signage.",
+  },
+  {
+    name: "15 oz premium",
+    image: "/images/placeholders/material-15oz.jpg",
+    alt: "15 oz premium gloss vinyl banner material",
+    price: `${formatUsd(MATERIAL_RATES.VINYL_15OZ_SINGLE)} / sq ft`,
+    description: "A heavier, more substantial option for demanding outdoor displays.",
+  },
+  {
+    name: "18 oz blockout",
+    image: "/images/placeholders/material-18oz.jpg",
+    alt: "18 oz blockout vinyl showing its opaque inner layer",
+    price: `From ${formatUsd(MATERIAL_RATES.VINYL_18OZ_SINGLE)} / sq ft`,
+    description: "Maximum durability and opacity, with single- or double-sided printing.",
+  },
+] as const;
+
 const CONSTRAINTS = [
   {
     label: `Minimum ${MIN_BILLABLE_FT}' × ${MIN_BILLABLE_FT}'`,
@@ -95,18 +120,53 @@ export default function SizesAndPricingPage() {
           <span className="text-ink">Sizes &amp; pricing</span>
         </nav>
 
-        <header className="mb-2xl">
-          <h1 className="font-display text-section-h2 text-ink leading-section-h2">
-            Sizes &amp; pricing
-          </h1>
-          <p className="text-body text-ink-muted mt-md max-w-2xl">
-            Transparent per-square-foot pricing. Welding and grommets are always included, add-ons
-            are listed up front, and shipping is a flat {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} per
-            banner.
-          </p>
+        <header className="mb-3xl overflow-hidden rounded-card border border-line-subtle bg-surface shadow-elev-1">
+          <div className="grid lg:grid-cols-12">
+            <div className="flex flex-col justify-center p-xl lg:col-span-7 lg:p-2xl">
+              <h1 className="font-display text-section-h2 text-ink leading-section-h2">
+                Sizes &amp; pricing
+              </h1>
+              <p className="text-body text-ink-muted mt-md max-w-2xl">
+                Transparent per-square-foot pricing. Welding and grommets are always included,
+                add-ons are listed up front, and shipping is a flat{" "}
+                {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} per banner.
+              </p>
+              <div className="mt-lg flex flex-wrap gap-sm">
+                <a
+                  href="#all-sizes-h"
+                  className="inline-flex items-center gap-xs rounded-btn bg-strong-accent px-lg py-sm text-body-sm font-bold text-strong-accent-text no-underline transition-colors hover:bg-strong-accent-hover"
+                >
+                  Browse standard sizes <ArrowRight className="h-4 w-4" aria-hidden />
+                </a>
+                <a
+                  href="#material-guide-h"
+                  className="inline-flex items-center gap-xs rounded-btn border border-line px-lg py-sm text-body-sm font-bold text-ink no-underline transition-colors hover:border-strong-accent hover:text-link"
+                >
+                  Compare materials
+                </a>
+              </div>
+            </div>
+            <div className="relative min-h-[260px] lg:col-span-5 lg:min-h-[360px]">
+              <Image
+                src="/images/hero-print-workshop.png"
+                alt="Large-format vinyl banner being printed in a professional print shop"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover object-[68%_center]"
+              />
+              <div className="absolute inset-x-md bottom-md rounded-card bg-navy-base/90 p-md text-ink-light backdrop-blur-sm">
+                <p className="font-bold">Printed, finished, and shipped fast</p>
+                <p className="mt-xs text-body-sm text-ink-light/80">
+                  Pick a size below to start with instant pricing.
+                </p>
+              </div>
+            </div>
+          </div>
         </header>
 
         <PricingMatrix />
+        <MaterialGuide />
         <AllSizesGrid />
         <FinishingSection />
         <RetractableSection />
@@ -121,6 +181,54 @@ export default function SizesAndPricingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function MaterialGuide() {
+  return (
+    <section className="mb-3xl" aria-labelledby="material-guide-h">
+      <SectionHeading
+        id="material-guide-h"
+        title="Choose the right material"
+        subtitle="A quick visual guide to the vinyl options shown in the pricing matrix."
+      />
+      <div className="grid grid-cols-1 gap-lg md:grid-cols-3">
+        {MATERIAL_GUIDE.map((material) => (
+          <Link
+            key={material.name}
+            href="/order/vinyl"
+            className="group overflow-hidden rounded-card border border-line-subtle bg-surface shadow-elev-1 no-underline transition-all hover:-translate-y-1 hover:border-strong-accent hover:shadow-elev-2"
+          >
+            <article>
+              <div className="relative h-44 overflow-hidden">
+                <Image
+                  src={material.image}
+                  alt={material.alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <div className="p-lg">
+                <div className="flex items-start justify-between gap-md">
+                  <h3 className="font-display text-heading-h4 font-bold uppercase text-ink">
+                    {material.name}
+                  </h3>
+                  <ArrowRight
+                    className="mt-xs h-5 w-5 shrink-0 text-strong-accent transition-transform group-hover:translate-x-1"
+                    aria-hidden
+                  />
+                </div>
+                <p className="mt-xs font-bold text-link">{material.price}</p>
+                <p className="mt-sm text-body-sm leading-relaxed text-ink-muted">
+                  {material.description}
+                </p>
+              </div>
+            </article>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -411,7 +519,7 @@ function ConstraintsSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
         {CONSTRAINTS.map((c) => (
           <article
-            key={c.ref}
+            key={`${c.ref}-${c.label}`}
             className="rounded-card border border-line-subtle bg-surface p-lg shadow-elev-1"
           >
             <div className="flex items-start justify-between gap-md">
