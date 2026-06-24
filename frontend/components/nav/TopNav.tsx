@@ -108,7 +108,7 @@ export function TopNav() {
               Log In
             </Link>
             <Link href="/order/vinyl" className="shrink-0">
-              <Button variant="cta-attached" size="attached" className="h-11 sm:h-11 px-md text-sm sm:text-sm">
+              <Button variant="cta-attached" size="attached" className="h-11 sm:h-11 px-md text-sm sm:text-sm text-ink">
                 Order now
                 <ArrowRight className="ml-xs h-4 w-4" aria-hidden />
               </Button>
@@ -162,7 +162,7 @@ export function TopNav() {
                 Log In
               </Link>
               <Link href="/order/vinyl" onClick={() => setMobileOpen(false)} className="shrink-0">
-                <Button variant="cta-attached" size="attached">
+                <Button variant="cta-attached" size="attached" className="text-ink">
                   Order now
                   <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
                 </Button>
