@@ -32,7 +32,7 @@ export function ArtworkUploader() {
     setLocalError(null);
     if (!(ARTWORK_MIME_TYPES as readonly string[]).includes(file.type)) {
       setLocalError(
-        `Unsupported file type: ${file.type || "unknown"}. We accept PDF, JPG, and JPEG only.`,
+        `Unsupported file type: ${file.type || "unknown"}. We accept PDF, JPG, JPEG, and PNG.`,
       );
       return;
     }
@@ -83,7 +83,7 @@ export function ArtworkUploader() {
         <input
           ref={fileInput}
           type="file"
-          accept=".pdf,.jpg,.jpeg,application/pdf,image/jpeg"
+          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
           className="sr-only"
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
@@ -92,7 +92,7 @@ export function ArtworkUploader() {
       <Card className="bg-surface">
         <h3 className="font-bold text-sm text-ink mb-sm">Requirements</h3>
         <ul className="text-body-sm text-ink-muted space-y-xs">
-          <li>Accepted: <strong className="text-ink">PDF, JPG, JPEG</strong></li>
+          <li>Accepted: <strong className="text-ink">PDF, JPG, JPEG, PNG</strong></li>
           <li>Max file size: <strong className="text-ink">{formatBytes(MAX_BYTES)}</strong></li>
           <li>Recommended: <strong className="text-ink">150 DPI</strong> at final size</li>
           <li>Add <strong className="text-ink">0.5&Prime; bleed</strong> on all sides when possible</li>

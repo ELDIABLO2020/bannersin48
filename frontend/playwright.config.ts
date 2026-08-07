@@ -25,12 +25,15 @@ export default defineConfig({
       use: { ...devices["iPhone 14"] },
     },
   ],
-  webServer: process.env.CI
-    ? {
-        command: "npm run start",
-        url: BASE_URL,
-        reuseExistingServer: true,
-        timeout: 60_000,
-      }
-    : undefined,
+  webServer: {
+    command: "npm run start",
+    url: BASE_URL,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_ENABLE_MOCKS: "1",
+      PORT,
+    },
+  },
 });

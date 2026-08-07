@@ -19,7 +19,7 @@ test.describe("M4: HCP design parity", () => {
   });
 
   test("primary accent surfaces use live HCP gold (#FF9B24)", async ({ page }) => {
-    const accent = page.locator(".bg-strong-accent").first();
+    const accent = page.locator(".bg-strong-accent").locator("visible=true").first();
     await expect(accent).toBeVisible();
     const bg = await accent.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(bg).toBe("rgb(255, 155, 36)");
@@ -50,7 +50,7 @@ test.describe("M4: HCP design parity", () => {
 
   test("homepage has multiple section images", async ({ page }) => {
     const images = page.locator("main img");
-    await expect(images).toHaveCount(await images.count());
+    await expect(images.first()).toBeVisible({ timeout: 10_000 });
     expect(await images.count()).toBeGreaterThanOrEqual(8);
   });
 
@@ -63,8 +63,10 @@ test.describe("M4: HCP design parity", () => {
   test("reduced motion keeps GSAP reveal content visible", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     const reveals = page.locator("[data-gsap-reveal]");
+    await expect(reveals.first()).toBeVisible({ timeout: 10_000 });
     expect(await reveals.count()).toBeGreaterThan(0);
     await expect(page.getByRole("heading", { name: /popular sizes/i })).toBeVisible();
 

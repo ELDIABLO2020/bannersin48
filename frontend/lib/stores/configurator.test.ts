@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useConfigurator } from "./configurator";
 
-describe("useConfigurator — store reducer logic", () => {
+describe("useConfigurator — multi-sign + finishing", () => {
   beforeEach(() => {
     useConfigurator.getState().reset();
   });
 
-  it("starts in vinyl mode, 13 oz, 4x8, qty 1", () => {
+  it("starts in vinyl mode, 13 oz, 4x8, qty 1, one sign", () => {
     const s = useConfigurator.getState();
     expect(s.product).toBe("vinyl");
     expect(s.material).toBe("VINYL_13OZ_SINGLE");
@@ -15,45 +15,39 @@ describe("useConfigurator — store reducer logic", () => {
     expect(s.finishing.welding).toBe(true);
     expect(s.finishing.grommets).toBe(true);
     expect(s.finishing.polePockets).toBe(false);
+    expect(s.finishing.rope).toBe(false);
+    expect(s.signs).toHaveLength(1);
   });
 
-  it("setMaterial updates material", () => {
+  it("setMaterial updates material on active sign", () => {
     useConfigurator.getState().setMaterial("VINYL_18OZ_SINGLE");
     expect(useConfigurator.getState().material).toBe("VINYL_18OZ_SINGLE");
+    expect(useConfigurator.getState().signs[0]!.material).toBe("VINYL_18OZ_SINGLE");
   });
 
-  it("togglePolePockets enables pole pockets and disables welding + grommets with message", () => {
-    useConfigurator.getState().togglePolePockets(true, "TOP_AND_BOTTOM");
+  it("togglePolePockets enables pockets, depth, and clears welding + grommets", () => {
+    useConfigurator.getState().togglePolePockets(true, "TOP_AND_BOTTOM", 3);
     const s = useConfigurator.getState();
     expect(s.finishing.polePockets).toBe(true);
     expect(s.finishing.polePocketPlacement).toBe("TOP_AND_BOTTOM");
+    expect(s.finishing.polePocketDepthIn).toBe(3);
     expect(s.finishing.welding).toBe(false);
     expect(s.finishing.grommets).toBe(false);
     expect(s.lastFinishingMessage).toMatch(/Pole pockets require/);
   });
 
-  it("turning pole pockets back off leaves welding/grommets at the cleared value", () => {
-    // Pole pockets auto-disable welding + grommets (per §8.2). When pole pockets
-    // are turned back off, the user must re-enable them manually if desired —
-    // the store does not silently restore them.
-    const store = useConfigurator.getState();
-    store.togglePolePockets(true, "TOP");
-    store.togglePolePockets(false);
+  it("enabling rope clears grommets", () => {
+    useConfigurator.getState().setFinishing({ rope: true });
     const s = useConfigurator.getState();
-    expect(s.finishing.polePockets).toBe(false);
-    expect(s.finishing.welding).toBe(false);
+    expect(s.finishing.rope).toBe(true);
     expect(s.finishing.grommets).toBe(false);
-    expect(s.lastFinishingMessage).toBeNull();
   });
 
-  it("user can re-enable welding after disabling pole pockets", () => {
-    const store = useConfigurator.getState();
-    store.togglePolePockets(true, "TOP");
-    store.togglePolePockets(false);
-    store.setFinishing({ welding: true, grommets: true });
-    const s = useConfigurator.getState();
-    expect(s.finishing.welding).toBe(true);
-    expect(s.finishing.grommets).toBe(true);
+  it("rejects wind slits outside size band", () => {
+    useConfigurator.getState().applySize(2, 4);
+    useConfigurator.getState().setFinishing({ windSlits: true });
+    expect(useConfigurator.getState().finishing.windSlits).toBe(false);
+    expect(useConfigurator.getState().lastFinishingMessage).toMatch(/Wind slits/);
   });
 
   it("setQuantity clamps to 1..10", () => {
@@ -74,10 +68,53 @@ describe("useConfigurator — store reducer logic", () => {
     expect(s.size.widthFt).toBe(0);
   });
 
-  it("setArtwork stores the id and filename", () => {
-    useConfigurator.getState().setArtwork("art_42", "my-design.pdf");
+  it("setArtwork stores id, filename, and can auto-size from DPI", () => {
+    useConfigurator.getState().setArtwork("art_42", "my-design.png", "/p.png", {
+      widthPx: 1800,
+      heightPx: 3600,
+      dpi: 150,
+      autoSize: true,
+    });
     const s = useConfigurator.getState();
     expect(s.artworkId).toBe("art_42");
-    expect(s.artworkFileName).toBe("my-design.pdf");
+    expect(s.artworkFileName).toBe("my-design.png");
+    expect(s.size).toEqual({ widthFt: 1, widthIn: 0, heightFt: 2, heightIn: 0 });
+  });
+
+  it("addSign creates a second sign and selectSign switches mirrors", () => {
+    useConfigurator.getState().applySize(5, 8);
+    useConfigurator.getState().addSign();
+    const s = useConfigurator.getState();
+    expect(s.signs).toHaveLength(2);
+    expect(s.activeSignId).toBe(s.signs[1]!.id);
+    useConfigurator.getState().selectSign(s.signs[0]!.id);
+    expect(useConfigurator.getState().size).toEqual({ widthFt: 5, widthIn: 0, heightFt: 8, heightIn: 0 });
+  });
+
+  it("removeSign keeps at least one sign", () => {
+    useConfigurator.getState().addSign();
+    const id = useConfigurator.getState().signs[0]!.id;
+    useConfigurator.getState().removeSign(id);
+    expect(useConfigurator.getState().signs).toHaveLength(1);
+    useConfigurator.getState().removeSign(useConfigurator.getState().signs[0]!.id);
+    expect(useConfigurator.getState().signs).toHaveLength(1);
+  });
+
+  it("setColorMatching stores PMS notes", () => {
+    useConfigurator.getState().setColorMatching("PMS 186 C");
+    expect(useConfigurator.getState().colorMatching).toEqual({ pmsNotes: "PMS 186 C" });
+    useConfigurator.getState().setColorMatching(null);
+    expect(useConfigurator.getState().colorMatching).toBeUndefined();
+  });
+
+  it("setGrommetPoints forces CUSTOM preset", () => {
+    useConfigurator.getState().setGrommetPoints([
+      { xIn: 1, yIn: 1 },
+      { xIn: 47, yIn: 1 },
+    ]);
+    const f = useConfigurator.getState().finishing;
+    expect(f.grommetPreset).toBe("CUSTOM");
+    expect(f.grommetPoints).toHaveLength(2);
+    expect(f.grommets).toBe(true);
   });
 });

@@ -14,13 +14,16 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@bannersin48/shared": "*"
   },
   "devDependencies": {
     "typescript": "~5.4.5",
-    "msw": "^2.4.0"
+    "msw": "^2.4.0",
+    "vitest": "^2.0.0"
   }
 }

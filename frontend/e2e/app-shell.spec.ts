@@ -13,7 +13,7 @@ test.describe("M3: app shell", () => {
     test.skip(testInfo.project.name !== "mobile-webkit", "Mobile only");
     await page.goto("/");
     await expect(page.getByRole("navigation", { name: /primary mobile navigation/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Order now" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /open menu/i })).toBeVisible();
   });
 
   test("manifest is served and references the PWA theme", async ({ request }) => {
@@ -27,7 +27,7 @@ test.describe("M3: app shell", () => {
 
   test("primary accent surfaces use live HCP gold (#FFB706)", async ({ page }) => {
     await page.goto("/");
-    const accent = page.locator(".bg-strong-accent").first();
+    const accent = page.locator(".bg-strong-accent").locator("visible=true").first();
     await expect(accent).toBeVisible();
     const bg = await accent.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(bg).toBe("rgb(255, 155, 36)");

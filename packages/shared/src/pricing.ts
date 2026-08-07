@@ -84,7 +84,8 @@ export function priceLine(input: PricingInput): PricingLine {
 
   const windSlits = input.finishing.windSlits ? billable.sqFt * ADDON_RATES.WIND_SLITS_PER_SQFT : 0;
   const polePockets = input.finishing.polePockets ? billable.sqFt * ADDON_RATES.POLE_POCKETS_PER_SQFT : 0;
-  const addons = windSlits + polePockets;
+  const rope = input.finishing.rope ? billable.sqFt * ADDON_RATES.ROPE_PER_SQFT : 0;
+  const addons = windSlits + polePockets + rope;
 
   const unitProduct = productBase + addons;
   const productSubtotal = unitProduct * input.quantity;
@@ -144,6 +145,14 @@ export const pricingRequestSchema = z
         polePockets: z.boolean(),
         polePocketPlacement: z
           .enum(["RIGHT", "LEFT", "LEFT_AND_RIGHT", "BOTTOM", "TOP", "TOP_AND_BOTTOM"])
+          .optional(),
+        polePocketDepthIn: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
+        rope: z.boolean().optional().default(false),
+        ropePlacement: z.enum(["TOP", "BOTTOM", "TOP_AND_BOTTOM"]).optional(),
+        grommetPreset: z.enum(["CORNERS", "TOP_AND_BOTTOM", "ALL_SIDES", "CUSTOM"]).optional(),
+        grommetSpacing: z.enum(["EVERY_2FT", "EVERY_3FT", "EVERY_2_3FT"]).optional(),
+        grommetPoints: z
+          .array(z.object({ xIn: z.number().nonnegative(), yIn: z.number().nonnegative() }).strict())
           .optional(),
       })
       .strict(),

@@ -34,7 +34,15 @@ export const handlers = [
       finishing: any;
       quantity: number;
     };
-    const result = priceOrder([body]);
+    const finishing = {
+      welding: true,
+      grommets: true,
+      windSlits: false,
+      polePockets: false,
+      rope: false,
+      ...body.finishing,
+    };
+    const result = priceOrder([{ ...body, finishing }]);
     const cutoff = computeNextCutoff();
     return HttpResponse.json({
       lines: result.lines,
@@ -97,6 +105,30 @@ export const handlers = [
     return HttpResponse.json(null, { status: 200 });
   }),
 
+  // --- Artwork library ---
+  http.get(`${API}/artwork/folders`, () => {
+    return HttpResponse.json(store.artworkFolders);
+  }),
+
+  http.get(`${API}/artwork/library`, ({ request }) => {
+    const url = new URL(request.url);
+    const folderId = url.searchParams.get("folderId") ?? "folder_home";
+    const items = Array.from(store.artwork.values())
+      .filter((a) => a.folderId === folderId)
+      .map((a) => ({
+        id: a.id,
+        folderId: a.folderId,
+        filename: a.filename,
+        previewUrl: a.previewUrl,
+        mimeType: a.mime,
+        sizeBytes: a.size,
+        widthPx: a.widthPx,
+        heightPx: a.heightPx,
+        dpi: a.dpi,
+      }));
+    return HttpResponse.json(items);
+  }),
+
   // --- Artwork upload ---
   http.post(`${API}/artwork/upload`, async ({ request }) => {
     const form = await request.formData();
@@ -104,22 +136,46 @@ export const handlers = [
     if (!(file instanceof File)) {
       return HttpResponse.json({ code: "NO_FILE", message: "No file provided." }, { status: 400 });
     }
-    const allowed = ["application/pdf", "image/jpeg", "image/jpg"];
+    const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
     if (!allowed.includes(file.type)) {
       return HttpResponse.json(
-        { code: "UNSUPPORTED_FILE_TYPE", message: "Only PDF, JPG, and JPEG files are accepted." },
+        { code: "UNSUPPORTED_FILE_TYPE", message: "Only PDF, JPG, JPEG, and PNG files are accepted." },
         { status: 400 },
       );
     }
+    const widthPxRaw = form.get("widthPx");
+    const heightPxRaw = form.get("heightPx");
+    const dpiRaw = form.get("dpi");
+    const widthPx = widthPxRaw ? Number(widthPxRaw) : undefined;
+    const heightPx = heightPxRaw ? Number(heightPxRaw) : undefined;
+    const dpi = dpiRaw ? Number(dpiRaw) : 150;
     const id = `art_${store.artworkIdCounter++}`;
-    const previewUrl = file.type === "application/pdf" ? "/placeholder-pdf.png" : URL.createObjectURL(file);
-    store.artwork.set(id, { id, filename: file.name, previewUrl, mime: file.type, size: file.size });
+    const previewUrl =
+      file.type === "application/pdf"
+        ? "/placeholder-pdf.png"
+        : typeof URL !== "undefined" && typeof URL.createObjectURL === "function"
+          ? URL.createObjectURL(file)
+          : "/placeholder-artwork.png";
+    store.artwork.set(id, {
+      id,
+      folderId: "folder_home",
+      filename: file.name,
+      previewUrl,
+      mime: file.type,
+      size: file.size,
+      widthPx: Number.isFinite(widthPx) ? widthPx : undefined,
+      heightPx: Number.isFinite(heightPx) ? heightPx : undefined,
+      dpi: Number.isFinite(dpi) ? dpi : 150,
+    });
     return HttpResponse.json({
       artworkId: id,
       previewUrl,
       meta: {
-        mimeType: file.type as "application/pdf" | "image/jpeg",
+        mimeType: file.type,
         sizeBytes: file.size,
+        widthPx: Number.isFinite(widthPx) ? widthPx : undefined,
+        heightPx: Number.isFinite(heightPx) ? heightPx : undefined,
+        dpi: Number.isFinite(dpi) ? dpi : 150,
       },
     });
   }),

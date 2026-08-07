@@ -103,7 +103,7 @@ export default function RetractableConfiguratorPage() {
                     product: "retractable",
                     material: "RETRACTABLE",
                     dimensions: { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 },
-                    finishing: { welding: false, grommets: false, windSlits: false, polePockets: false },
+                    finishing: { welding: false, grommets: false, windSlits: false, polePockets: false, rope: false },
                     quantity,
                     unitProduct: unitPrice,
                     addons: 0,

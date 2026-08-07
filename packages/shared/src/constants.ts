@@ -33,15 +33,22 @@ export const MATERIAL_RATES = {
 export const ADDON_RATES = {
   WIND_SLITS_PER_SQFT: 0.75,
   POLE_POCKETS_PER_SQFT: 0.5,
+  ROPE_PER_SQFT: 0.25,
 } as const;
+
+/** Wind slits: both dimensions must be strictly greater than min and strictly less than max (inches). */
+export const WIND_SLITS_MIN_IN = 24;
+export const WIND_SLITS_MAX_IN = 120;
 
 // Supported artwork file types
 export const ARTWORK_MIME_TYPES = [
   "application/pdf",
   "image/jpeg",
   "image/jpg",
+  "image/png",
 ] as const;
 export const ARTWORK_MAX_BYTES_DEFAULT = 50 * 1024 * 1024; // 50 MB
+export const ARTWORK_DEFAULT_DPI = 150;
 
 // Cancellation window (in ms). Backend honors env override.
 export const CANCELLATION_WINDOW_MS_DEFAULT = 10 * 60 * 1000;
@@ -155,6 +162,12 @@ export const CUTOFF_CYCLES: ReadonlyArray<{
 
 export const POLE_POCKET_INCOMPAT_MESSAGE =
   "Pole pockets require a different finishing method, so grommets and welding have been removed.";
+
+export const ROPE_GROMMET_INCOMPAT_MESSAGE =
+  "Rope and grommets cannot be combined — the other option has been turned off.";
+
+export const COLOR_MATCH_DELAY_MESSAGE =
+  "PMS color matching may add 24–48 hours to production time.";
 
 /**
  * Standard quick-pick sizes (13 oz, single-sided, qty 1, no add-ons, +$10 shipping).

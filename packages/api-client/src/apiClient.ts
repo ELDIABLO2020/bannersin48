@@ -38,7 +38,8 @@ export class ApiClient {
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, "");
     this.getToken = config.getToken;
-    this.fetchImpl = config.fetchImpl ?? fetch;
+    // Bind fetch — unbound `fetch` throws "Illegal invocation" in browsers.
+    this.fetchImpl = config.fetchImpl ?? globalThis.fetch.bind(globalThis);
   }
 
   private async request<T>(
@@ -126,12 +127,25 @@ export class ApiClient {
   }
 
   // --- Artwork ---
-  uploadArtwork(file: File, meta?: { widthPx?: number; heightPx?: number }): Promise<ArtworkUploadResponse> {
+  uploadArtwork(
+    file: File,
+    meta?: { widthPx?: number; heightPx?: number; dpi?: number },
+  ): Promise<ArtworkUploadResponse> {
     const form = new FormData();
     form.append("file", file);
     if (meta?.widthPx) form.append("widthPx", String(meta.widthPx));
     if (meta?.heightPx) form.append("heightPx", String(meta.heightPx));
+    if (meta?.dpi) form.append("dpi", String(meta.dpi));
     return this.request<ArtworkUploadResponse>("POST", "/artwork/upload", form);
+  }
+
+  listArtworkFolders(): Promise<import("@bannersin48/shared").ArtworkFolder[]> {
+    return this.request("GET", "/artwork/folders");
+  }
+
+  listArtwork(folderId?: string): Promise<import("@bannersin48/shared").ArtworkLibraryItem[]> {
+    const q = folderId ? `?folderId=${encodeURIComponent(folderId)}` : "";
+    return this.request("GET", `/artwork/library${q}`);
   }
 
   // --- Address ---

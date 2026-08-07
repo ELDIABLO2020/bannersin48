@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { priceLine, priceOrder } from "./pricing";
 import { billableDimensions } from "./dimensions";
-import { normalizeFinishing } from "./finishing";
+import { normalizeFinishing, DEFAULT_FINISHING } from "./finishing";
+
+const fin = (patch: Partial<typeof DEFAULT_FINISHING> = {}) => ({ ...DEFAULT_FINISHING, ...patch });
 
 /**
  * The 5 plan pricing examples (plan §9.5) — these MUST match exactly.
@@ -11,7 +13,7 @@ describe("priceLine — plan examples (must match §9.5)", () => {
     const result = priceLine({
       material: "VINYL_13OZ_SINGLE",
       dimensions: { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 },
-      finishing: { welding: true, grommets: true, windSlits: false, polePockets: false },
+      finishing: fin(),
       quantity: 1,
     });
     expect(result.productSubtotal).toBe(128);
@@ -23,7 +25,7 @@ describe("priceLine — plan examples (must match §9.5)", () => {
     const result = priceLine({
       material: "VINYL_13OZ_SINGLE",
       dimensions: { widthFt: 2, widthIn: 1, heightFt: 4, heightIn: 7 },
-      finishing: { welding: true, grommets: true, windSlits: false, polePockets: false },
+      finishing: fin(),
       quantity: 1,
     });
     expect(result.billableSqFt).toBe(15);
@@ -37,7 +39,7 @@ describe("priceLine — plan examples (must match §9.5)", () => {
     const result = priceLine({
       material: "VINYL_13OZ_SINGLE",
       dimensions: { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 },
-      finishing: { welding: true, grommets: true, windSlits: true, polePockets: false },
+      finishing: fin({ windSlits: true }),
       quantity: 1,
     });
     expect(result.productSubtotal).toBe(152); // 128 + 32*0.75
@@ -49,7 +51,15 @@ describe("priceLine — plan examples (must match §9.5)", () => {
     const result = priceLine({
       material: "VINYL_15OZ_SINGLE",
       dimensions: { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 },
-      finishing: { welding: false, grommets: false, windSlits: false, polePockets: true, polePocketPlacement: "TOP_AND_BOTTOM" },
+      finishing: fin({
+        welding: false,
+        grommets: false,
+        polePockets: true,
+        polePocketPlacement: "TOP_AND_BOTTOM",
+        polePocketDepthIn: 2,
+        grommetPreset: undefined,
+        grommetSpacing: undefined,
+      }),
       quantity: 3,
     });
     // Unit: 32 × $4.75 = $152 + 32 × $0.50 = $16 → $168; ×3 = $504; shipping $30
@@ -63,7 +73,7 @@ describe("priceLine — plan examples (must match §9.5)", () => {
     const result = priceLine({
       material: "VINYL_18OZ_DOUBLE",
       dimensions: { widthFt: 5, widthIn: 0, heightFt: 10, heightIn: 0 },
-      finishing: { welding: true, grommets: true, windSlits: false, polePockets: false },
+      finishing: fin(),
       quantity: 2,
     });
     // 50 × $7.50 = $375 unit; ×2 = $750; shipping $20
@@ -71,6 +81,25 @@ describe("priceLine — plan examples (must match §9.5)", () => {
     expect(result.productSubtotal).toBe(750);
     expect(result.shipping).toBe(20);
     expect(result.totalBeforeTax).toBe(770);
+  });
+
+  it("4' × 8' 13 oz with rope → adds $0.25/sqft", () => {
+    const result = priceLine({
+      material: "VINYL_13OZ_SINGLE",
+      dimensions: { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 },
+      finishing: fin({
+        grommets: false,
+        rope: true,
+        ropePlacement: "TOP",
+        grommetPreset: undefined,
+        grommetSpacing: undefined,
+      }),
+      quantity: 1,
+    });
+    // 128 + 32*0.25 = 136 product; +10 ship = 146
+    expect(result.addons).toBe(8);
+    expect(result.productSubtotal).toBe(136);
+    expect(result.totalBeforeTax).toBe(146);
   });
 });
 
@@ -96,11 +125,13 @@ describe("billableDimensions — plan rounding examples (§7.2)", () => {
 describe("normalizeFinishing — pole pocket incompatibility (§8.2)", () => {
   it("auto-removes welding and grommets when pole pockets are enabled", () => {
     const r = normalizeFinishing({
+      ...DEFAULT_FINISHING,
       welding: true,
       grommets: true,
       windSlits: false,
       polePockets: true,
       polePocketPlacement: "TOP",
+      polePocketDepthIn: 2,
     });
     expect(r.finishing.welding).toBe(false);
     expect(r.finishing.grommets).toBe(false);
@@ -110,18 +141,17 @@ describe("normalizeFinishing — pole pocket incompatibility (§8.2)", () => {
 
   it("preserves all options when pole pockets are off", () => {
     const r = normalizeFinishing({
+      ...DEFAULT_FINISHING,
       welding: true,
       grommets: true,
       windSlits: true,
       polePockets: false,
     });
-    expect(r.finishing).toEqual({
-      welding: true,
-      grommets: true,
-      windSlits: true,
-      polePockets: false,
-      polePocketPlacement: undefined,
-    });
+    expect(r.finishing.welding).toBe(true);
+    expect(r.finishing.grommets).toBe(true);
+    expect(r.finishing.windSlits).toBe(true);
+    expect(r.finishing.polePockets).toBe(false);
+    expect(r.finishing.polePocketPlacement).toBeUndefined();
     expect(r.message).toBeUndefined();
   });
 });
@@ -132,13 +162,13 @@ describe("priceOrder — multi-line aggregation", () => {
       {
         material: "VINYL_13OZ_SINGLE",
         dimensions: { widthFt: 2, widthIn: 0, heightFt: 4, heightIn: 0 },
-        finishing: { welding: true, grommets: true, windSlits: false, polePockets: false },
+        finishing: fin(),
         quantity: 1,
       },
       {
         material: "VINYL_13OZ_SINGLE",
         dimensions: { widthFt: 3, widthIn: 0, heightFt: 6, heightIn: 0 },
-        finishing: { welding: true, grommets: true, windSlits: false, polePockets: false },
+        finishing: fin(),
         quantity: 2,
       },
     ]);

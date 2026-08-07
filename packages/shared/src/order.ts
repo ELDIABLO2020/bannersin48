@@ -4,6 +4,7 @@ import { finishingSchema } from "./finishing";
 import { dimensionsSchema } from "./dimensions";
 import { quantitySchema } from "./quantity";
 import { addressSchema } from "./address";
+import { colorMatchingSchema } from "./artwork";
 
 /**
  * Order status state machine from the plan §18.2.
@@ -32,6 +33,7 @@ export const orderLineSchema = z
     finishing: finishingSchema,
     quantity: quantitySchema,
     artworkId: z.string().optional(),
+    colorMatching: colorMatchingSchema.optional(),
     unitProduct: z.number().nonnegative(),
     addons: z.number().nonnegative(),
     productSubtotal: z.number().nonnegative(),
