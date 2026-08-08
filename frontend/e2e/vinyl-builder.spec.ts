@@ -23,6 +23,15 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("item-rail")).toBeVisible();
     // Default 4×8 13oz → $138
     await expect(page.getByTestId("price-total")).toContainText("$138", { timeout: 10_000 });
+
+    const viewport = page.viewportSize();
+    const stageBox = await page.getByTestId("builder-stage").boundingBox();
+    const dockBox = await page.getByTestId("control-dock").boundingBox();
+    expect(viewport).toBeTruthy();
+    expect(stageBox).toBeTruthy();
+    expect(dockBox).toBeTruthy();
+    expect(stageBox!.height).toBeLessThanOrEqual(Math.min(viewport!.height * 0.52, 512) + 1);
+    expect(dockBox!.y).toBeLessThan(viewport!.height);
   });
 
   test("set size updates preview and keeps price > 0", async ({ page }, testInfo) => {

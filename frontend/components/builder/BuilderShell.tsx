@@ -20,8 +20,8 @@ export function BuilderShell({
     <div
       data-testid="builder-shell"
       className={cn(
-        "min-h-[calc(100vh-4rem)] bg-surface-tint",
-        "bg-[radial-gradient(ellipse_at_top,_var(--color-bg-soft-accent)_0%,_transparent_55%),linear-gradient(180deg,_var(--color-bg-surface-tint)_0%,_var(--color-bg-surface)_100%)]",
+        "min-h-[calc(100vh-4rem)] bg-navy-base",
+        "bg-[radial-gradient(ellipse_at_top,_var(--color-bg-navy-deep)_0%,_var(--color-bg-darkest)_72%)]",
         className,
       )}
     >

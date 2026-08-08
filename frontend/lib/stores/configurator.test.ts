@@ -68,6 +68,17 @@ describe("useConfigurator — multi-sign + finishing", () => {
     expect(s.size.widthFt).toBe(0);
   });
 
+  it("restores a valid default size when returning to vinyl", () => {
+    useConfigurator.getState().setProduct("retractable");
+    useConfigurator.getState().setProduct("vinyl");
+    expect(useConfigurator.getState().size).toEqual({
+      widthFt: 4,
+      widthIn: 0,
+      heightFt: 8,
+      heightIn: 0,
+    });
+  });
+
   it("setArtwork stores id, filename, and can auto-size from DPI", () => {
     useConfigurator.getState().setArtwork("art_42", "my-design.png", "/p.png", {
       widthPx: 1800,

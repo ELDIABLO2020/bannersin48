@@ -13,10 +13,12 @@ export function BuilderStage() {
   const setPickerOpen = useConfigurator((s) => s.setPickerOpen);
 
   const { widthIn, heightIn } = dimensionsToInches(size);
-  const aspect = Math.max(0.2, widthIn / Math.max(1, heightIn));
+  const hasValidDimensions = widthIn > 0 && heightIn > 0;
+  const aspect = hasValidDimensions ? widthIn / heightIn : 1;
+  const stageWidth = `min(100%, ${(aspect * 52).toFixed(3)}vh, ${(aspect * 32).toFixed(3)}rem)`;
 
   const grommets = useMemo(() => {
-    if (!finishing.grommets) return [];
+    if (!hasValidDimensions || !finishing.grommets) return [];
     if (finishing.grommetPoints?.length) return finishing.grommetPoints;
     return generateGrommetPoints(
       widthIn,
@@ -24,13 +26,13 @@ export function BuilderStage() {
       finishing.grommetPreset ?? "TOP_AND_BOTTOM",
       finishing.grommetSpacing ?? "EVERY_2_3FT",
     );
-  }, [finishing, widthIn, heightIn]);
+  }, [finishing, hasValidDimensions, widthIn, heightIn]);
 
   return (
     <div data-testid="builder-stage" className="relative w-full">
       <div
-        className="relative mx-auto w-full max-w-3xl transition-[aspect-ratio] duration-200 ease-out rounded-feature border border-line bg-surface shadow-[0_12px_40px_-24px_rgba(0,0,0,0.35)] overflow-hidden"
-        style={{ aspectRatio: `${aspect}` }}
+        className="relative mx-auto max-w-3xl transition-[width,aspect-ratio] duration-200 ease-out rounded-feature border border-line bg-surface shadow-[0_12px_40px_-24px_rgba(0,0,0,0.35)] overflow-hidden"
+        style={{ aspectRatio: `${aspect}`, width: stageWidth }}
       >
         {/* Artwork plane */}
         <div

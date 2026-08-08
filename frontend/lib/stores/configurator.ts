@@ -205,7 +205,9 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
         });
         return { product: p, ...patch };
       }
-      const patch = updateActive(state, { material: "VINYL_13OZ_SINGLE" });
+      const { widthIn, heightIn } = dimensionsToInches(state.size);
+      const size = widthIn > 0 && heightIn > 0 ? state.size : { ...DEFAULT_SIZE };
+      const patch = updateActive(state, { material: "VINYL_13OZ_SINGLE", size });
       return { product: p, ...patch };
     }),
 
