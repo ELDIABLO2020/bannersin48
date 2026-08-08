@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useConfigurator } from "@/lib/stores/configurator";
 import { dimensionsToInches, generateGrommetPoints } from "@bannersin48/shared";
 import { ImageIcon } from "lucide-react";
+
+const STAGE_MAX_HEIGHT_PX = 640;
+const STAGE_MIN_HEIGHT_PX = 280;
+/** Reserve space for dock tiles + a short open panel so controls stay reachable. */
+const DOCK_RESERVE_PX = 220;
 
 export function BuilderStage() {
   const size = useConfigurator((s) => s.size);
@@ -12,10 +17,48 @@ export function BuilderStage() {
   const fitMode = useConfigurator((s) => s.fitMode);
   const setPickerOpen = useConfigurator((s) => s.setPickerOpen);
 
+  const slotRef = useRef<HTMLDivElement>(null);
+  const [maxHeightPx, setMaxHeightPx] = useState(STAGE_MAX_HEIGHT_PX);
+  const [slotWidthPx, setSlotWidthPx] = useState(0);
+
+  useEffect(() => {
+    const el = slotRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      setSlotWidthPx(rect.width);
+      const viewportCap = window.innerHeight * 0.68;
+      const available = window.innerHeight - rect.top - DOCK_RESERVE_PX;
+      setMaxHeightPx(
+        Math.max(
+          STAGE_MIN_HEIGHT_PX,
+          Math.min(STAGE_MAX_HEIGHT_PX, viewportCap, Math.floor(available)),
+        ),
+      );
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
   const { widthIn, heightIn } = dimensionsToInches(size);
   const hasValidDimensions = widthIn > 0 && heightIn > 0;
   const aspect = hasValidDimensions ? widthIn / heightIn : 1;
-  const stageWidth = `min(100%, ${(aspect * 52).toFixed(3)}vh, ${(aspect * 32).toFixed(3)}rem)`;
+
+  const stageWidth = useMemo(() => {
+    const widthCap = slotWidthPx > 0 ? slotWidthPx : Number.POSITIVE_INFINITY;
+    const heightFromWidth = widthCap / aspect;
+    const height = Math.min(maxHeightPx, heightFromWidth);
+    const width = Math.min(widthCap, height * aspect);
+    return Number.isFinite(width) ? width : undefined;
+  }, [aspect, maxHeightPx, slotWidthPx]);
 
   const grommets = useMemo(() => {
     if (!hasValidDimensions || !finishing.grommets) return [];
@@ -29,10 +72,14 @@ export function BuilderStage() {
   }, [finishing, hasValidDimensions, widthIn, heightIn]);
 
   return (
-    <div data-testid="builder-stage" className="relative w-full">
+    <div ref={slotRef} data-testid="builder-stage" className="relative flex w-full items-center justify-center">
       <div
-        className="relative mx-auto max-w-3xl transition-[width,aspect-ratio] duration-200 ease-out rounded-feature border border-line bg-surface shadow-[0_12px_40px_-24px_rgba(0,0,0,0.35)] overflow-hidden"
-        style={{ aspectRatio: `${aspect}`, width: stageWidth }}
+        className="relative mx-auto max-w-3xl transition-[width,height] duration-200 ease-out rounded-feature border border-line bg-surface shadow-[0_12px_40px_-24px_rgba(0,0,0,0.35)] overflow-hidden"
+        style={{
+          aspectRatio: `${aspect}`,
+          width: stageWidth,
+          maxHeight: maxHeightPx,
+        }}
       >
         {/* Artwork plane */}
         <div

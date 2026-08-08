@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useConfigurator, type DockPanel } from "@/lib/stores/configurator";
 import { getControlEligibility, type BuilderControl } from "./builderRules";
 import { SizePanel } from "./SizePanel";
@@ -57,13 +58,16 @@ export function ControlDock() {
   const mobileDockOpen = useConfigurator((s) => s.mobileDockOpen);
   const setMobileDockOpen = useConfigurator((s) => s.setMobileDockOpen);
   const lastMessage = useConfigurator((s) => s.lastFinishingMessage);
+  const [eligibilityHint, setEligibilityHint] = useState<string | null>(null);
 
   function openPanel(id: Exclude<DockPanel, null>) {
     if (id === "images") {
       setPickerOpen(true);
       setActiveDockPanel(null);
+      setEligibilityHint(null);
       return;
     }
+    setEligibilityHint(null);
     setActiveDockPanel(activeDockPanel === id ? null : id);
   }
 
@@ -94,23 +98,25 @@ export function ControlDock() {
             const eligibility = getControlEligibility(tile.control, { material, size, finishing });
             const Icon = tile.icon;
             const active = activeDockPanel === tile.id;
+            const hardDisabled = !eligibility.enabled;
             return (
               <button
                 key={tile.id}
                 type="button"
                 data-testid={`dock-${tile.id}`}
                 title={eligibility.reason}
-                disabled={!eligibility.enabled && tile.id !== "images" && tile.id !== "size" && tile.id !== "material"}
+                aria-disabled={hardDisabled || undefined}
                 onClick={() => {
-                  if (!eligibility.enabled && tile.id !== "images" && tile.id !== "size" && tile.id !== "material") return;
+                  if (hardDisabled) {
+                    setEligibilityHint(eligibility.reason ?? "This option is unavailable for the current configuration.");
+                    return;
+                  }
                   openPanel(tile.id);
                 }}
                 className={cn(
                   "shrink-0 flex flex-col items-center gap-1 rounded-card px-3 py-2 text-[11px] font-bold min-w-[4.5rem] transition-colors",
                   active ? "bg-soft-accent text-strong-accent" : "text-ink-muted hover:bg-surface-tint hover:text-ink",
-                  !eligibility.enabled && tile.id !== "images" && tile.id !== "size" && tile.id !== "material"
-                    ? "opacity-40 cursor-not-allowed"
-                    : "",
+                  hardDisabled ? "opacity-40 cursor-help" : "",
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden />
@@ -120,8 +126,21 @@ export function ControlDock() {
           })}
         </div>
 
+        {eligibilityHint && (
+          <p
+            role="status"
+            data-testid="dock-eligibility-hint"
+            className="px-md py-sm text-sm bg-warning-bg text-ink border-b border-line"
+          >
+            {eligibilityHint}
+          </p>
+        )}
+
         {activeDockPanel && (
-          <div data-testid={`dock-panel-${activeDockPanel}`} className="p-md border-t border-line animate-in fade-in">
+          <div
+            data-testid={`dock-panel-${activeDockPanel}`}
+            className="max-h-[min(40vh,22rem)] overflow-y-auto p-md border-t border-line animate-in fade-in"
+          >
             {activeDockPanel === "size" && <SizePanel />}
             {activeDockPanel === "material" && (
               <div className="space-y-sm">
@@ -202,10 +221,12 @@ export function ControlDock() {
             {activeDockPanel === "rope" && (
               <div className="space-y-sm">
                 <p className="text-sm font-bold text-ink">Rope</p>
+                {finishing.grommets && !finishing.rope && (
+                  <p className="text-sm text-ink-muted">Turning on rope will remove grommets.</p>
+                )}
                 <Toggle
                   label={finishing.rope ? "On" : "Off"}
                   active={finishing.rope}
-                  disabled={finishing.grommets}
                   onClick={() => setFinishing({ rope: !finishing.rope })}
                   testId="rope-toggle"
                 />

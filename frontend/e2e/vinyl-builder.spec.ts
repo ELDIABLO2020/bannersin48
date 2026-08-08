@@ -25,12 +25,13 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("price-total")).toContainText("$138", { timeout: 10_000 });
 
     const viewport = page.viewportSize();
-    const stageBox = await page.getByTestId("builder-stage").boundingBox();
+    const stageBox = await page.getByTestId("builder-stage").locator("> div").boundingBox();
     const dockBox = await page.getByTestId("control-dock").boundingBox();
     expect(viewport).toBeTruthy();
     expect(stageBox).toBeTruthy();
     expect(dockBox).toBeTruthy();
-    expect(stageBox!.height).toBeLessThanOrEqual(Math.min(viewport!.height * 0.52, 512) + 1);
+    expect(stageBox!.height).toBeLessThanOrEqual(Math.min(viewport!.height * 0.68, 640) + 1);
+    expect(stageBox!.height).toBeGreaterThanOrEqual(280);
     expect(dockBox!.y).toBeLessThan(viewport!.height);
   });
 
@@ -60,15 +61,17 @@ test.describe("Vinyl builder", () => {
 
   test("wind slits gated by size; rope clears grommets path", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop dock");
-    // 2×4 is outside wind band — tile disabled
+    // 2×4 is outside wind band — hint explains why
     await page.getByTestId("dock-size").click();
     await page.getByTestId("popular-size-2x4").click();
-    await expect(page.getByTestId("dock-wind")).toBeDisabled();
+    await page.getByTestId("dock-wind").click();
+    await expect(page.getByTestId("dock-eligibility-hint")).toContainText(/Wind slits/i);
 
     // Back to 4×8 — wind enabled
+    await page.getByTestId("dock-size").click();
     await page.getByTestId("popular-size-4x8").click();
-    await expect(page.getByTestId("dock-wind")).toBeEnabled();
     await page.getByTestId("dock-wind").click();
+    await expect(page.getByTestId("dock-panel-wind")).toBeVisible();
     await page.getByTestId("wind-toggle").click();
 
     // Pockets clear grommets
@@ -77,13 +80,21 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("pocket-indicator")).toBeVisible();
     await page.getByTestId("pocket-depth-3").click();
 
-    // Turn pockets off (grommets stay off) → enable rope
+    // Turn pockets off → enable rope (also works when grommets would conflict)
     await page.getByTestId("pockets-toggle").click();
+    await page.getByTestId("dock-grommets").click();
+    await page.getByTestId("grommets-toggle").click();
+    await expect(page.getByTestId("grommet-dot").first()).toBeVisible();
     await page.getByTestId("dock-rope").click();
     await page.getByTestId("rope-toggle").click();
     await expect(page.getByTestId("rope-indicator")).toBeVisible();
   });
 
+  test("disabled print sides shows eligibility hint on 13 oz", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop dock");
+    await page.getByTestId("dock-sides").click();
+    await expect(page.getByTestId("dock-eligibility-hint")).toContainText(/18 oz/i);
+  });
   test("custom grommet add and save", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop dock");
     await page.getByTestId("dock-grommets").click();

@@ -46,7 +46,7 @@ describe("builderRules", () => {
     ).toBe(false);
   });
 
-  it("disables grommets when rope is on and vice versa", () => {
+  it("keeps rope and grommets tiles enabled so finishing patch can clear conflicts", () => {
     const withRope = {
       ...DEFAULT_FINISHING,
       grommets: false,
@@ -59,12 +59,29 @@ describe("builderRules", () => {
         size: size4x8,
         finishing: withRope,
       }).enabled,
-    ).toBe(false);
+    ).toBe(true);
     expect(
       getControlEligibility("rope", {
         material: "VINYL_13OZ_SINGLE",
         size: size4x8,
         finishing: DEFAULT_FINISHING,
+      }).enabled,
+    ).toBe(true);
+  });
+
+  it("still disables grommets when pole pockets are on", () => {
+    expect(
+      getControlEligibility("grommets", {
+        material: "VINYL_13OZ_SINGLE",
+        size: size4x8,
+        finishing: {
+          ...DEFAULT_FINISHING,
+          welding: false,
+          grommets: false,
+          polePockets: true,
+          polePocketPlacement: "TOP",
+          polePocketDepthIn: 2,
+        },
       }).enabled,
     ).toBe(false);
   });

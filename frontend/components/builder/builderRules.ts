@@ -74,15 +74,11 @@ export function getControlEligibility(
       if (finishing.polePockets) {
         return { enabled: false, reason: "Grommets are unavailable when pole pockets are selected." };
       }
-      if (finishing.rope) {
-        return { enabled: false, reason: "Grommets cannot be combined with rope." };
-      }
+      // Rope can still be cleared via applyFinishingPatch when grommets are turned on.
       return { enabled: true };
 
     case "rope":
-      if (finishing.grommets) {
-        return { enabled: false, reason: "Rope cannot be combined with grommets. Turn off grommets first." };
-      }
+      // Grommets clear automatically via applyFinishingPatch when rope is enabled.
       return { enabled: true };
 
     case "pockets":

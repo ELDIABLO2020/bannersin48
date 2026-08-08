@@ -81,11 +81,15 @@ export function GrommetEditor() {
             finishing.grommets ? "border-strong-accent bg-soft-accent" : "border-line",
           )}
           onClick={() => setFinishing({ grommets: !finishing.grommets })}
-          disabled={finishing.rope || finishing.polePockets}
+          disabled={finishing.polePockets}
         >
           {finishing.grommets ? "On" : "Off"}
         </button>
       </div>
+
+      {finishing.rope && !finishing.grommets && (
+        <p className="text-sm text-ink-muted">Turning on grommets will remove rope.</p>
+      )}
 
       {finishing.grommets && (
         <>

@@ -77,7 +77,7 @@ export function ItemRail() {
         type="button"
         data-testid="add-sign"
         onClick={() => addSign()}
-        className="shrink-0 w-28 min-h-[5.5rem] rounded-feature border border-dashed border-line bg-surface/60 text-ink-muted hover:border-strong-accent hover:text-strong-accent flex flex-col items-center justify-center gap-1 text-[11px] font-bold uppercase tracking-wide"
+        className="shrink-0 w-28 min-h-[5.5rem] rounded-feature border border-dashed border-strong-accent bg-surface text-ink hover:bg-strong-accent hover:text-strong-accent-fg flex flex-col items-center justify-center gap-1 text-[11px] font-bold uppercase tracking-wide transition-colors"
       >
         <Plus className="h-4 w-4" aria-hidden />
         Add sign
