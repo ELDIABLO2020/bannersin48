@@ -90,12 +90,13 @@ export function FAQ() {
   return (
     <section className="bg-surface-tint" aria-labelledby="faq-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <div className="text-center mb-2xl">
+        <div className="mb-2xl max-w-2xl">
+          <p className="text-strong-accent font-semibold text-sm mb-md font-body">FAQ</p>
           <h2 id="faq-h" className="font-display tracking-tight text-ink leading-tight text-[clamp(34px,4.5vw,68px)] uppercase">
             Frequently asked
           </h2>
         </div>
-        <ul className="max-w-3xl mx-auto space-y-sm">
+        <ul className="max-w-3xl space-y-sm">
           {FAQS.map((f, i) => {
             const isOpen = open === i;
             return (

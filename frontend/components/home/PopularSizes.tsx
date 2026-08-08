@@ -97,7 +97,7 @@ export function PopularSizes() {
           </div>
           <Link
             href="/sizes"
-            className="inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
+            className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
           >
             View all sizes
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -176,12 +176,12 @@ export function PopularSizes() {
 
         <ScrollReveal className="mt-xl flex flex-col gap-sm text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-center">
           <span className="inline-flex items-center justify-center gap-xs">
-            <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
+            <Truck className="h-4 w-4 text-ink-muted" aria-hidden />
             Delivery promise shown before checkout
           </span>
           <span className="hidden sm:inline text-ink-muted">|</span>
           <span className="inline-flex items-center justify-center gap-xs">
-            <BadgeCheck className="h-4 w-4 text-strong-accent" aria-hidden />
+            <BadgeCheck className="h-4 w-4 text-ink-muted" aria-hidden />
             Proof approval starts production
           </span>
         </ScrollReveal>

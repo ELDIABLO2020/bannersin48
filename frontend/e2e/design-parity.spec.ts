@@ -31,7 +31,7 @@ test.describe("M4: HCP design parity", () => {
     const inputRadius = await input.evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
     expect(parseFloat(inputRadius)).toBeGreaterThan(40);
 
-    const submit = page.getByRole("button", { name: /start your order/i }).first();
+    const submit = page.getByRole("button", { name: /start your order/i }).last();
     const btnRadius = await submit.evaluate((el) => getComputedStyle(el).borderTopRightRadius);
     expect(parseFloat(btnRadius)).toBeGreaterThan(40);
   });

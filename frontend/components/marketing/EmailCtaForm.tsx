@@ -11,6 +11,7 @@ type EmailCtaFormProps = {
   className?: string;
   buttonLabel?: string;
   microcopy?: string;
+  microcopyClassName?: string;
   redirectPath?: string;
   layout?: "inline" | "stacked";
 };
@@ -19,6 +20,7 @@ export function EmailCtaForm({
   className,
   buttonLabel = "Start your order",
   microcopy = "No credit card required.",
+  microcopyClassName,
   redirectPath = "/register",
   layout = "inline",
 }: EmailCtaFormProps) {
@@ -69,7 +71,7 @@ export function EmailCtaForm({
         </Button>
       </form>
       {microcopy && (
-        <p className="mt-sm text-sm text-ink-muted">{microcopy}</p>
+        <p className={cn("mt-sm text-sm text-ink-muted", microcopyClassName)}>{microcopy}</p>
       )}
     </div>
   );

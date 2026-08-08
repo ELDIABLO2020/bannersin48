@@ -3,12 +3,11 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Clock, FileUp, ShieldCheck, Truck, Upload } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, FileUp, ShieldCheck, Truck, Upload } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/gsap/registry";
 import { CountdownCard } from "./CountdownCard";
-import { EmailCtaForm } from "@/components/marketing/EmailCtaForm";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders } from "@/content/placeholders";
 
@@ -25,58 +24,17 @@ export function Hero() {
   useGSAP(
     () => {
       if (!heroRef.current) return;
-      const reduced = prefersReducedMotion();
+      if (prefersReducedMotion()) return;
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      tl.fromTo(
-        heroRef.current.querySelector(".hero-kicker"),
-        reduced ? {} : { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.5 },
-        0,
-      );
-
-      tl.fromTo(
-        heroRef.current.querySelector(".hero-headline"),
-        reduced ? {} : { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 0.6 },
-        0.1,
-      );
-
-      tl.fromTo(
-        heroRef.current.querySelector(".hero-subhead"),
-        reduced ? {} : { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.55 },
-        0.2,
-      );
-
-      tl.fromTo(
-        heroRef.current.querySelector(".hero-email"),
-        reduced ? {} : { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.5 },
-        0.3,
-      );
-
-      tl.fromTo(
-        heroRef.current.querySelector(".hero-trust"),
-        reduced ? {} : { opacity: 0, y: 12 },
-        { opacity: 1, y: 0, duration: 0.45 },
-        0.45,
-      );
-
-      tl.fromTo(
-        heroRef.current.querySelector(".hero-countdown"),
-        reduced ? {} : { opacity: 0, y: 32 },
-        { opacity: 1, y: 0, duration: 0.6 },
-        0.5,
-      );
-
-      tl.fromTo(
-        heroRef.current.querySelector(".hero-media"),
-        reduced ? {} : { opacity: 0, scale: 1.03 },
-        { opacity: 1, scale: 1, duration: 0.8 },
-        0.15,
-      );
+      tl.from(".hero-kicker", { opacity: 0, y: 16, duration: 0.5 }, 0);
+      tl.from(".hero-headline", { opacity: 0, y: 24, duration: 0.6 }, 0.1);
+      tl.from(".hero-subhead", { opacity: 0, y: 20, duration: 0.55 }, 0.2);
+      tl.from(".hero-actions", { opacity: 0, y: 16, duration: 0.5 }, 0.3);
+      tl.from(".hero-trust", { opacity: 0, y: 12, duration: 0.45 }, 0.45);
+      tl.from(".hero-countdown", { opacity: 0, y: 32, duration: 0.6 }, 0.5);
+      tl.from(".hero-media", { opacity: 0, scale: 1.03, duration: 0.8 }, 0.15);
     },
     { scope: heroRef },
   );
@@ -103,22 +61,22 @@ export function Hero() {
               className="hero-headline font-display tracking-tight text-[clamp(40px,7vw,83px)] leading-[1.02] text-ink uppercase"
             >
               Everything to print and ship your banner in{" "}
-              <span className="text-strong-accent">48</span>
-              <span className="block text-strong-accent text-[0.45em] leading-none mt-xs">
-                business hours
-              </span>
+              <span className="text-strong-accent">48 business hours</span>
             </h1>
             <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-xl leading-relaxed font-body">
               Premium Vinyl Banners Printed, Finished, Shipped and Delivered in 48 Hours
               Guaranteed. Choose your size, upload artwork, approve proof, and keep your event
               moving.
             </p>
-            <div className="hero-email mt-xl max-w-lg">
-              <EmailCtaForm buttonLabel="Start your order" />
-            </div>
-            <div className="hero-actions mt-md flex flex-col sm:flex-row gap-sm">
+            <div className="hero-actions mt-xl flex flex-col sm:flex-row gap-sm">
+              <Link href="/order/vinyl">
+                <Button variant="cta" size="lg">
+                  Start your order
+                  <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
+                </Button>
+              </Link>
               <Link href="/order/artwork">
-                <Button variant="outline" size="md">
+                <Button variant="outline" size="lg">
                   <Upload className="mr-sm h-5 w-5" aria-hidden />
                   Upload artwork
                 </Button>
@@ -129,7 +87,7 @@ export function Hero() {
                 const Icon = item.icon;
                 return (
                   <li key={item.label} className="flex items-center gap-sm">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-soft-accent text-strong-accent">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-soft-accent text-ink-muted">
                       <Icon className="h-4 w-4" aria-hidden />
                     </span>
                     <span className="leading-tight">{item.label}</span>
@@ -140,49 +98,47 @@ export function Hero() {
           </div>
 
           <div className="lg:col-span-6">
-            <div
-              className="hero-media relative rounded-card border border-line bg-soft-accent shadow-elev-3 overflow-hidden aspect-[4/3]"
-            >
+            <div className="hero-media relative aspect-[4/3] overflow-hidden">
               <PlaceholderImage
                 src={heroImage.src}
                 alt={heroImage.alt}
                 width={heroImage.width}
                 height={heroImage.height}
                 priority
+                framed
+                overlay
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
           </div>
 
           <div className="hero-countdown lg:col-span-12">
-            <div className="rounded-card border border-line bg-white p-sm shadow-elev-2">
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-sm items-stretch">
-                <div className="rounded-card bg-surface text-ink p-lg">
-                  <div className="flex items-center gap-sm text-strong-accent">
-                    <Clock className="h-5 w-5" aria-hidden />
-                    <p className="text-xs font-semibold font-body">Next production cutoff</p>
-                  </div>
-                  <div className="mt-md">
-                    <CountdownCard variant="inline" />
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-sm items-stretch">
+              <div className="rounded-card border border-line bg-surface text-ink p-lg shadow-elev-1">
+                <div className="flex items-center gap-sm text-strong-accent">
+                  <Clock className="h-5 w-5" aria-hidden />
+                  <p className="text-xs font-semibold font-body">Next production cutoff</p>
                 </div>
-                <div className="rounded-card bg-soft-accent text-ink p-lg">
-                  <p className="text-xs font-semibold text-link font-body">Order path</p>
-                  <ul className="mt-md space-y-sm text-sm font-semibold font-body">
-                    <li className="flex items-center gap-sm">
-                      <FileUp className="h-4 w-4 text-strong-accent" aria-hidden />
-                      Upload artwork
-                    </li>
-                    <li className="flex items-center gap-sm">
-                      <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
-                      Approve proof
-                    </li>
-                    <li className="flex items-center gap-sm">
-                      <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
-                      Ships fast
-                    </li>
-                  </ul>
+                <div className="mt-md">
+                  <CountdownCard variant="inline" />
                 </div>
+              </div>
+              <div className="rounded-card border border-line bg-soft-accent text-ink p-lg shadow-elev-1">
+                <p className="text-xs font-semibold text-ink-muted font-body">Order path</p>
+                <ul className="mt-md space-y-sm text-sm font-semibold font-body">
+                  <li className="flex items-center gap-sm">
+                    <FileUp className="h-4 w-4 text-ink-muted" aria-hidden />
+                    Upload artwork
+                  </li>
+                  <li className="flex items-center gap-sm">
+                    <CheckCircle2 className="h-4 w-4 text-ink-muted" aria-hidden />
+                    Approve proof
+                  </li>
+                  <li className="flex items-center gap-sm">
+                    <Truck className="h-4 w-4 text-ink-muted" aria-hidden />
+                    Ships fast
+                  </li>
+                </ul>
               </div>
             </div>
           </div>

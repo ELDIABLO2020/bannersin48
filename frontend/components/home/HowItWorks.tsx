@@ -1,7 +1,11 @@
 "use client";
 
-import { CheckCircle2, FileUp, Printer, Ruler, Truck } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Clock, FileCheck2, FileUp, Printer, Ruler, Truck } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { Button } from "@/components/ui/button";
+import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
+import { placeholders } from "@/content/placeholders";
 
 const STEPS = [
   {
@@ -30,18 +34,74 @@ const STEPS = [
   },
 ] as const;
 
+const PATH_PILLS = [
+  { icon: Clock, label: "Order by cutoff" },
+  { icon: FileCheck2, label: "Approve proof" },
+  { icon: Truck, label: "Ships in 48 hrs" },
+] as const;
+
 export function HowItWorks() {
+  const image = placeholders.flagshipProduction;
+
   return (
-    <section
-      className="bg-light text-ink"
-      aria-labelledby="how-h"
-    >
+    <section className="bg-light text-ink" aria-labelledby="how-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <ScrollReveal className="text-center">
-          <h2 id="how-h" className="font-display tracking-tight text-[clamp(36px,5vw,58px)] leading-[1.05] text-ink uppercase">
-            How it works
-          </h2>
-          <p className="mt-sm text-ink-muted">Simple process. Professional results.</p>
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-2 gap-2xl items-start">
+          <div>
+            <p className="text-strong-accent font-semibold text-sm mb-md font-body">
+              48-hour production
+            </p>
+            <h2
+              id="how-h"
+              className="font-display tracking-tight text-[clamp(36px,5vw,58px)] leading-[1.05] text-ink uppercase"
+            >
+              How it works
+            </h2>
+            <p className="mt-sm text-ink-muted max-w-lg font-body">
+              Order by 9 PM ET, approve your proof, and count on FedEx delivery in 48 business
+              hours across the US and Canada.
+            </p>
+
+            <ul className="mt-xl flex flex-wrap gap-md">
+              {PATH_PILLS.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <li
+                    key={step.label}
+                    className="flex items-center gap-sm rounded-pill bg-surface border border-line px-md py-sm text-sm font-semibold text-ink font-body"
+                  >
+                    <Icon className="h-4 w-4 text-ink-muted" aria-hidden />
+                    {step.label}
+                  </li>
+                );
+              })}
+            </ul>
+
+            <Link href="/order/vinyl" className="mt-xl inline-block">
+              <Button variant="cta" size="lg">
+                Start your order
+                <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="rounded-card bg-darkest p-md lg:p-lg shadow-elev-3 max-w-md mx-auto lg:mx-0 lg:ml-auto overflow-hidden">
+            <div className="relative aspect-square overflow-hidden rounded-card">
+              <PlaceholderImage
+                src={image.src}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+                framed
+                overlay
+                sizes="(max-width: 1024px) 100vw, 400px"
+              />
+            </div>
+            <div className="mt-md flex justify-between text-xs text-white/70 font-body px-sm">
+              <span>Proof approved</span>
+              <span className="text-strong-accent font-semibold">In production</span>
+            </div>
+          </div>
         </ScrollReveal>
 
         <ScrollReveal
@@ -58,11 +118,11 @@ export function HowItWorks() {
             return (
               <li key={step.n} className="hw-step relative">
                 <div className="relative z-10 flex h-full flex-col rounded-card border border-line bg-surface p-lg shadow-elev-1">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-card bg-strong-accent text-strong-accent-text shadow-elev-2">
+                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-card bg-soft-accent text-ink-muted shadow-elev-1">
                     <Icon className="h-8 w-8" aria-hidden />
                   </div>
                   <div className="mt-lg flex items-start gap-sm">
-                    <span className="font-display font-extrabold text-[28px] leading-none text-strong-accent">
+                    <span className="font-display font-extrabold text-[28px] leading-none text-ink-muted">
                       {step.n}
                     </span>
                     <div>
@@ -76,7 +136,7 @@ export function HowItWorks() {
           })}
         </ScrollReveal>
 
-        <ScrollReveal className="mt-2xl rounded-card border border-strong-accent/30 bg-soft-accent p-lg">
+        <ScrollReveal className="mt-2xl rounded-card border border-line bg-soft-accent p-lg">
           <div className="flex flex-col gap-md md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-strong-accent">Production promise</p>
@@ -86,7 +146,7 @@ export function HowItWorks() {
               </p>
             </div>
             <div className="flex items-center gap-sm text-sm font-bold text-ink">
-              <CheckCircle2 className="h-5 w-5 text-strong-accent" aria-hidden />
+              <CheckCircle2 className="h-5 w-5 text-ink-muted" aria-hidden />
               Proof approval starts the clock
             </div>
           </div>

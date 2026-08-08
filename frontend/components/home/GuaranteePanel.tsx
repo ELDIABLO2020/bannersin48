@@ -27,7 +27,7 @@ export function GuaranteePanel() {
                   key={metric.label}
                   className="gp-row rounded-card border border-line bg-surface p-lg text-center shadow-elev-1"
                 >
-                  <Icon className="mx-auto h-8 w-8 text-strong-accent" aria-hidden />
+                  <Icon className="mx-auto h-8 w-8 text-ink-muted" aria-hidden />
                   <p className="mt-md font-display text-[clamp(32px,4vw,48px)] leading-none text-ink tabular-nums uppercase">
                     {metric.value}
                   </p>
@@ -50,7 +50,7 @@ export function GuaranteePanel() {
               shipping charge for that banner is refunded automatically.
             </p>
             <Link
-              href="/guarantee"
+              href="/help"
               className="mt-lg inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
             >
               Learn about the guarantee

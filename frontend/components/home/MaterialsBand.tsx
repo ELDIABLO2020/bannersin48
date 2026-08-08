@@ -39,21 +39,20 @@ export function MaterialsBand() {
       aria-labelledby="materials-h"
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <ScrollReveal className="mb-2xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2
-              id="materials-h"
-              className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
-            >
-              Choose the right material
-            </h2>
-            <p className="text-body text-ink-muted mt-md max-w-2xl font-body">
-              Durable vinyl options for different environments, visibility needs, and handling.
-            </p>
-          </div>
+        <ScrollReveal className="mb-2xl text-center">
+          <p className="text-strong-accent font-semibold text-sm mb-md font-body">Materials</p>
+          <h2
+            id="materials-h"
+            className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
+          >
+            Choose the right material
+          </h2>
+          <p className="text-body text-ink-muted mt-md mx-auto max-w-2xl font-body">
+            Durable vinyl options for different environments, visibility needs, and handling.
+          </p>
           <Link
             href="/order/vinyl"
-            className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
+            className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
           >
             Compare materials
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -68,12 +67,14 @@ export function MaterialsBand() {
                 key={material.name}
                 className="overflow-hidden rounded-card border border-line bg-surface shadow-elev-1"
               >
-                <div className="relative h-40 overflow-hidden">
+                <div className="relative aspect-[4/3] overflow-hidden">
                   <PlaceholderImage
                     src={image.src}
                     alt={image.alt}
                     width={image.width}
                     height={image.height}
+                    rounded="none"
+                    overlay
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />
                   {material.label && (
@@ -90,7 +91,7 @@ export function MaterialsBand() {
                   <ul className="mt-md space-y-xs text-sm text-ink font-body">
                     {material.points.map((point) => (
                       <li key={point} className="flex items-center gap-xs">
-                        <CheckCircle2 className="h-4 w-4 text-strong-accent" aria-hidden />
+                        <CheckCircle2 className="h-4 w-4 text-ink-muted" aria-hidden />
                         {point}
                       </li>
                     ))}

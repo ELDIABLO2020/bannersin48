@@ -8,8 +8,8 @@ export type PlaceholderAsset = {
 
 export const placeholders = {
   hero: {
-    src: "/images/hero-print-workshop.png",
-    alt: "Large-format vinyl banner being printed in a professional print shop",
+    src: "/images/hero-banner-context.png",
+    alt: "Finished vinyl banner installed above a retail storefront entrance",
     width: 1200,
     height: 900,
   },

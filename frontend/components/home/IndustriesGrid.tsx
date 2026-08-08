@@ -21,21 +21,20 @@ export function IndustriesGrid() {
   return (
     <section className="bg-soft-accent" aria-labelledby="industries-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <ScrollReveal className="flex flex-col gap-md md:flex-row md:items-end md:justify-between mb-2xl">
-          <div>
-            <h2
-              id="industries-h"
-              className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
-            >
-              Customized banners for every use case
-            </h2>
-            <p className="mt-md max-w-2xl text-body text-ink-muted font-body">
-              From jobsites to grand openings, pick the path that matches your banner job.
-            </p>
-          </div>
+        <ScrollReveal className="mb-2xl text-center">
+          <p className="text-strong-accent font-semibold text-sm mb-md font-body">Use cases</p>
+          <h2
+            id="industries-h"
+            className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
+          >
+            Customized banners for every use case
+          </h2>
+          <p className="mt-md mx-auto max-w-2xl text-body text-ink-muted font-body">
+            From jobsites to grand openings, pick the path that matches your banner job.
+          </p>
           <Link
             href="/order/vinyl"
-            className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
+            className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
           >
             View all use cases
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -56,6 +55,8 @@ export function IndustriesGrid() {
                     alt={image.alt}
                     width={image.width}
                     height={image.height}
+                    rounded="none"
+                    overlay
                     sizes="(max-width: 768px) 50vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-darkest/80 via-darkest/20 to-transparent" />
