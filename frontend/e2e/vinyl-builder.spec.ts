@@ -25,13 +25,26 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("price-total")).toContainText("$138", { timeout: 10_000 });
 
     const viewport = page.viewportSize();
-    const stageBox = await page.getByTestId("builder-stage").locator("> div").boundingBox();
+    const stageSlot = page.getByTestId("builder-stage").locator("..");
+    await expect(page.getByTestId("builder-creative")).toBeVisible();
+    await expect(page.getByTestId("stage-ruler-h")).toBeVisible();
+    await expect(page.getByTestId("stage-ruler-v")).toBeVisible();
+    const stageBox = await page.getByTestId("builder-stage").boundingBox();
+    const slotBox = await stageSlot.boundingBox();
+    const creativeBox = await page.getByTestId("builder-creative").boundingBox();
     const dockBox = await page.getByTestId("control-dock").boundingBox();
     expect(viewport).toBeTruthy();
     expect(stageBox).toBeTruthy();
+    expect(slotBox).toBeTruthy();
+    expect(creativeBox).toBeTruthy();
     expect(dockBox).toBeTruthy();
-    expect(stageBox!.height).toBeLessThanOrEqual(Math.min(viewport!.height * 0.68, 640) + 1);
+    // Workspace fills the flex-1 stage slot
+    expect(stageBox!.width).toBeGreaterThan(slotBox!.width - 2);
     expect(stageBox!.height).toBeGreaterThanOrEqual(280);
+    expect(Math.abs(stageBox!.height - slotBox!.height)).toBeLessThan(2);
+    // Default 4×8 creative keeps ~0.5 aspect and is larger than the old capped stage
+    expect(creativeBox!.width / creativeBox!.height).toBeCloseTo(0.5, 1);
+    expect(creativeBox!.height).toBeGreaterThan(200);
     expect(dockBox!.y).toBeLessThan(viewport!.height);
   });
 

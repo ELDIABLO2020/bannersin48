@@ -31,7 +31,7 @@ export function BuilderShell({
             {price}
           </aside>
           <div className="order-2 min-[901px]:order-2 flex flex-col gap-md min-w-0">
-            <div className="flex min-h-[280px] flex-1 items-center justify-center">{stage}</div>
+            <div className="flex min-h-[280px] flex-1 items-stretch">{stage}</div>
             <div className="shrink-0">{dock}</div>
           </div>
           <aside className="order-3 min-[901px]:order-1 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-20">
