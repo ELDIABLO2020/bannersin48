@@ -24,7 +24,7 @@ export default function ReviewsPage() {
             <p className="text-body text-ink-muted">
               Verified customer stories will appear here as they become available.
             </p>
-            <Link href="/order/vinyl" className="inline-block mt-xl">
+            <Link href="/order" className="inline-block mt-xl">
               <Button variant="cta" size="lg">
                 Start your order
                 <ChevronRight className="ml-sm h-5 w-5" aria-hidden />

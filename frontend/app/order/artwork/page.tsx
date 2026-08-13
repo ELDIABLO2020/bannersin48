@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 export default function ArtworkPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/order/vinyl?picker=1");
+    router.replace("/order/hd-banner?picker=1");
   }, [router]);
 
   return (

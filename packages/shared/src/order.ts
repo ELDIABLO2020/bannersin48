@@ -28,6 +28,7 @@ export type OrderStatus = z.infer<typeof orderStatusSchema>;
 export const orderLineSchema = z
   .object({
     id: z.string(),
+    productId: z.string().optional(),
     material: materialSchema,
     dimensions: dimensionsSchema,
     finishing: finishingSchema,

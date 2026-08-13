@@ -11,7 +11,7 @@ import { useCart } from "@/lib/stores/cart";
 import { useCartDrawer } from "@/lib/stores/cart-drawer";
 
 const CENTER_LINKS: ReadonlyArray<{ href: string; label: string }> = [
-  { href: "/order/vinyl", label: "Banners" },
+  { href: "/order", label: "Banners" },
   { href: "/sizes", label: "Sizes & Pricing" },
   { href: "/order/retractable", label: "Retractable" },
   { href: "/how-it-works", label: "How It Works" },
@@ -19,12 +19,12 @@ const CENTER_LINKS: ReadonlyArray<{ href: string; label: string }> = [
 ];
 
 const USE_CASES: ReadonlyArray<{ href: string; label: string }> = [
-  { href: "/order/vinyl?use=business", label: "Business" },
-  { href: "/order/vinyl?use=restaurant", label: "Restaurant" },
-  { href: "/order/vinyl?use=contractor", label: "Contractor" },
-  { href: "/order/vinyl?use=school", label: "School & Sports" },
-  { href: "/order/vinyl?use=events", label: "Events" },
-  { href: "/order/vinyl?use=real-estate", label: "Real Estate" },
+  { href: "/order/hd-banner?use=business", label: "Business" },
+  { href: "/order/hd-banner?use=restaurant", label: "Restaurant" },
+  { href: "/order/hd-banner?use=contractor", label: "Contractor" },
+  { href: "/order/hd-banner?use=school", label: "School & Sports" },
+  { href: "/order/hd-banner?use=events", label: "Events" },
+  { href: "/order/hd-banner?use=real-estate", label: "Real Estate" },
 ];
 
 function navLinkClass(active: boolean) {
@@ -56,7 +56,10 @@ export function TopNav() {
                   onMouseEnter={() => setTemplatesOpen(true)}
                   onMouseLeave={() => setTemplatesOpen(false)}
                   onFocus={() => setTemplatesOpen(true)}
-                  className={navLinkClass(pathname.startsWith("/order/vinyl"))}
+                  className={navLinkClass(
+                    pathname === "/order" ||
+                      (pathname.startsWith("/order/") && !pathname.startsWith("/order/retractable")),
+                  )}
                 >
                   {l.label}
                   <ChevronDown className="h-3.5 w-3.5" />
@@ -111,7 +114,7 @@ export function TopNav() {
             >
               Log In
             </Link>
-            <Link href="/order/vinyl" className="shrink-0">
+            <Link href="/order" className="shrink-0">
               <Button variant="cta-attached" size="attached" className="h-11 sm:h-11 px-md text-sm sm:text-sm text-ink">
                 Order now
                 <ArrowRight className="ml-xs h-4 w-4" aria-hidden />
@@ -199,7 +202,7 @@ export function TopNav() {
               >
                 Log In
               </Link>
-              <Link href="/order/vinyl" onClick={() => setMobileOpen(false)} className="shrink-0">
+              <Link href="/order" onClick={() => setMobileOpen(false)} className="shrink-0">
                 <Button variant="cta-attached" size="attached" className="text-ink">
                   Order now
                   <ArrowRight className="ml-sm h-5 w-5" aria-hidden />

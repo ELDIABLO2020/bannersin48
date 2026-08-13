@@ -2,6 +2,7 @@ export * from "./constants";
 export * from "./dimensions";
 export * from "./material";
 export * from "./finishing";
+export * from "./product";
 export * from "./quantity";
 export * from "./artwork";
 export * from "./address";

@@ -173,7 +173,7 @@ export default function SizesAndPricingPage() {
         <ConstraintsSection />
 
         <div className="text-center mt-3xl">
-          <Link href="/order/vinyl">
+          <Link href="/order/hd-banner">
             <Button variant="cta" size="lg">
               Start your order <ChevronRight className="ml-sm h-5 w-5" aria-hidden />
             </Button>
@@ -196,7 +196,7 @@ function MaterialGuide() {
         {MATERIAL_GUIDE.map((material) => (
           <Link
             key={material.name}
-            href="/order/vinyl"
+            href="/order/hd-banner"
             className="group overflow-hidden rounded-card border border-line-subtle bg-surface shadow-elev-1 no-underline transition-all hover:-translate-y-1 hover:border-strong-accent hover:shadow-elev-2"
           >
             <article>
@@ -310,7 +310,7 @@ function PricingMatrix() {
                     className="text-left font-bold text-ink px-lg py-md whitespace-nowrap"
                   >
                     <Link
-                      href={`/order/vinyl?w=${s.widthFt}&h=${s.heightFt}`}
+                      href={`/order/hd-banner?w=${s.widthFt}&h=${s.heightFt}`}
                       className="text-link no-underline hover:underline"
                     >
                       {s.label}
@@ -356,7 +356,7 @@ function AllSizesGrid() {
         {POPULAR_SIZES.map((s) => (
           <Link
             key={s.id}
-            href={`/order/vinyl?w=${s.widthFt}&h=${s.heightFt}`}
+            href={`/order/hd-banner?w=${s.widthFt}&h=${s.heightFt}`}
             className="ps-card group block no-underline"
           >
             <article
@@ -390,7 +390,7 @@ function AllSizesGrid() {
           </Link>
         ))}
 
-        <Link href="/order/vinyl" className="ps-card group block no-underline">
+        <Link href="/order/hd-banner" className="ps-card group block no-underline">
           <article className="relative flex min-h-[200px] flex-col rounded-card border border-navy-deep bg-navy-base p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2">
             <span className="absolute -top-sm left-lg rounded-sm bg-strong-accent px-sm py-micro text-[11px] font-bold uppercase text-strong-accent-text">
               Made to order

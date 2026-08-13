@@ -6,7 +6,7 @@ test.describe("Vinyl builder", () => {
       sessionStorage.removeItem("bi48.builder");
       localStorage.removeItem("bi48.cart");
     });
-    await page.goto("/order/vinyl");
+    await page.goto("/order/hd-banner");
     await expect(page.getByTestId("builder-shell")).toBeVisible({ timeout: 30_000 });
     await page.waitForFunction(
       () => (window as unknown as { __BI48_MOCKS_READY__?: boolean }).__BI48_MOCKS_READY__ === true,
@@ -154,6 +154,23 @@ test.describe("Vinyl builder", () => {
     await page.getByTestId("color-match-submit").click();
     await expect(page.getByTestId("color-match-modal")).toBeHidden();
     await expect(page.getByTestId("open-color-match")).toContainText(/PMS notes saved/i);
+    await expect(page.getByTestId("finishing-message")).toContainText(
+      "PMS color matching may add 24–48 hours to production time.",
+    );
+  });
+
+  test("rejects unsupported artwork types", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop picker");
+    await page.getByTestId("dock-images").click();
+    await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("image-picker-file").setInputFiles({
+      name: "bad.gif",
+      mimeType: "image/gif",
+      buffer: Buffer.from("GIF89a"),
+    });
+    await expect(page.getByTestId("upload-reject")).toHaveText(
+      "Only these file types are allowed: jpg, jpeg, pdf, tiff, tif, eps, png.",
+    );
   });
 
   test("ADD SIGN then add to cart adds two lines", async ({ page }, testInfo) => {
@@ -182,6 +199,6 @@ test.describe("Vinyl builder", () => {
 test("artwork route redirects into builder picker", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
   await page.goto("/order/artwork");
-  await expect(page).toHaveURL(/\/order\/vinyl\?picker=1/, { timeout: 10_000 });
+  await expect(page).toHaveURL(/\/order\/hd-banner\?picker=1/, { timeout: 10_000 });
   await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 15_000 });
 });

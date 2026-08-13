@@ -1,9 +1,14 @@
 import { z } from "zod";
-import { MATERIAL_RATES, ADDON_RATES, SHIPPING_FLAT_PER_UNIT_USD, MAX_BILLABLE_FT, RETRACTABLE } from "./constants";
+import {
+  ADDON_RATES,
+  SHIPPING_FLAT_PER_UNIT_USD,
+  WEBBING_PER_WIDTH_FT_PER_EDGE_USD,
+} from "./constants";
 import { billableDimensions, type Dimensions } from "./dimensions";
-import type { Material } from "./material";
+import { materialSchema, type Material } from "./material";
 import type { Finishing } from "./finishing";
 import type { Quantity } from "./quantity";
+import { PRODUCTS, productIdForMaterial, productIdSchema, validateProductSize, type ProductId } from "./product";
 
 /**
  * Pricing engine from the plan §9.
@@ -18,6 +23,7 @@ import type { Quantity } from "./quantity";
  */
 
 export interface PricingInput {
+  productId?: ProductId;
   material: Material;
   dimensions: Dimensions;
   finishing: Finishing;
@@ -51,12 +57,17 @@ function round2(n: number): number {
 
 export function priceLine(input: PricingInput): PricingLine {
   const notes: string[] = [];
+  const productId = input.productId ?? productIdForMaterial(input.material);
+  const config = PRODUCTS[productId];
 
-  // Retractable is a flat-priced product
-  if (input.material === "RETRACTABLE") {
-    const unitProduct = RETRACTABLE.priceUsd;
+  if (config.sizeMode === "fixed") {
+    const unitProduct = config.flatPriceUsd ?? 0;
     const productSubtotal = unitProduct * input.quantity;
     const shipping = input.quantity * SHIPPING_FLAT_PER_UNIT_USD;
+    const note =
+      productId === "RETRACTABLE"
+        ? `${config.fixedSizeIn?.widthIn ?? 33.5}" × ${config.fixedSizeIn?.heightIn ?? 80}" retractable, hardware + carrying case included.`
+        : `33.5" × 80" banner stand, hardware included.`;
     return {
       unitProduct,
       addons: 0,
@@ -67,25 +78,30 @@ export function priceLine(input: PricingInput): PricingLine {
       billableSqFt: 0,
       billableDims: { widthFt: 0, heightFt: 0 },
       eligible: true,
-      notes: [
-        `${RETRACTABLE.widthIn}\" × ${RETRACTABLE.heightIn}\" retractable, hardware + carrying case included.`,
-      ],
+      notes: [note],
     };
   }
 
   const billable = billableDimensions(input.dimensions);
-  const eligible = billable.widthFt <= MAX_BILLABLE_FT && billable.heightFt <= MAX_BILLABLE_FT;
+  const validation = validateProductSize(config, input.dimensions);
+  const eligible = validation.ok;
   if (!eligible) {
-    notes.push("Billable size exceeds the 10 ft × 10 ft maximum — custom quote required.");
+    notes.push(validation.message);
   }
 
-  const rate = MATERIAL_RATES[input.material];
+  const rate = config.ratePerSqFt(input.material);
   const productBase = billable.sqFt * rate;
 
-  const windSlits = input.finishing.windSlits ? billable.sqFt * ADDON_RATES.WIND_SLITS_PER_SQFT : 0;
-  const polePockets = input.finishing.polePockets ? billable.sqFt * ADDON_RATES.POLE_POCKETS_PER_SQFT : 0;
-  const rope = input.finishing.rope ? billable.sqFt * ADDON_RATES.ROPE_PER_SQFT : 0;
-  const addons = windSlits + polePockets + rope;
+  const windSlits =
+    config.dock.windSlits && input.finishing.windSlits ? billable.sqFt * ADDON_RATES.WIND_SLITS_PER_SQFT : 0;
+  const polePockets =
+    config.dock.polePockets && input.finishing.polePockets ? billable.sqFt * ADDON_RATES.POLE_POCKETS_PER_SQFT : 0;
+  const rope = config.dock.rope && input.finishing.rope ? billable.sqFt * ADDON_RATES.ROPE_PER_SQFT : 0;
+  const webbing =
+    config.dock.webbing && input.finishing.webbing
+      ? billable.widthFt * WEBBING_PER_WIDTH_FT_PER_EDGE_USD * 2
+      : 0;
+  const addons = windSlits + polePockets + rope + webbing;
 
   const unitProduct = productBase + addons;
   const productSubtotal = unitProduct * input.quantity;
@@ -102,9 +118,7 @@ export function priceLine(input: PricingInput): PricingLine {
     billableSqFt: billable.sqFt,
     billableDims: { widthFt: billable.widthFt, heightFt: billable.heightFt },
     eligible,
-    ineligibilityReason: eligible
-      ? undefined
-      : `Billable size ${billable.widthFt}' × ${billable.heightFt}' exceeds the 10 ft maximum.`,
+    ineligibilityReason: eligible ? undefined : validation.message,
     notes,
   };
 }
@@ -122,18 +136,13 @@ export function priceOrder(lines: PricingInput[]): PricingResult {
  */
 export const pricingRequestSchema = z
   .object({
-    material: z.enum([
-      "VINYL_13OZ_SINGLE",
-      "VINYL_15OZ_SINGLE",
-      "VINYL_18OZ_SINGLE",
-      "VINYL_18OZ_DOUBLE",
-      "RETRACTABLE",
-    ]),
+    productId: productIdSchema.optional(),
+    material: materialSchema,
     dimensions: z
       .object({
-        widthFt: z.number().int().min(1),
+        widthFt: z.number().int().min(0),
         widthIn: z.number().int().min(0).max(11),
-        heightFt: z.number().int().min(1),
+        heightFt: z.number().int().min(0),
         heightIn: z.number().int().min(0).max(11),
       })
       .strict(),
@@ -154,6 +163,7 @@ export const pricingRequestSchema = z
         grommetPoints: z
           .array(z.object({ xIn: z.number().nonnegative(), yIn: z.number().nonnegative() }).strict())
           .optional(),
+        webbing: z.boolean().optional().default(false),
       })
       .strict(),
     quantity: z.number().int().min(1).max(10),

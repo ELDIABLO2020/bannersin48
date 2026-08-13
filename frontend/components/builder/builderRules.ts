@@ -1,7 +1,8 @@
-import type { Material } from "@bannersin48/shared";
+import type { Material, ProductId } from "@bannersin48/shared";
 import {
   isWindSlitsEligible,
   windSlitsIneligibilityReason,
+  PRODUCTS,
   type Dimensions,
   type Finishing,
 } from "@bannersin48/shared";
@@ -13,10 +14,35 @@ export type BuilderControl =
   | "material"
   | "sides"
   | "welding"
+  | "webbing"
   | "rope"
   | "grommets"
   | "pockets"
   | "wind";
+
+const DOCK_FLAG: Partial<Record<BuilderControl, keyof (typeof PRODUCTS)[ProductId]["dock"]>> = {
+  material: "material",
+  sides: "sides",
+  welding: "welding",
+  webbing: "webbing",
+  rope: "rope",
+  grommets: "grommets",
+  pockets: "polePockets",
+  wind: "windSlits",
+};
+
+const TILE_ORDER: BuilderControl[] = [
+  "images",
+  "size",
+  "material",
+  "sides",
+  "welding",
+  "webbing",
+  "rope",
+  "grommets",
+  "pockets",
+  "wind",
+];
 
 export interface ControlEligibility {
   enabled: boolean;
@@ -47,11 +73,27 @@ export function materialForPrintSides(current: Material, doubleSided: boolean): 
   return current;
 }
 
+export function visibleTiles(productId: ProductId): BuilderControl[] {
+  const config = PRODUCTS[productId];
+  return TILE_ORDER.filter((control) => {
+    if (control === "images") return true;
+    if (control === "size") return config.sizeMode === "custom";
+    const flag = DOCK_FLAG[control];
+    return flag ? config.dock[flag] : false;
+  });
+}
+
 export function getControlEligibility(
   control: BuilderControl,
-  opts: { material: Material; size: SizeState; finishing: Finishing },
+  opts: { productId: ProductId; material: Material; size: SizeState; finishing: Finishing },
 ): ControlEligibility {
-  const { material, size, finishing } = opts;
+  const { productId, material, size, finishing } = opts;
+  const config = PRODUCTS[productId];
+  const flag = DOCK_FLAG[control];
+  if (flag && !config.dock[flag]) {
+    return { enabled: false, reason: "Not available for this product." };
+  }
+
   const dims = sizeToDimensions(size);
 
   switch (control) {
@@ -74,11 +116,12 @@ export function getControlEligibility(
       if (finishing.polePockets) {
         return { enabled: false, reason: "Grommets are unavailable when pole pockets are selected." };
       }
-      // Rope can still be cleared via applyFinishingPatch when grommets are turned on.
       return { enabled: true };
 
     case "rope":
-      // Grommets clear automatically via applyFinishingPatch when rope is enabled.
+      return { enabled: true };
+
+    case "webbing":
       return { enabled: true };
 
     case "pockets":
@@ -108,6 +151,18 @@ export function materialLabel(material: Material): string {
       return "18 oz double-sided";
     case "RETRACTABLE":
       return "Retractable";
+    case "HDPE":
+      return "HDPE";
+    case "CANVAS_11OZ":
+      return "11 oz canvas";
+    case "MESH_8OZ":
+      return "8 oz mesh";
+    case "POSTER_8MIL":
+      return "8 mil poster paper";
+    case "NO_CURL_8MIL":
+      return "8 mil no-curl";
+    case "ECONOSTAND":
+      return "Econostand";
     default:
       return material;
   }

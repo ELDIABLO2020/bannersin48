@@ -69,7 +69,7 @@ export function Hero() {
               moving.
             </p>
             <div className="hero-actions mt-xl flex flex-col sm:flex-row gap-sm">
-              <Link href="/order/vinyl">
+              <Link href="/order">
                 <Button variant="cta" size="lg">
                   Start your order
                   <ArrowRight className="ml-sm h-5 w-5" aria-hidden />

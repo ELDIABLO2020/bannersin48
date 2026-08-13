@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 const USE_CASES = [
-  { label: "Contractors", href: "/order/vinyl?use=contractor" },
-  { label: "Restaurants", href: "/order/vinyl?use=restaurant" },
-  { label: "Schools", href: "/order/vinyl?use=school" },
-  { label: "Real Estate", href: "/order/vinyl?use=real-estate" },
-  { label: "Events", href: "/order/vinyl?use=events" },
-  { label: "Retail", href: "/order/vinyl?use=business" },
-  { label: "Sports Teams", href: "/order/vinyl?use=school" },
-  { label: "Grand Openings", href: "/order/vinyl?use=business" },
+  { label: "Contractors", href: "/order/hd-banner?use=contractor" },
+  { label: "Restaurants", href: "/order/hd-banner?use=restaurant" },
+  { label: "Schools", href: "/order/hd-banner?use=school" },
+  { label: "Real Estate", href: "/order/hd-banner?use=real-estate" },
+  { label: "Events", href: "/order/hd-banner?use=events" },
+  { label: "Retail", href: "/order/hd-banner?use=business" },
+  { label: "Sports Teams", href: "/order/hd-banner?use=school" },
+  { label: "Grand Openings", href: "/order/hd-banner?use=business" },
 ] as const;
 
 export function UseCaseMarquee() {

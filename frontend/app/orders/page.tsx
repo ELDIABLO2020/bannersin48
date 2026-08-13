@@ -68,7 +68,7 @@ export default function OrdersListPage() {
         ) : !orders || orders.length === 0 ? (
           <Card className="bg-surface text-center p-2xl">
             <p className="text-ink-muted">No orders yet.</p>
-            <Link href="/order/vinyl"><Button variant="cta" size="md" className="mt-md">Start your first order</Button></Link>
+            <Link href="/order"><Button variant="cta" size="md" className="mt-md">Start your first order</Button></Link>
           </Card>
         ) : (
           <ul className="space-y-sm">

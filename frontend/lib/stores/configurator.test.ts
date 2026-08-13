@@ -8,7 +8,7 @@ describe("useConfigurator — multi-sign + finishing", () => {
 
   it("starts in vinyl mode, 13 oz, 4x8, qty 1, one sign", () => {
     const s = useConfigurator.getState();
-    expect(s.product).toBe("vinyl");
+    expect(s.productId).toBe("HD_BANNER");
     expect(s.material).toBe("VINYL_13OZ_SINGLE");
     expect(s.size).toEqual({ widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 });
     expect(s.quantity).toBe(1);
@@ -61,16 +61,16 @@ describe("useConfigurator — multi-sign + finishing", () => {
   });
 
   it("setProduct to retractable forces material RETRACTABLE and zeros dimensions", () => {
-    useConfigurator.getState().setProduct("retractable");
+    useConfigurator.getState().setProduct("RETRACTABLE");
     const s = useConfigurator.getState();
-    expect(s.product).toBe("retractable");
+    expect(s.productId).toBe("RETRACTABLE");
     expect(s.material).toBe("RETRACTABLE");
     expect(s.size.widthFt).toBe(0);
   });
 
   it("restores a valid default size when returning to vinyl", () => {
-    useConfigurator.getState().setProduct("retractable");
-    useConfigurator.getState().setProduct("vinyl");
+    useConfigurator.getState().setProduct("RETRACTABLE");
+    useConfigurator.getState().setProduct("HD_BANNER");
     expect(useConfigurator.getState().size).toEqual({
       widthFt: 4,
       widthIn: 0,
@@ -90,6 +90,20 @@ describe("useConfigurator — multi-sign + finishing", () => {
     expect(s.artworkId).toBe("art_42");
     expect(s.artworkFileName).toBe("my-design.png");
     expect(s.size).toEqual({ widthFt: 1, widthIn: 0, heightFt: 2, heightIn: 0 });
+  });
+
+  it("setArtwork skips auto-size on fixed products", () => {
+    useConfigurator.getState().setProduct("ECONOSTAND");
+    const before = useConfigurator.getState().size;
+    useConfigurator.getState().setArtwork("art_42", "stand.png", "/p.png", {
+      widthPx: 1800,
+      heightPx: 3600,
+      dpi: 150,
+      autoSize: true,
+    });
+    const s = useConfigurator.getState();
+    expect(s.artworkId).toBe("art_42");
+    expect(s.size).toEqual(before);
   });
 
   it("addSign creates a second sign and selectSign switches mirrors", () => {

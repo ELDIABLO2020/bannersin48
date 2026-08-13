@@ -8,7 +8,7 @@ import { getApiClient } from "@/lib/api/client";
 
 /** Shared optimistic + debounced API quote for stage header and PriceHero. */
 export function useBuilderQuote() {
-  const product = useConfigurator((s) => s.product);
+  const productId = useConfigurator((s) => s.productId);
   const material = useConfigurator((s) => s.material);
   const size = useConfigurator((s) => s.size);
   const finishing = useConfigurator((s) => s.finishing);
@@ -17,35 +17,38 @@ export function useBuilderQuote() {
   const optimistic = useMemo(
     () =>
       priceLine({
+        productId,
         material,
         dimensions: size,
         finishing,
         quantity: Math.max(1, Math.min(10, quantity)) as Quantity,
       }),
-    [material, size, finishing, quantity],
+    [productId, material, size, finishing, quantity],
   );
 
-  const [debounced, setDebounced] = useState({ material, size, finishing, quantity });
+  const [debounced, setDebounced] = useState({ productId, material, size, finishing, quantity });
   useEffect(() => {
-    const id = setTimeout(() => setDebounced({ material, size, finishing, quantity }), 250);
+    const id = setTimeout(() => setDebounced({ productId, material, size, finishing, quantity }), 250);
     return () => clearTimeout(id);
-  }, [material, size, finishing, quantity]);
+  }, [productId, material, size, finishing, quantity]);
 
   const { data, isFetching } = useQuery({
     queryKey: ["quote", debounced],
     queryFn: () =>
       getApiClient().quote({
+        productId: debounced.productId,
         material: debounced.material,
         dimensions: debounced.size,
         finishing: debounced.finishing,
         quantity: debounced.quantity,
       }),
-    enabled: !(product === "retractable" && debounced.size.widthFt === 0),
+    enabled: true,
   });
 
   const displayTotal = data?.total ?? optimistic.totalBeforeTax;
   const eligible = data?.eligible ?? optimistic.eligible;
   const billableSqFt = data?.lines[0]?.billableSqFt ?? optimistic.billableSqFt;
+  const ineligibilityReason = data?.lines[0]?.ineligibilityReason ?? optimistic.ineligibilityReason;
 
   return {
     material,
@@ -56,5 +59,6 @@ export function useBuilderQuote() {
     isFetching,
     optimistic,
     data,
+    ineligibilityReason,
   };
 }

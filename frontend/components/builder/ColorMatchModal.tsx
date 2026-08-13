@@ -11,6 +11,7 @@ export function ColorMatchModal() {
   const setOpen = useConfigurator((s) => s.setColorMatchOpen);
   const colorMatching = useConfigurator((s) => s.colorMatching);
   const setColorMatching = useConfigurator((s) => s.setColorMatching);
+  const flashMessage = useConfigurator((s) => s.flashMessage);
   const [notes, setNotes] = useState(colorMatching?.pmsNotes ?? "");
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export function ColorMatchModal() {
               data-testid="color-match-submit"
               onClick={() => {
                 setColorMatching(notes);
+                flashMessage(COLOR_MATCH_DELAY_MESSAGE);
                 setOpen(false);
               }}
             >

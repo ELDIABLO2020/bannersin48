@@ -5,7 +5,7 @@ import { ArrowRight, Headphones, Maximize2, Upload } from "lucide-react";
 
 const ACTIONS = [
   {
-    href: "/order/vinyl",
+    href: "/order",
     icon: Maximize2,
     label: "Choose size",
     description: "Start with popular dimensions or enter a custom size.",
@@ -44,7 +44,7 @@ export function QuickActions() {
               practical, and focused on getting your file to production.
             </p>
             <Link
-              href="/order/vinyl"
+              href="/order"
               className="mt-xl inline-flex items-center gap-sm rounded-btn bg-strong-accent px-2xl py-sm font-bold text-strong-accent-text no-underline hover:bg-strong-accent-hover"
             >
               Start an order

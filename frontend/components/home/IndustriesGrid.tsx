@@ -9,12 +9,12 @@ const INDUSTRIES: ReadonlyArray<{
   label: string;
   imageKey: PlaceholderKey;
 }> = [
-  { href: "/order/vinyl?use=contractor", label: "Contractor", imageKey: "industryContractor" },
-  { href: "/order/vinyl?use=restaurant", label: "Restaurant", imageKey: "industryRestaurant" },
-  { href: "/order/vinyl?use=school", label: "School & Sports", imageKey: "industrySchool" },
-  { href: "/order/vinyl?use=events", label: "Events", imageKey: "industryEvents" },
-  { href: "/order/vinyl?use=business", label: "Business", imageKey: "industryBusiness" },
-  { href: "/order/vinyl?use=real-estate", label: "Real Estate", imageKey: "industryRealEstate" },
+  { href: "/order/hd-banner?use=contractor", label: "Contractor", imageKey: "industryContractor" },
+  { href: "/order/hd-banner?use=restaurant", label: "Restaurant", imageKey: "industryRestaurant" },
+  { href: "/order/hd-banner?use=school", label: "School & Sports", imageKey: "industrySchool" },
+  { href: "/order/hd-banner?use=events", label: "Events", imageKey: "industryEvents" },
+  { href: "/order/hd-banner?use=business", label: "Business", imageKey: "industryBusiness" },
+  { href: "/order/hd-banner?use=real-estate", label: "Real Estate", imageKey: "industryRealEstate" },
 ];
 
 export function IndustriesGrid() {
@@ -33,7 +33,7 @@ export function IndustriesGrid() {
             From jobsites to grand openings, pick the path that matches your banner job.
           </p>
           <Link
-            href="/order/vinyl"
+            href="/order/hd-banner"
             className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
           >
             View all use cases

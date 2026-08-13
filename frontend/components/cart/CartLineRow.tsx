@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { formatUsd } from "@/lib/utils/format";
 import { Trash2 } from "lucide-react";
 import type { CartLine } from "@/lib/stores/cart";
+import { PRODUCTS, productIdForMaterial, type ProductId } from "@bannersin48/shared";
+import { materialLabel } from "@/components/builder/builderRules";
 
 interface CartLineRowProps {
   line: CartLine;
@@ -17,14 +19,19 @@ interface CartLineRowProps {
 }
 
 export function CartLineRow({ line: l, onRemove, onUpdateQty, bare = false }: CartLineRowProps) {
+  const productId: ProductId = (l.productId as ProductId | undefined) ?? productIdForMaterial(l.material);
+  const productTitle = PRODUCTS[productId].title;
+  const mat = materialLabel(l.material);
+  const heading =
+    productId === "RETRACTABLE"
+      ? 'Retractable Banner (33.5" × 80")'
+      : productTitle === mat
+        ? productTitle
+        : `${productTitle} · ${mat}`;
   const body = (
     <div className="flex items-start justify-between gap-md">
       <div className="min-w-0">
-        <p className="font-bold text-ink break-words">
-          {l.product === "retractable"
-            ? "Retractable Banner (33.5\" × 80\")"
-            : `${l.display.requestedLabel} (${l.material.replaceAll("_", " ")})`}
-        </p>
+        <p className="font-bold text-ink break-words">{heading}</p>
         <p className="text-body-sm text-ink-muted mt-xs">
           Requested: {l.display.requestedLabel} · Billable: {l.display.billableLabel}
           {l.billableSqFt > 0 && ` · ${l.billableSqFt} sq ft`}

@@ -14,16 +14,14 @@ import Link from "next/link";
 
 export default function RetractableConfiguratorPage() {
   const setProduct = useConfigurator((s) => s.setProduct);
-  const setMaterial = useConfigurator((s) => s.setMaterial);
   const setQuantity = useConfigurator((s) => s.setQuantity);
   const quantity = useConfigurator((s) => s.quantity);
   const addLine = useCart((s) => s.addLine);
   const router = useRouter();
 
   useEffect(() => {
-    setProduct("retractable");
-    setMaterial("RETRACTABLE");
-  }, [setProduct, setMaterial]);
+    setProduct("RETRACTABLE");
+  }, [setProduct]);
 
   const unitPrice = RETRACTABLE.priceUsd;
   const shipping = 10 * quantity;
@@ -101,9 +99,10 @@ export default function RetractableConfiguratorPage() {
                   addLine({
                     id: `cart_${Date.now()}`,
                     product: "retractable",
+                    productId: "RETRACTABLE",
                     material: "RETRACTABLE",
                     dimensions: { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 },
-                    finishing: { welding: false, grommets: false, windSlits: false, polePockets: false, rope: false },
+                    finishing: { welding: false, grommets: false, windSlits: false, polePockets: false, rope: false, webbing: false },
                     quantity,
                     unitProduct: unitPrice,
                     addons: 0,

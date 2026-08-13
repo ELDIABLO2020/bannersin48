@@ -43,6 +43,25 @@ export interface QuoteResponse {
   cutoffAtEt: string;
 }
 
+export interface BannerCatalogCard {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  hasMoreInfo: boolean;
+  route: string;
+}
+
+export interface BannerCatalogInfo {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  commonUses: string[];
+  environment: string[];
+  options: string[];
+}
+
 export interface ArtworkUploadResponse {
   artworkId: string;
   previewUrl: string;
@@ -64,6 +83,7 @@ export interface OrderListItem {
 export interface CreateOrderInput {
   email: string;
   lines: Array<{
+    productId?: string;
     material: Material;
     dimensions: PricingInput["dimensions"];
     finishing: Finishing;

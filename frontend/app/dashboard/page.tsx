@@ -28,7 +28,7 @@ const STATUS_TONE: Record<OrderStatus, "info" | "success" | "warning" | "error" 
 };
 
 const QUICK_ACTIONS = [
-  { href: "/order/vinyl", icon: Package, label: "New vinyl banner", soon: false },
+  { href: "/order", icon: Package, label: "New banner order", soon: false },
   { href: "/order/retractable", icon: Package, label: "New retractable", soon: false },
   { href: "/order/artwork", icon: Upload, label: "Upload artwork", soon: false },
   { href: "/design", icon: PenTool, label: "Design online", soon: true },
@@ -140,7 +140,7 @@ export default function DashboardPage() {
           <Card className="bg-surface text-center p-2xl">
             <ShoppingBag className="h-8 w-8 text-ink-muted mx-auto mb-sm" aria-hidden />
             <p className="text-ink-muted">No orders yet.</p>
-            <Link href="/order/vinyl">
+            <Link href="/order">
               <Button variant="cta" size="md" className="mt-md">Order your first banner</Button>
             </Link>
           </Card>

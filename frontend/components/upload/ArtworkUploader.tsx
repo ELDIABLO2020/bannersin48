@@ -5,7 +5,7 @@ import { Upload, FileText, X, AlertCircle } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
 import { useConfigurator } from "@/lib/stores/configurator";
-import { ARTWORK_MIME_TYPES, formatBytes } from "@bannersin48/shared";
+import { ARTWORK_MIME_TYPES, UPLOAD_REJECT, formatBytes } from "@bannersin48/shared";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -31,9 +31,7 @@ export function ArtworkUploader() {
   function validateAndUpload(file: File) {
     setLocalError(null);
     if (!(ARTWORK_MIME_TYPES as readonly string[]).includes(file.type)) {
-      setLocalError(
-        `Unsupported file type: ${file.type || "unknown"}. We accept PDF, JPG, JPEG, and PNG.`,
-      );
+      setLocalError(UPLOAD_REJECT);
       return;
     }
     if (file.size > MAX_BYTES) {
@@ -83,7 +81,7 @@ export function ArtworkUploader() {
         <input
           ref={fileInput}
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+          accept=".pdf,.jpg,.jpeg,.png,.tif,.tiff,.eps,application/pdf,image/jpeg,image/png,image/tiff,application/postscript"
           className="sr-only"
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
@@ -92,7 +90,7 @@ export function ArtworkUploader() {
       <Card className="bg-surface">
         <h3 className="font-bold text-sm text-ink mb-sm">Requirements</h3>
         <ul className="text-body-sm text-ink-muted space-y-xs">
-          <li>Accepted: <strong className="text-ink">PDF, JPG, JPEG, PNG</strong></li>
+          <li>Accepted: <strong className="text-ink">PDF, JPG, PNG, TIFF, EPS</strong></li>
           <li>Max file size: <strong className="text-ink">{formatBytes(MAX_BYTES)}</strong></li>
           <li>Recommended: <strong className="text-ink">150 DPI</strong> at final size</li>
           <li>Add <strong className="text-ink">0.5&Prime; bleed</strong> on all sides when possible</li>
@@ -148,7 +146,7 @@ export function ArtworkUploader() {
           type="button"
           variant="secondary"
           size="lg"
-          onClick={() => router.push("/order/vinyl")}
+          onClick={() => router.push("/order/hd-banner")}
         >
           Back to configurator
         </Button>

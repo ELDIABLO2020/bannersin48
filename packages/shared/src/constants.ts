@@ -20,6 +20,17 @@ export const RETRACTABLE = {
   priceUsd: 175,
 } as const;
 
+// PLACEHOLDER — pending pricing decision (D1/D2)
+export const PRODUCT_RATES = {
+  HDPE: 4.5, // per billable sqft
+  CANVAS_11OZ: 15.0,
+  MESH_8OZ: 7.25,
+  POSTER_8MIL: 6.0,
+  NO_CURL_8MIL: 9.0,
+} as const;
+export const ECONOSTAND_FLAT_USD = 135; // per item
+export const WEBBING_PER_WIDTH_FT_PER_EDGE_USD = 2; // webbing = billableWidthFt × this × 2 (top + bottom)
+
 // Pricing rates (per billable square foot)
 export const MATERIAL_RATES = {
   VINYL_13OZ_SINGLE: 4.0,
@@ -27,6 +38,12 @@ export const MATERIAL_RATES = {
   VINYL_18OZ_SINGLE: 5.25,
   VINYL_18OZ_DOUBLE: 7.5,
   RETRACTABLE: 0, // flat-priced
+  HDPE: PRODUCT_RATES.HDPE,
+  CANVAS_11OZ: PRODUCT_RATES.CANVAS_11OZ,
+  MESH_8OZ: PRODUCT_RATES.MESH_8OZ,
+  POSTER_8MIL: PRODUCT_RATES.POSTER_8MIL,
+  NO_CURL_8MIL: PRODUCT_RATES.NO_CURL_8MIL,
+  ECONOSTAND: 0,
 } as const;
 
 // Add-on rates (per billable square foot)
@@ -46,6 +63,8 @@ export const ARTWORK_MIME_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
+  "image/tiff",
+  "application/postscript",
 ] as const;
 export const ARTWORK_MAX_BYTES_DEFAULT = 50 * 1024 * 1024; // 50 MB
 export const ARTWORK_DEFAULT_DPI = 150;
@@ -168,6 +187,23 @@ export const ROPE_GROMMET_INCOMPAT_MESSAGE =
 
 export const COLOR_MATCH_DELAY_MESSAGE =
   "PMS color matching may add 24–48 hours to production time.";
+
+export const WEBBING_HELP =
+  "Webbing reinforces the top and bottom welds. Recommended for mesh banners wider than 8 ft.";
+export const ROPE_HELP = "Nylon cord welded into the banner edge with slack on both ends.";
+export const POCKET_DIAMETER_HELP =
+  "Pole pocket size is the diameter of the pole. We add the material needed to fit that pole; the pocket is welded.";
+export const DS_WELD_BORDER_MSG =
+  'Double-sided banners include a 1.5" white border on all edges for welding. We automatically adjust your artwork to fit.';
+export const DS_POCKETS_BLEED_MSG =
+  "Double-sided banners with pole pockets are finished at the ordered size with bleed.";
+export const MIN_SIZE_MSG = 'The minimum size is 12" × 12".';
+export function MAX_SHORT_SIDE_MSG(title: string, inches: number): string {
+  return `The shorter side of a ${title} can be at most ${inches}".`;
+}
+export const UPLOAD_REJECT = "Only these file types are allowed: jpg, jpeg, pdf, tiff, tif, eps, png.";
+export const HUB_TITLE = "Order banners";
+export const HUB_SUBTITLE = "Pick a product to start building. Every banner ships on our 48-hour schedule.";
 
 /**
  * Standard quick-pick sizes (13 oz, single-sided, qty 1, no add-ons, +$10 shipping).

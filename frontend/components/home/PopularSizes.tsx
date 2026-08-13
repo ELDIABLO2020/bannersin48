@@ -110,7 +110,7 @@ export function PopularSizes() {
             return (
               <Link
                 key={s.id}
-                href={isCustom ? "/order/vinyl" : `/order/vinyl?w=${s.widthFt}&h=${s.heightFt}`}
+                href={isCustom ? "/order/hd-banner" : `/order/hd-banner?w=${s.widthFt}&h=${s.heightFt}`}
                 className="ps-card group block no-underline"
               >
                 <article

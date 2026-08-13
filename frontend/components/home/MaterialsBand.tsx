@@ -51,7 +51,7 @@ export function MaterialsBand() {
             Durable vinyl options for different environments, visibility needs, and handling.
           </p>
           <Link
-            href="/order/vinyl"
+            href="/order/hd-banner"
             className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
           >
             Compare materials

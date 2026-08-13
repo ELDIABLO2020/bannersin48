@@ -4,16 +4,20 @@ import {
   materialForPrintSides,
   canSelectDoubleSided,
   isDoubleSided,
+  visibleTiles,
 } from "./builderRules";
+import { popularSizesForProduct } from "./SizePanel";
 import { DEFAULT_FINISHING } from "@bannersin48/shared";
 
 const size4x8 = { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 };
 const size2x4 = { widthFt: 2, widthIn: 0, heightFt: 4, heightIn: 0 };
+const hd = { productId: "HD_BANNER" as const };
 
 describe("builderRules", () => {
   it("disables DOUBLE on 13/15 oz", () => {
     expect(
       getControlEligibility("sides", {
+        ...hd,
         material: "VINYL_13OZ_SINGLE",
         size: size4x8,
         finishing: DEFAULT_FINISHING,
@@ -32,6 +36,7 @@ describe("builderRules", () => {
   it("gates wind slits by size band", () => {
     expect(
       getControlEligibility("wind", {
+        ...hd,
         material: "VINYL_13OZ_SINGLE",
         size: size4x8,
         finishing: DEFAULT_FINISHING,
@@ -39,6 +44,7 @@ describe("builderRules", () => {
     ).toBe(true);
     expect(
       getControlEligibility("wind", {
+        ...hd,
         material: "VINYL_13OZ_SINGLE",
         size: size2x4,
         finishing: DEFAULT_FINISHING,
@@ -55,6 +61,7 @@ describe("builderRules", () => {
     };
     expect(
       getControlEligibility("grommets", {
+        ...hd,
         material: "VINYL_13OZ_SINGLE",
         size: size4x8,
         finishing: withRope,
@@ -62,6 +69,7 @@ describe("builderRules", () => {
     ).toBe(true);
     expect(
       getControlEligibility("rope", {
+        ...hd,
         material: "VINYL_13OZ_SINGLE",
         size: size4x8,
         finishing: DEFAULT_FINISHING,
@@ -72,6 +80,7 @@ describe("builderRules", () => {
   it("still disables grommets when pole pockets are on", () => {
     expect(
       getControlEligibility("grommets", {
+        ...hd,
         material: "VINYL_13OZ_SINGLE",
         size: size4x8,
         finishing: {
@@ -89,6 +98,7 @@ describe("builderRules", () => {
   it("disables welding when pole pockets on", () => {
     expect(
       getControlEligibility("welding", {
+        ...hd,
         material: "VINYL_13OZ_SINGLE",
         size: size4x8,
         finishing: {
@@ -101,5 +111,41 @@ describe("builderRules", () => {
         },
       }).enabled,
     ).toBe(false);
+  });
+
+  it("visibleTiles for poster is images + size", () => {
+    expect(visibleTiles("POSTER")).toEqual(["images", "size"]);
+  });
+
+  it("visibleTiles for mesh includes webbing and excludes wind/material/sides", () => {
+    const tiles = visibleTiles("MESH");
+    expect(tiles).toContain("webbing");
+    expect(tiles).not.toContain("wind");
+    expect(tiles).not.toContain("material");
+    expect(tiles).not.toContain("sides");
+  });
+
+  it("visibleTiles for econostand is images only", () => {
+    expect(visibleTiles("ECONOSTAND")).toEqual(["images"]);
+  });
+
+  it("enables webbing on mesh", () => {
+    expect(
+      getControlEligibility("webbing", {
+        productId: "MESH",
+        material: "MESH_8OZ",
+        size: size4x8,
+        finishing: DEFAULT_FINISHING,
+      }).enabled,
+    ).toBe(true);
+  });
+
+  it("filters popular sizes by product caps", () => {
+    const noCurl = popularSizesForProduct("NO_CURL").map((s) => s.id);
+    expect(noCurl).toEqual(["2x4", "2x6", "2x8"]);
+    expect(popularSizesForProduct("POSTER").some((s) => s.id === "4x8")).toBe(true);
+    expect(popularSizesForProduct("POSTER").some((s) => s.id === "5x8")).toBe(false);
+    expect(popularSizesForProduct("CANVAS").some((s) => s.id === "10x10")).toBe(false);
+    expect(popularSizesForProduct("HDPE").some((s) => s.id === "4x6")).toBe(true);
   });
 });

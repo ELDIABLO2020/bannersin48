@@ -50,7 +50,7 @@ export default function HowItWorksPage() {
           ))}
         </ol>
         <div className="text-center mt-2xl">
-          <Link href="/order/vinyl">
+          <Link href="/order">
             <Button variant="cta" size="lg">
               Start an order <ChevronRight className="ml-sm h-5 w-5" aria-hidden />
             </Button>

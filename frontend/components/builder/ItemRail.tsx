@@ -4,6 +4,7 @@ import { useConfigurator } from "@/lib/stores/configurator";
 import { materialLabel } from "./builderRules";
 import { Plus, Trash2, Palette, Check } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { PRODUCTS } from "@bannersin48/shared";
 
 export function ItemRail() {
   const signs = useConfigurator((s) => s.signs);
@@ -53,7 +54,9 @@ export function ItemRail() {
                 }
               />
               <p className="mt-xs text-[11px] text-ink truncate">
-                {sign.size.widthFt}&prime;×{sign.size.heightFt}&prime;
+                {PRODUCTS[sign.productId]?.sizeMode === "fixed"
+                  ? "33.5″×80″"
+                  : `${sign.size.widthFt}′×${sign.size.heightFt}′`}
               </p>
               <p className="text-[10px] text-ink-muted truncate">{materialLabel(sign.material)}</p>
               <p className="text-[10px] text-ink-muted">Qty {sign.quantity}</p>

@@ -5,6 +5,7 @@ import { formatUsd } from "@/lib/utils/format";
 import { materialLabel } from "./builderRules";
 import { RateMatrix } from "./RateMatrix";
 import { useBuilderQuote } from "./useBuilderQuote";
+import { PRODUCTS, SHIPPING_FLAT_PER_UNIT_USD } from "@bannersin48/shared";
 
 function formatSizeLabel(size: {
   widthFt: number;
@@ -18,7 +19,6 @@ function formatSizeLabel(size: {
 }
 
 function specsSubtitle(materialLabelText: string, sizeLabel: string): string {
-  // "13 oz single-sided" → "Vinyl 13 oz Single Sided"
   const sides = materialLabelText
     .replace(/single-sided/i, "Single Sided")
     .replace(/double-sided/i, "Double Sided");
@@ -26,12 +26,20 @@ function specsSubtitle(materialLabelText: string, sizeLabel: string): string {
 }
 
 export function StageHeader() {
+  const productId = useConfigurator((s) => s.productId);
   const material = useConfigurator((s) => s.material);
   const size = useConfigurator((s) => s.size);
+  const quantity = useConfigurator((s) => s.quantity);
   const { displayTotal, billableSqFt, isFetching } = useBuilderQuote();
+  const config = PRODUCTS[productId];
 
   const sizeLabel = formatSizeLabel(size);
-  const subtitle = specsSubtitle(materialLabel(material), sizeLabel);
+  const subtitle =
+    productId === "HD_BANNER"
+      ? specsSubtitle(materialLabel(material), sizeLabel)
+      : config.sizeMode === "fixed"
+        ? `${config.title}, 33.5" × 80"`
+        : `${materialLabel(material)}, ${sizeLabel}`;
 
   return (
     <header
@@ -41,7 +49,7 @@ export function StageHeader() {
       <div className="grid grid-cols-1 gap-sm min-[901px]:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)_minmax(0,0.9fr)] min-[901px]:items-start min-[901px]:gap-md">
         <div className="min-w-0">
           <h1 className="font-display text-lg font-bold uppercase tracking-tight text-ink leading-tight sm:text-xl">
-            HD Banner (Vinyl)
+            {productId === "HD_BANNER" ? "HD Banner (Vinyl)" : config.title}
           </h1>
           <p data-testid="stage-header-specs" className="mt-0.5 text-xs text-ink-muted truncate">
             {subtitle}
@@ -49,7 +57,13 @@ export function StageHeader() {
         </div>
 
         <div className="hidden min-[901px]:flex min-[901px]:justify-center">
-          <RateMatrix material={material} showShippingNote title="Pricing and shipping" />
+          {productId === "HD_BANNER" ? (
+            <RateMatrix material={material} showShippingNote title="Pricing and shipping" />
+          ) : config.sizeMode === "custom" ? (
+            <p data-testid="rate-single" className="text-[11px] text-ink-muted">
+              ${config.ratePerSqFt(material).toFixed(2)} / sq ft · Shipping ${SHIPPING_FLAT_PER_UNIT_USD.toFixed(0)} / banner
+            </p>
+          ) : null}
         </div>
 
         <div className="min-[901px]:text-right">
@@ -65,7 +79,9 @@ export function StageHeader() {
             )}
           </p>
           <p className="mt-1 text-xs text-ink-muted">
-            {billableSqFt} sq ft / 48-hour production
+            {config.sizeMode === "fixed"
+              ? `${quantity} item${quantity === 1 ? "" : "s"} / 48-hour production`
+              : `${billableSqFt} sq ft / 48-hour production`}
           </p>
         </div>
       </div>

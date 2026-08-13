@@ -2,22 +2,42 @@
 
 import { useMemo, useState } from "react";
 import { useConfigurator } from "@/lib/stores/configurator";
-import { POPULAR_SIZES } from "@bannersin48/shared";
+import {
+  POPULAR_SIZES,
+  PRODUCTS,
+  validateProductSize,
+  type PopularSize,
+  type ProductId,
+} from "@bannersin48/shared";
 import { cn } from "@/lib/utils/cn";
 
+export function popularSizesForProduct(productId: ProductId, query = ""): PopularSize[] {
+  const config = PRODUCTS[productId];
+  const legal = POPULAR_SIZES.filter((s) =>
+    validateProductSize(config, {
+      widthFt: s.widthFt,
+      widthIn: 0,
+      heightFt: s.heightFt,
+      heightIn: 0,
+    }).ok,
+  );
+  const q = query.trim().toLowerCase();
+  if (!q) return legal;
+  return legal.filter((s) => s.label.toLowerCase().includes(q) || s.id.includes(q));
+}
+
 export function SizePanel() {
+  const productId = useConfigurator((s) => s.productId);
   const size = useConfigurator((s) => s.size);
   const setSize = useConfigurator((s) => s.setSize);
   const applySize = useConfigurator((s) => s.applySize);
   const aspectLocked = useConfigurator((s) => s.aspectLocked);
   const setAspectLocked = useConfigurator((s) => s.setAspectLocked);
   const [query, setQuery] = useState("");
+  const config = PRODUCTS[productId];
+  const sizeError = validateProductSize(config, size);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return POPULAR_SIZES;
-    return POPULAR_SIZES.filter((s) => s.label.toLowerCase().includes(q) || s.id.includes(q));
-  }, [query]);
+  const filtered = useMemo(() => popularSizesForProduct(productId, query), [productId, query]);
 
   function updateAxis(axis: "width" | "height", ft: number, inches: number) {
     if (!aspectLocked) {
@@ -85,6 +105,12 @@ export function SizePanel() {
           testId="size-height"
         />
       </div>
+
+      {!sizeError.ok && (
+        <p role="alert" data-testid="size-error" className="text-sm text-danger">
+          {sizeError.message}
+        </p>
+      )}
 
       <div>
         <input

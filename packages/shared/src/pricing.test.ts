@@ -177,3 +177,186 @@ describe("priceOrder — multi-line aggregation", () => {
     expect(r.total).toBe(206);
   });
 });
+
+describe("priceLine — BANNER catalog products", () => {
+  const size3x6 = { widthFt: 3, widthIn: 0, heightFt: 6, heightIn: 0 };
+  const size2x6 = { widthFt: 2, widthIn: 0, heightFt: 6, heightIn: 0 };
+  const size2x2 = { widthFt: 2, widthIn: 0, heightFt: 2, heightIn: 0 };
+  const size4x8 = { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 };
+
+  it("HD Banner 4×8 13oz remains $138", () => {
+    const result = priceLine({
+      productId: "HD_BANNER",
+      material: "VINYL_13OZ_SINGLE",
+      dimensions: size4x8,
+      finishing: fin(),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(128);
+    expect(result.totalBeforeTax).toBe(138);
+  });
+
+  it("HDPE 3×6 → $91", () => {
+    const result = priceLine({
+      productId: "HDPE",
+      material: "HDPE",
+      dimensions: size3x6,
+      finishing: fin({ welding: false, grommets: false }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(81);
+    expect(result.totalBeforeTax).toBe(91);
+  });
+
+  it("Canvas 3×6 → $280", () => {
+    const result = priceLine({
+      productId: "CANVAS",
+      material: "CANVAS_11OZ",
+      dimensions: size3x6,
+      finishing: fin({ welding: false, grommets: false }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(270);
+    expect(result.totalBeforeTax).toBe(280);
+  });
+
+  it("Mesh 3×6 defaults → $140.50", () => {
+    const result = priceLine({
+      productId: "MESH",
+      material: "MESH_8OZ",
+      dimensions: size3x6,
+      finishing: fin({ webbing: false }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(130.5);
+    expect(result.totalBeforeTax).toBe(140.5);
+  });
+
+  it("Mesh 3×6 + webbing → $152.50", () => {
+    const result = priceLine({
+      productId: "MESH",
+      material: "MESH_8OZ",
+      dimensions: size3x6,
+      finishing: fin({ webbing: true }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(142.5);
+    expect(result.totalBeforeTax).toBe(152.5);
+  });
+
+  it("Mesh webbing delta is $12 at 3×6 and $8 at 2×2", () => {
+    const off3 = priceLine({
+      productId: "MESH",
+      material: "MESH_8OZ",
+      dimensions: size3x6,
+      finishing: fin({ webbing: false }),
+      quantity: 1,
+    });
+    const on3 = priceLine({
+      productId: "MESH",
+      material: "MESH_8OZ",
+      dimensions: size3x6,
+      finishing: fin({ webbing: true }),
+      quantity: 1,
+    });
+    expect(on3.unitProduct - off3.unitProduct).toBe(12);
+
+    const off2 = priceLine({
+      productId: "MESH",
+      material: "MESH_8OZ",
+      dimensions: size2x2,
+      finishing: fin({ webbing: false }),
+      quantity: 1,
+    });
+    const on2 = priceLine({
+      productId: "MESH",
+      material: "MESH_8OZ",
+      dimensions: size2x2,
+      finishing: fin({ webbing: true }),
+      quantity: 1,
+    });
+    expect(on2.unitProduct - off2.unitProduct).toBe(8);
+  });
+
+  it("Poster 3×6 → $118", () => {
+    const result = priceLine({
+      productId: "POSTER",
+      material: "POSTER_8MIL",
+      dimensions: size3x6,
+      finishing: fin({ welding: false, grommets: false }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(108);
+    expect(result.totalBeforeTax).toBe(118);
+  });
+
+  it("No Curl 2×6 → $118", () => {
+    const result = priceLine({
+      productId: "NO_CURL",
+      material: "NO_CURL_8MIL",
+      dimensions: size2x6,
+      finishing: fin({ welding: false, grommets: false }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(108);
+    expect(result.totalBeforeTax).toBe(118);
+  });
+
+  it("ignores vinyl adders on HDPE", () => {
+    const result = priceLine({
+      productId: "HDPE",
+      material: "HDPE",
+      dimensions: size3x6,
+      finishing: fin({
+        welding: false,
+        grommets: false,
+        rope: true,
+        ropePlacement: "TOP",
+        windSlits: true,
+        polePockets: true,
+        polePocketPlacement: "TOP",
+        polePocketDepthIn: 2,
+      }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(81);
+    expect(result.addons).toBe(0);
+  });
+
+  it("legacy body without productId still prices 15oz 3×6 as 18 × $4.75", () => {
+    const result = priceLine({
+      material: "VINYL_15OZ_SINGLE",
+      dimensions: size3x6,
+      finishing: fin(),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(85.5);
+    expect(result.totalBeforeTax).toBe(95.5);
+  });
+
+  it("Econostand qty 2 → productSubtotal 270, shipping 20", () => {
+    const result = priceLine({
+      productId: "ECONOSTAND",
+      material: "ECONOSTAND",
+      dimensions: { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 },
+      finishing: fin({ welding: false, grommets: false }),
+      quantity: 2,
+    });
+    expect(result.unitProduct).toBe(135);
+    expect(result.productSubtotal).toBe(270);
+    expect(result.shipping).toBe(20);
+    expect(result.totalBeforeTax).toBe(290);
+  });
+
+  it("Retractable remains $175 flat", () => {
+    const result = priceLine({
+      material: "RETRACTABLE",
+      dimensions: { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 },
+      finishing: fin({ welding: false, grommets: false }),
+      quantity: 1,
+    });
+    expect(result.unitProduct).toBe(175);
+    expect(result.totalBeforeTax).toBe(185);
+    expect(result.notes[0]).toMatch(/retractable, hardware \+ carrying case included/);
+  });
+});

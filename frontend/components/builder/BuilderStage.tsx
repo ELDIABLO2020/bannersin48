@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useConfigurator } from "@/lib/stores/configurator";
-import { dimensionsToInches, generateGrommetPoints } from "@bannersin48/shared";
+import { dimensionsToInches, generateGrommetPoints, PRODUCTS } from "@bannersin48/shared";
 import { ImageIcon } from "lucide-react";
 import { StageHeader } from "./StageHeader";
 
@@ -13,6 +13,7 @@ const MINOR_TICK_IN = 6; // 6″
 
 export function BuilderStage() {
   const size = useConfigurator((s) => s.size);
+  const productId = useConfigurator((s) => s.productId);
   const finishing = useConfigurator((s) => s.finishing);
   const artworkPreviewUrl = useConfigurator((s) => s.artworkPreviewUrl);
   const fitMode = useConfigurator((s) => s.fitMode);
@@ -36,7 +37,11 @@ export function BuilderStage() {
     return () => ro.disconnect();
   }, []);
 
-  const { widthIn, heightIn } = dimensionsToInches(size);
+  const config = PRODUCTS[productId];
+  const { widthIn, heightIn } =
+    config.sizeMode === "fixed" && config.fixedSizeIn
+      ? { widthIn: config.fixedSizeIn.widthIn, heightIn: config.fixedSizeIn.heightIn }
+      : dimensionsToInches(size);
   const hasValidDimensions = widthIn > 0 && heightIn > 0;
 
   const layout = useMemo(() => {
@@ -209,8 +214,14 @@ export function BuilderStage() {
 
               {/* Dimension labels */}
               <div className="absolute left-2 top-2 rounded-sm bg-ink/75 px-2 py-0.5 text-[11px] font-bold text-white tabular-nums">
-                {size.widthFt}&prime;{size.widthIn > 0 ? `${size.widthIn}&Prime;` : ""} × {size.heightFt}
-                &prime;{size.heightIn > 0 ? `${size.heightIn}&Prime;` : ""}
+                {PRODUCTS[productId].sizeMode === "fixed" ? (
+                  <span data-testid="fixed-size-label">33.5″ × 80″ · Front side</span>
+                ) : (
+                  <>
+                    {size.widthFt}&prime;{size.widthIn > 0 ? `${size.widthIn}&Prime;` : ""} × {size.heightFt}
+                    &prime;{size.heightIn > 0 ? `${size.heightIn}&Prime;` : ""}
+                  </>
+                )}
               </div>
 
               {/* Grommet dots */}

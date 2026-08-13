@@ -44,7 +44,7 @@ export default function DesignPage() {
         </ul>
 
         <Link
-          href="/order/vinyl"
+          href="/order/hd-banner"
           className="inline-block mt-2xl bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover"
         >
           Skip ahead &mdash; order a banner now <ChevronRight className="inline h-4 w-4" aria-hidden />

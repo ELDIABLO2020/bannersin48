@@ -224,7 +224,7 @@ export function MobileMenuDrawer({
         </div>
 
         <div className="border-t border-line bg-surface px-lg pb-[calc(16px+env(safe-area-inset-bottom))] pt-md">
-          <Link href="/order/vinyl" onClick={onClose}>
+          <Link href="/order" onClick={onClose}>
             <Button variant="cta" size="block" className="w-full">
               Order now
               <ArrowRight className="ml-sm h-5 w-5" aria-hidden />

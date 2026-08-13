@@ -12,7 +12,7 @@ export const SITE_NAVIGATION_GROUPS: ReadonlyArray<SiteNavigationGroup> = [
   {
     title: "Products",
     items: [
-      { href: "/order/vinyl", label: "Vinyl Banners" },
+      { href: "/order/hd-banner", label: "HD Banners" },
       { href: "/order/retractable", label: "Retractable Banners" },
       { href: "/sizes", label: "All Sizes & Pricing" },
       { href: "/order/artwork", label: "Upload Artwork" },

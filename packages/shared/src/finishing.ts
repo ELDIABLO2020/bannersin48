@@ -70,6 +70,7 @@ export const finishingSchema = z
     grommetPreset: grommetPresetSchema.optional(),
     grommetSpacing: grommetSpacingSchema.optional(),
     grommetPoints: z.array(grommetPointSchema).optional(),
+    webbing: z.boolean().optional().default(false),
   })
   .strict()
   .superRefine((val, ctx) => {
@@ -143,6 +144,7 @@ export const DEFAULT_FINISHING: Finishing = {
   grommetPreset: "TOP_AND_BOTTOM",
   grommetSpacing: "EVERY_2_3FT",
   grommetPoints: undefined,
+  webbing: false,
 };
 
 export interface PolePocketPlacementOption {

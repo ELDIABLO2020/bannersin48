@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
 import { useConfigurator } from "@/lib/stores/configurator";
-import { ARTWORK_MIME_TYPES, ARTWORK_DEFAULT_DPI, formatBytes } from "@bannersin48/shared";
+import { ARTWORK_MIME_TYPES, ARTWORK_DEFAULT_DPI, UPLOAD_REJECT, formatBytes } from "@bannersin48/shared";
 import { Button } from "@/components/ui/button";
 import { X, Upload, Folder } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -66,7 +66,7 @@ export function ImagePickerOverlay() {
   function validateAndUpload(file: File) {
     setError(null);
     if (!(ARTWORK_MIME_TYPES as readonly string[]).includes(file.type)) {
-      setError(`Unsupported file type. We accept PDF, JPG, JPEG, and PNG.`);
+      setError(UPLOAD_REJECT);
       return;
     }
     if (file.size > MAX_BYTES) {
@@ -135,7 +135,7 @@ export function ImagePickerOverlay() {
               <input
                 ref={fileInput}
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                accept=".pdf,.jpg,.jpeg,.png,.tif,.tiff,.eps,application/pdf,image/jpeg,image/png,image/tiff,application/postscript"
                 className="sr-only"
                 data-testid="image-picker-file"
                 onChange={(e) => {
@@ -144,11 +144,11 @@ export function ImagePickerOverlay() {
                   e.target.value = "";
                 }}
               />
-              <span className="text-xs text-ink-muted">PDF, JPG, PNG · max 50 MB</span>
+              <span className="text-xs text-ink-muted">PDF, JPG, PNG, TIFF, EPS · max 50 MB</span>
             </div>
 
             {error && (
-              <p role="alert" className="mb-sm text-sm text-danger">
+              <p role="alert" data-testid="upload-reject" className="mb-sm text-sm text-danger">
                 {error}
               </p>
             )}

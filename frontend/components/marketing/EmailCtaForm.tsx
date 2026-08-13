@@ -31,7 +31,7 @@ export function EmailCtaForm({
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed) {
-      router.push("/order/vinyl");
+      router.push("/order");
       return;
     }
     const params = new URLSearchParams({ email: trimmed });

@@ -77,7 +77,7 @@ export function HowItWorks() {
               })}
             </ul>
 
-            <Link href="/order/vinyl" className="mt-xl inline-block">
+            <Link href="/order" className="mt-xl inline-block">
               <Button variant="cta" size="lg">
                 Start your order
                 <ArrowRight className="ml-sm h-5 w-5" aria-hidden />

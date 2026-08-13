@@ -15,6 +15,8 @@ import type {
   ApproveProofInput,
   OrderListItem,
   ApiError,
+  BannerCatalogCard,
+  BannerCatalogInfo,
 } from "./types";
 import type { DeliveryResponse, PopularSize, RegisterInput, LoginInput, User, Address, AddressValidationResult } from "@bannersin48/shared";
 import { POPULAR_SIZES } from "@bannersin48/shared";
@@ -99,12 +101,22 @@ export class ApiClient {
 
   // --- Pricing engine ---
   quote(input: {
+    productId?: string;
     material: string;
     dimensions: { widthFt: number; widthIn: number; heightFt: number; heightIn: number };
     finishing: import("@bannersin48/shared").Finishing;
     quantity: number;
   }): Promise<QuoteResponse> {
     return this.request<QuoteResponse>("POST", "/pricing/quote", input);
+  }
+
+  // --- Catalog ---
+  getBannerCatalog(): Promise<BannerCatalogCard[]> {
+    return this.request<BannerCatalogCard[]>("GET", "/catalog/banner");
+  }
+
+  getBannerCatalogInfo(slug: string): Promise<BannerCatalogInfo> {
+    return this.request<BannerCatalogInfo>("GET", `/catalog/banner/${encodeURIComponent(slug)}`);
   }
 
   // --- Catalog ---

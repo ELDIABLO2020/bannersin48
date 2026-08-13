@@ -38,7 +38,7 @@ export default function TemplatesPage() {
         </ul>
 
         <Link
-          href="/order/vinyl"
+          href="/order/hd-banner"
           className="inline-block mt-2xl bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover"
         >
           Upload your own artwork <ChevronRight className="inline h-4 w-4" aria-hidden />

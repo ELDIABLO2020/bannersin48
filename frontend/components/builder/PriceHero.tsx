@@ -13,14 +13,18 @@ import { Clock, ShoppingCart } from "lucide-react";
 import { materialLabel } from "./builderRules";
 import { RateMatrix } from "./RateMatrix";
 import { useBuilderQuote } from "./useBuilderQuote";
+import { PRODUCTS, SHIPPING_FLAT_PER_UNIT_USD } from "@bannersin48/shared";
 
 export function PriceHero() {
   const signs = useConfigurator((s) => s.signs);
+  const productId = useConfigurator((s) => s.productId);
   const material = useConfigurator((s) => s.material);
+  const quantity = useConfigurator((s) => s.quantity);
   const addLine = useCart((s) => s.addLine);
   const openDrawer = useCartDrawer((s) => s.open);
+  const config = PRODUCTS[productId];
 
-  const { displayTotal, eligible, billableSqFt, isFetching } = useBuilderQuote();
+  const { displayTotal, eligible, billableSqFt, isFetching, ineligibilityReason } = useBuilderQuote();
 
   const { data: cutoff } = useQuery({
     queryKey: ["next-cutoff"],
@@ -44,6 +48,7 @@ export function PriceHero() {
     try {
       for (const sign of signs) {
         const quote = await getApiClient().quote({
+          productId: sign.productId,
           material: sign.material,
           dimensions: sign.size,
           finishing: sign.finishing,
@@ -51,9 +56,11 @@ export function PriceHero() {
         });
         const line = quote.lines[0];
         if (!line || !quote.eligible) continue;
+        const signConfig = PRODUCTS[sign.productId];
         addLine({
           id: `cart_${Date.now()}_${sign.id}`,
-          product: "vinyl",
+          product: signConfig.slug,
+          productId: sign.productId,
           material: sign.material,
           dimensions: sign.size,
           finishing: sign.finishing,
@@ -67,8 +74,11 @@ export function PriceHero() {
           billableSqFt: line.billableSqFt,
           billableDims: line.billableDims,
           display: {
-            requestedLabel: `${sign.size.widthFt}' ${sign.size.widthIn}" × ${sign.size.heightFt}' ${sign.size.heightIn}"`,
-            billableLabel: `${line.billableDims.widthFt}' × ${line.billableDims.heightFt}'`,
+            requestedLabel:
+              signConfig.sizeMode === "fixed"
+                ? '33.5" × 80"'
+                : `${sign.size.widthFt}' ${sign.size.widthIn}" × ${sign.size.heightFt}' ${sign.size.heightIn}"`,
+            billableLabel: signConfig.sizeMode === "fixed" ? "Fixed size" : `${line.billableDims.widthFt}' × ${line.billableDims.heightFt}'`,
           },
         });
       }
@@ -89,7 +99,9 @@ export function PriceHero() {
         {isFetching && <span className="ml-2 text-body-sm text-ink-muted font-body font-normal">updating…</span>}
       </p>
       <p className="text-body-sm text-ink-muted mt-xs">
-        {billableSqFt} sq ft · {materialLabel(material)}
+        {config.sizeMode === "fixed"
+          ? `${quantity} item${quantity === 1 ? "" : "s"} · ${config.title}`
+          : `${billableSqFt} sq ft · ${materialLabel(material)}`}
       </p>
 
       {cutoff && (
@@ -103,13 +115,18 @@ export function PriceHero() {
         </div>
       )}
 
-      {/* Rate matrix — desktop only (≥901px) */}
-      <RateMatrix
-        material={material}
-        showShippingNote
-        className="mt-md hidden min-[901px]:block"
-        title="Rates / sq ft"
-      />
+      {productId === "HD_BANNER" ? (
+        <RateMatrix
+          material={material}
+          showShippingNote
+          className="mt-md hidden min-[901px]:block"
+          title="Rates / sq ft"
+        />
+      ) : config.sizeMode === "custom" ? (
+        <p data-testid="rate-single" className="mt-md hidden min-[901px]:block text-[11px] text-ink-muted">
+          ${config.ratePerSqFt(material).toFixed(2)} / sq ft · Shipping ${SHIPPING_FLAT_PER_UNIT_USD.toFixed(0)} / banner
+        </p>
+      ) : null}
 
       <Button
         type="button"
@@ -124,7 +141,9 @@ export function PriceHero() {
         {signs.length > 1 ? `Add ${signs.length} signs to cart` : "Add to cart"}
       </Button>
       {!eligible && (
-        <p className="mt-sm text-sm text-danger text-center">This size exceeds the 10′ maximum.</p>
+        <p className="mt-sm text-sm text-danger text-center">
+          {ineligibilityReason ?? "This size exceeds the 10′ maximum."}
+        </p>
       )}
     </div>
   );

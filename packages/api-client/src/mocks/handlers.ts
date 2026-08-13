@@ -8,7 +8,17 @@
 
 import { http, HttpResponse } from "msw";
 import { computeNextCutoff, store } from "./fixtures";
-import { priceOrder, type Order, ORDER_STATUS_LABELS } from "@bannersin48/shared";
+import {
+  priceOrder,
+  type Order,
+  ORDER_STATUS_LABELS,
+  PRODUCTS,
+  BANNER_HUB_ORDER,
+  productBySlug,
+  productIdForMaterial,
+  type ProductId,
+  type Material,
+} from "@bannersin48/shared";
 
 const uuid = (): string => {
   if (typeof globalThis.crypto?.randomUUID === "function") {
@@ -29,20 +39,19 @@ export const handlers = [
   // --- Pricing engine ---
   http.post(`${API}/pricing/quote`, async ({ request }) => {
     const body = (await request.json()) as {
-      material: any;
+      productId?: ProductId;
+      material: Material;
       dimensions: any;
       finishing: any;
       quantity: number;
     };
+    const productId = body.productId ?? productIdForMaterial(body.material);
+    const config = PRODUCTS[productId];
     const finishing = {
-      welding: true,
-      grommets: true,
-      windSlits: false,
-      polePockets: false,
-      rope: false,
+      ...config.defaultFinishing,
       ...body.finishing,
     };
-    const result = priceOrder([{ ...body, finishing }]);
+    const result = priceOrder([{ ...body, productId, finishing }]);
     const cutoff = computeNextCutoff();
     return HttpResponse.json({
       lines: result.lines,
@@ -60,6 +69,36 @@ export const handlers = [
   // --- Catalog ---
   http.get(`${API}/sizes/popular`, () => {
     return HttpResponse.json(store["popularSizes" as keyof typeof store] ?? []);
+  }),
+
+  http.get(`${API}/catalog/banner`, () =>
+    HttpResponse.json(
+      BANNER_HUB_ORDER.map((id) => {
+        const p = PRODUCTS[id];
+        return {
+          id: p.id,
+          slug: p.slug,
+          title: p.title,
+          subtitle: p.subtitle,
+          hasMoreInfo: p.hasMoreInfo,
+          route: `/order/${p.slug}`,
+        };
+      }),
+    ),
+  ),
+
+  http.get(`${API}/catalog/banner/:slug`, ({ params }) => {
+    const p = productBySlug(params["slug"] as string);
+    if (!p || !p.hasMoreInfo) {
+      return HttpResponse.json({ code: "NOT_FOUND", message: "Product not found." }, { status: 404 });
+    }
+    return HttpResponse.json({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      subtitle: p.subtitle,
+      ...p.hubCopy,
+    });
   }),
 
   // --- Auth ---
@@ -136,10 +175,17 @@ export const handlers = [
     if (!(file instanceof File)) {
       return HttpResponse.json({ code: "NO_FILE", message: "No file provided." }, { status: 400 });
     }
-    const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+    const allowed = [
+      "application/pdf",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/tiff",
+      "application/postscript",
+    ];
     if (!allowed.includes(file.type)) {
       return HttpResponse.json(
-        { code: "UNSUPPORTED_FILE_TYPE", message: "Only PDF, JPG, JPEG, and PNG files are accepted." },
+        { code: "UNSUPPORTED_FILE_TYPE", message: "Only PDF, JPG, JPEG, PNG, TIFF, and EPS files are accepted." },
         { status: 400 },
       );
     }
@@ -151,7 +197,9 @@ export const handlers = [
     const dpi = dpiRaw ? Number(dpiRaw) : 150;
     const id = `art_${store.artworkIdCounter++}`;
     const previewUrl =
-      file.type === "application/pdf"
+      file.type === "application/pdf" ||
+      file.type === "image/tiff" ||
+      file.type === "application/postscript"
         ? "/placeholder-pdf.png"
         : typeof URL !== "undefined" && typeof URL.createObjectURL === "function"
           ? URL.createObjectURL(file)
@@ -231,6 +279,7 @@ export const handlers = [
       email: body.email,
       lines: priced.lines.map((l, i) => ({
         id: `line_${i}_${uuid()}`,
+        productId: body.lines[i].productId,
         material: body.lines[i].material,
         dimensions: body.lines[i].dimensions,
         finishing: body.lines[i].finishing,

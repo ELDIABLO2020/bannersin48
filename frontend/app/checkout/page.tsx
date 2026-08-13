@@ -62,6 +62,7 @@ export default function CheckoutPage() {
       const order = await getApiClient().createOrder({
         email: auth.user?.email ?? a.email ?? "guest@bannersin48.com",
         lines: lines.map((l) => ({
+          productId: l.productId,
           material: l.material,
           dimensions: l.dimensions,
           finishing: l.finishing,
@@ -87,7 +88,7 @@ export default function CheckoutPage() {
       <div className="bg-surface-tint min-h-[60vh] flex items-center justify-center p-md">
         <div className="bg-surface rounded-card p-3xl text-center max-w-md">
           <p className="font-display text-section-h2 text-ink">Your cart is empty</p>
-          <Link href="/order/vinyl" className="inline-block mt-md bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover">
+          <Link href="/order" className="inline-block mt-md bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover">
             Start an order
           </Link>
         </div>

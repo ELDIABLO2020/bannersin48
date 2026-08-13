@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { useConfigurator, type DockPanel } from "@/lib/stores/configurator";
-import { getControlEligibility, type BuilderControl } from "./builderRules";
+import { getControlEligibility, visibleTiles, type BuilderControl } from "./builderRules";
 import { SizePanel } from "./SizePanel";
 import { GrommetEditor } from "./GrommetEditor";
 import {
   POLE_POCKET_PLACEMENT_OPTIONS,
   POLE_POCKET_DEPTH_OPTIONS,
   ROPE_PLACEMENT_OPTIONS,
-  MATERIAL_RATES,
+  PRODUCTS,
+  WEBBING_HELP,
+  POCKET_DIAMETER_HELP,
 } from "@bannersin48/shared";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -21,6 +23,7 @@ import {
   CircleDot,
   Anchor,
   Wind,
+  Link2,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
@@ -37,6 +40,7 @@ const TILES: Array<{
   { id: "material", control: "material", label: "Material", icon: Layers },
   { id: "sides", control: "sides", label: "Print sides", icon: FlipHorizontal2 },
   { id: "welding", control: "welding", label: "Welding", icon: Flame },
+  { id: "webbing", control: "webbing", label: "Webbing", icon: Link2 },
   { id: "rope", control: "rope", label: "Rope", icon: Anchor },
   { id: "grommets", control: "grommets", label: "Grommets", icon: CircleDot },
   { id: "pockets", control: "pockets", label: "Pole pockets", icon: Layers },
@@ -44,6 +48,7 @@ const TILES: Array<{
 ];
 
 export function ControlDock() {
+  const productId = useConfigurator((s) => s.productId);
   const material = useConfigurator((s) => s.material);
   const size = useConfigurator((s) => s.size);
   const finishing = useConfigurator((s) => s.finishing);
@@ -59,6 +64,8 @@ export function ControlDock() {
   const setMobileDockOpen = useConfigurator((s) => s.setMobileDockOpen);
   const lastMessage = useConfigurator((s) => s.lastFinishingMessage);
   const [eligibilityHint, setEligibilityHint] = useState<string | null>(null);
+  const config = PRODUCTS[productId];
+  const shown = visibleTiles(productId);
 
   function openPanel(id: Exclude<DockPanel, null>) {
     if (id === "images") {
@@ -88,14 +95,18 @@ export function ControlDock() {
 
       <div className={cn("min-[901px]:block", mobileDockOpen ? "block" : "hidden")}>
         {lastMessage && (
-          <p role="status" className="px-md py-sm text-sm bg-warning-bg text-ink border-b border-line">
+          <p
+            role="status"
+            data-testid="finishing-message"
+            className="px-md py-sm text-sm bg-warning-bg text-ink border-b border-line"
+          >
             {lastMessage}
           </p>
         )}
 
         <div className="flex gap-1 overflow-x-auto p-sm border-b border-line">
-          {TILES.map((tile) => {
-            const eligibility = getControlEligibility(tile.control, { material, size, finishing });
+          {TILES.filter((tile) => shown.includes(tile.control)).map((tile) => {
+            const eligibility = getControlEligibility(tile.control, { productId, material, size, finishing });
             const Icon = tile.icon;
             const active = activeDockPanel === tile.id;
             const hardDisabled = !eligibility.enabled;
@@ -105,10 +116,10 @@ export function ControlDock() {
                 type="button"
                 data-testid={`dock-${tile.id}`}
                 title={eligibility.reason}
-                aria-disabled={hardDisabled || undefined}
                 onClick={() => {
                   if (hardDisabled) {
                     setEligibilityHint(eligibility.reason ?? "This option is unavailable for the current configuration.");
+                    setActiveDockPanel(null);
                     return;
                   }
                   openPanel(tile.id);
@@ -124,6 +135,27 @@ export function ControlDock() {
               </button>
             );
           })}
+        </div>
+
+        <div className="flex items-center gap-sm px-md py-sm border-b border-line">
+          <span className="text-sm text-ink">Qty</span>
+          <button
+            type="button"
+            data-testid="qty-minus"
+            className="h-8 w-8 border border-line rounded-btn"
+            onClick={() => setQuantity(quantity - 1)}
+          >
+            −
+          </button>
+          <span data-testid="qty-value" className="tabular-nums font-bold w-6 text-center">{quantity}</span>
+          <button
+            type="button"
+            data-testid="qty-plus"
+            className="h-8 w-8 border border-line rounded-btn"
+            onClick={() => setQuantity(quantity + 1)}
+          >
+            +
+          </button>
         </div>
 
         {eligibilityHint && (
@@ -145,19 +177,23 @@ export function ControlDock() {
             {activeDockPanel === "material" && (
               <div className="space-y-sm">
                 <p className="text-sm font-bold text-ink">Material</p>
-                {(
-                  [
-                    ["VINYL_13OZ_SINGLE", "13 oz"],
-                    ["VINYL_15OZ_SINGLE", "15 oz"],
-                    ["VINYL_18OZ_SINGLE", "18 oz"],
-                  ] as const
-                ).map(([id, label]) => (
+                {config.materials
+                  .filter((id) => id !== "VINYL_18OZ_DOUBLE")
+                  .map((id) => {
+                    const label =
+                      id === "VINYL_13OZ_SINGLE"
+                        ? "13 oz"
+                        : id === "VINYL_15OZ_SINGLE"
+                          ? "15 oz"
+                          : id === "VINYL_18OZ_SINGLE"
+                            ? "18 oz"
+                            : id;
+                    return (
                   <button
                     key={id}
                     type="button"
                     data-testid={`material-${id}`}
                     onClick={() => {
-                      // Preserve double-sided only when staying on 18oz
                       if (isDoubleSided(material) && id === "VINYL_18OZ_SINGLE") {
                         setMaterial("VINYL_18OZ_DOUBLE");
                       } else {
@@ -172,22 +208,17 @@ export function ControlDock() {
                     )}
                   >
                     <span className="font-bold">{label}</span>
-                    <span className="text-ink-muted ml-2">${MATERIAL_RATES[id].toFixed(2)}/sq ft</span>
+                    <span className="text-ink-muted ml-2">${config.ratePerSqFt(id).toFixed(2)}/sq ft</span>
                   </button>
-                ))}
-                <div className="flex items-center gap-sm pt-sm">
-                  <span className="text-sm text-ink">Qty</span>
-                  <button type="button" className="h-8 w-8 border border-line rounded-btn" onClick={() => setQuantity(quantity - 1)}>−</button>
-                  <span data-testid="qty-value" className="tabular-nums font-bold w-6 text-center">{quantity}</span>
-                  <button type="button" className="h-8 w-8 border border-line rounded-btn" onClick={() => setQuantity(quantity + 1)}>+</button>
-                </div>
+                    );
+                  })}
               </div>
             )}
             {activeDockPanel === "sides" && (
               <div className="space-y-sm">
                 <p className="text-sm font-bold text-ink">Print sides</p>
-                {getControlEligibility("sides", { material, size, finishing }).reason && (
-                  <p className="text-sm text-ink-muted">{getControlEligibility("sides", { material, size, finishing }).reason}</p>
+                {getControlEligibility("sides", { productId, material, size, finishing }).reason && (
+                  <p className="text-sm text-ink-muted">{getControlEligibility("sides", { productId, material, size, finishing }).reason}</p>
                 )}
                 <div className="flex gap-sm">
                   <Toggle
@@ -199,7 +230,7 @@ export function ControlDock() {
                   <Toggle
                     label="Double"
                     active={isDoubleSided(material)}
-                    disabled={!getControlEligibility("sides", { material, size, finishing }).enabled}
+                    disabled={!getControlEligibility("sides", { productId, material, size, finishing }).enabled}
                     onClick={() => setMaterial(materialForPrintSides(material, true))}
                     testId="sides-double"
                   />
@@ -216,6 +247,18 @@ export function ControlDock() {
                   onClick={() => setFinishing({ welding: !finishing.welding })}
                   testId="welding-toggle"
                 />
+              </div>
+            )}
+            {activeDockPanel === "webbing" && (
+              <div className="space-y-sm">
+                <p className="text-sm font-bold text-ink">Webbing</p>
+                <Toggle
+                  label={finishing.webbing ? "On" : "Off"}
+                  active={Boolean(finishing.webbing)}
+                  onClick={() => setFinishing({ webbing: !finishing.webbing })}
+                  testId="webbing-toggle"
+                />
+                {finishing.webbing && <p className="text-sm text-ink-muted">{WEBBING_HELP}</p>}
               </div>
             )}
             {activeDockPanel === "rope" && (
@@ -257,6 +300,7 @@ export function ControlDock() {
                 />
                 {finishing.polePockets && (
                   <>
+                    <p className="text-sm text-ink-muted">{POCKET_DIAMETER_HELP}</p>
                     <p className="text-xs font-bold uppercase tracking-wide text-ink-muted mt-sm">Depth</p>
                     <div className="flex flex-wrap gap-sm">
                       {POLE_POCKET_DEPTH_OPTIONS.map((opt) => (
@@ -288,13 +332,13 @@ export function ControlDock() {
             {activeDockPanel === "wind" && (
               <div className="space-y-sm">
                 <p className="text-sm font-bold text-ink">Wind slits</p>
-                {getControlEligibility("wind", { material, size, finishing }).reason && (
-                  <p className="text-sm text-ink-muted">{getControlEligibility("wind", { material, size, finishing }).reason}</p>
+                {getControlEligibility("wind", { productId, material, size, finishing }).reason && (
+                  <p className="text-sm text-ink-muted">{getControlEligibility("wind", { productId, material, size, finishing }).reason}</p>
                 )}
                 <Toggle
                   label={finishing.windSlits ? "On" : "Off"}
                   active={finishing.windSlits}
-                  disabled={!getControlEligibility("wind", { material, size, finishing }).enabled}
+                  disabled={!getControlEligibility("wind", { productId, material, size, finishing }).enabled}
                   onClick={() => setFinishing({ windSlits: !finishing.windSlits })}
                   testId="wind-toggle"
                 />

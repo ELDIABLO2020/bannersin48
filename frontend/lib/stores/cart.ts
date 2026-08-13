@@ -2,11 +2,13 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { OrderLine, Order } from "@bannersin48/shared";
+import type { OrderLine, Order, ProductId } from "@bannersin48/shared";
+import { PRODUCTS, productBySlug, productIdForMaterial } from "@bannersin48/shared";
 
 export interface CartLine {
   id: string;
-  product: "vinyl" | "retractable";
+  product: string;
+  productId?: string;
   material: OrderLine["material"];
   dimensions: OrderLine["dimensions"];
   finishing: OrderLine["finishing"];
@@ -34,43 +36,72 @@ interface CartState {
   loadFromOrder: (order: Order) => void;
 }
 
+export function normalizeCartLine(line: CartLine): CartLine {
+  const product = line.product === "vinyl" ? "hd-banner" : line.product;
+  const fromSlug = productBySlug(product)?.id;
+  const productId =
+    (line.productId as ProductId | undefined) ??
+    fromSlug ??
+    productIdForMaterial(line.material);
+  return {
+    ...line,
+    product,
+    productId,
+    finishing: { ...line.finishing, webbing: line.finishing.webbing ?? false },
+  };
+}
+
 export const useCart = create<CartState>()(
   persist(
     (set) => ({
       lines: [],
-      addLine: (line) => set((state) => ({ lines: [...state.lines, line] })),
+      addLine: (line) => set((state) => ({ lines: [...state.lines, normalizeCartLine(line)] })),
       updateLine: (id, patch) =>
         set((state) => ({
-          lines: state.lines.map((l) => (l.id === id ? { ...l, ...patch } : l)),
+          lines: state.lines.map((l) => (l.id === id ? normalizeCartLine({ ...l, ...patch }) : l)),
         })),
       removeLine: (id) =>
         set((state) => ({ lines: state.lines.filter((l) => l.id !== id) })),
       clear: () => set({ lines: [] }),
       loadFromOrder: (order) => {
-        const lines: CartLine[] = order.lines.map((l) => ({
-          id: `cart_${Date.now()}_${l.id}`,
-          product: l.material === "RETRACTABLE" ? "retractable" : "vinyl",
-          material: l.material,
-          dimensions: l.dimensions,
-          finishing: l.finishing,
-          quantity: l.quantity,
-          artworkId: l.artworkId,
-          unitProduct: l.unitProduct,
-          addons: l.addons,
-          productSubtotal: l.productSubtotal,
-          shipping: l.shipping,
-          totalBeforeTax: l.totalBeforeTax,
-          billableSqFt: l.billableSqFt,
-          billableDims: l.billableDims,
-          display: {
-            requestedLabel: `${l.dimensions.widthFt}' ${l.dimensions.widthIn}" × ${l.dimensions.heightFt}' ${l.dimensions.heightIn}"`,
-            billableLabel: `${l.billableDims.widthFt}' × ${l.billableDims.heightFt}'`,
-          },
-        }));
+        const lines: CartLine[] = order.lines.map((l) => {
+          const productId = (l.productId as ProductId | undefined) ?? productIdForMaterial(l.material);
+          return normalizeCartLine({
+            id: `cart_${Date.now()}_${l.id}`,
+            product: PRODUCTS[productId].slug,
+            productId,
+            material: l.material,
+            dimensions: l.dimensions,
+            finishing: l.finishing,
+            quantity: l.quantity,
+            artworkId: l.artworkId,
+            unitProduct: l.unitProduct,
+            addons: l.addons,
+            productSubtotal: l.productSubtotal,
+            shipping: l.shipping,
+            totalBeforeTax: l.totalBeforeTax,
+            billableSqFt: l.billableSqFt,
+            billableDims: l.billableDims,
+            display: {
+              requestedLabel: `${l.dimensions.widthFt}' ${l.dimensions.widthIn}" × ${l.dimensions.heightFt}' ${l.dimensions.heightIn}"`,
+              billableLabel: `${l.billableDims.widthFt}' × ${l.billableDims.heightFt}'`,
+            },
+          });
+        });
         set({ lines });
       },
     }),
-    { name: "bi48.cart" },
+    {
+      name: "bi48.cart",
+      version: 1,
+      migrate: (persisted) => {
+        const state = persisted as CartState;
+        return {
+          ...state,
+          lines: Array.isArray(state.lines) ? state.lines.map(normalizeCartLine) : [],
+        };
+      },
+    },
   ),
 );
 

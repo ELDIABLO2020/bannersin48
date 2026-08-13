@@ -162,7 +162,7 @@ export function CartDrawer() {
               <p className="text-body text-ink-muted mt-sm">
                 Build a banner in under 3 minutes and it will show up here.
               </p>
-              <Link href="/order/vinyl" onClick={close}>
+              <Link href="/order" onClick={close}>
                 <Button variant="cta" size="lg" className="mt-lg">Start an order</Button>
               </Link>
             </div>

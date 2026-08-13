@@ -8,7 +8,8 @@ import {
   type GrommetPoint,
   type PolePocketPlacement,
   type PolePocketDepthIn,
-  DEFAULT_FINISHING,
+  type ProductId,
+  PRODUCTS,
   applyFinishingPatch,
   generateGrommetPoints,
   dimensionsToInches,
@@ -16,9 +17,10 @@ import {
   isWindSlitsEligible,
   MAX_QUANTITY_PER_LINE,
   MAX_BILLABLE_FT,
+  DS_WELD_BORDER_MSG,
+  DS_POCKETS_BLEED_MSG,
 } from "@bannersin48/shared";
 
-export type ProductKind = "vinyl" | "retractable";
 export type FitMode = "fit" | "center";
 
 export interface SizeState {
@@ -30,6 +32,7 @@ export interface SizeState {
 
 export interface SignDraft {
   id: string;
+  productId: ProductId;
   size: SizeState;
   material: Material;
   finishing: Finishing;
@@ -49,13 +52,14 @@ export type DockPanel =
   | "material"
   | "sides"
   | "welding"
+  | "webbing"
   | "rope"
   | "grommets"
   | "pockets"
   | "wind";
 
 export interface ConfiguratorState {
-  product: ProductKind;
+  productId: ProductId;
   signs: SignDraft[];
   activeSignId: string;
   lastFinishingMessage: string | null;
@@ -76,7 +80,7 @@ export interface ConfiguratorState {
   fitMode: FitMode;
   aspectLocked: boolean;
 
-  setProduct: (p: ProductKind) => void;
+  setProduct: (p: ProductId) => void;
   setMaterial: (m: Material) => void;
   setSize: (s: Partial<SizeState>) => void;
   applySize: (widthFt: number, heightFt: number) => void;
@@ -94,6 +98,7 @@ export interface ConfiguratorState {
   setAspectLocked: (locked: boolean) => void;
   setGrommetPoints: (points: GrommetPoint[]) => void;
   clearFinishingMessage: () => void;
+  flashMessage: (msg: string | null) => void;
 
   addSign: () => void;
   removeSign: (id: string) => void;
@@ -108,18 +113,18 @@ export interface ConfiguratorState {
   reset: () => void;
 }
 
-const DEFAULT_SIZE: SizeState = { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 };
-
 function newSignId(): string {
   return `sign_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function createDefaultSign(partial?: Partial<SignDraft>): SignDraft {
+  const hd = PRODUCTS.HD_BANNER;
   return {
     id: newSignId(),
-    size: { ...DEFAULT_SIZE },
-    material: "VINYL_13OZ_SINGLE",
-    finishing: { ...DEFAULT_FINISHING },
+    productId: "HD_BANNER",
+    size: { ...hd.defaultSize },
+    material: hd.materials[0]!,
+    finishing: { ...hd.defaultFinishing },
     quantity: 1,
     artworkId: null,
     artworkFileName: null,
@@ -133,6 +138,7 @@ export function createDefaultSign(partial?: Partial<SignDraft>): SignDraft {
 
 function mirrorFromSign(sign: SignDraft) {
   return {
+    productId: sign.productId,
     material: sign.material,
     size: sign.size,
     finishing: sign.finishing,
@@ -172,6 +178,11 @@ function loadSession(): { signs: SignDraft[]; activeSignId: string } | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { signs: SignDraft[]; activeSignId: string };
     if (!Array.isArray(parsed.signs) || parsed.signs.length === 0) return null;
+    parsed.signs = parsed.signs.map((s) => ({
+      ...s,
+      productId: s.productId ?? "HD_BANNER",
+      finishing: { ...s.finishing, webbing: s.finishing?.webbing ?? false },
+    }));
     return parsed;
   } catch {
     return null;
@@ -185,7 +196,6 @@ const bootActiveId = session?.activeSignId ?? bootSigns[0]!.id;
 const bootActive = bootSigns.find((s) => s.id === bootActiveId) ?? bootSigns[0]!;
 
 export const useConfigurator = create<ConfiguratorState>((set, get) => ({
-  product: "vinyl",
   signs: bootSigns,
   activeSignId: bootActive.id,
   lastFinishingMessage: null,
@@ -195,28 +205,34 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
   mobileDockOpen: false,
   ...mirrorFromSign(bootActive),
 
-  setProduct: (p) =>
+  setProduct: (productId) =>
     set((state) => {
-      if (p === "retractable") {
-        const patch = updateActive(state, {
-          material: "RETRACTABLE",
-          size: { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 },
-          finishing: { ...DEFAULT_FINISHING },
-        });
-        return { product: p, ...patch };
+      const active = state.signs.find((s) => s.id === state.activeSignId);
+      if (state.productId === productId && active?.productId === productId) {
+        return { productId };
       }
-      const { widthIn, heightIn } = dimensionsToInches(state.size);
-      const size = widthIn > 0 && heightIn > 0 ? state.size : { ...DEFAULT_SIZE };
-      const patch = updateActive(state, { material: "VINYL_13OZ_SINGLE", size });
-      return { product: p, ...patch };
+      const config = PRODUCTS[productId];
+      const size =
+        config.sizeMode === "fixed"
+          ? { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 }
+          : { ...config.defaultSize };
+      const patch = updateActive(state, {
+        productId,
+        material: config.materials[0]!,
+        size,
+        finishing: { ...config.defaultFinishing },
+      });
+      persistSession(patch.signs as SignDraft[], state.activeSignId);
+      return { productId, ...patch };
     }),
 
   setMaterial: (m) =>
     set((state) => {
       let material = m;
-      // Double-sided only via 18oz double material
       if (m === "VINYL_18OZ_DOUBLE") material = "VINYL_18OZ_DOUBLE";
-      const next = updateActive(state, { material });
+      const extras =
+        material === "VINYL_18OZ_DOUBLE" ? { lastFinishingMessage: DS_WELD_BORDER_MSG } : {};
+      const next = updateActive(state, { material }, extras);
       persistSession(next.signs as SignDraft[], state.activeSignId);
       return next;
     }),
@@ -227,7 +243,11 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
       let finishing = state.finishing;
       let lastFinishingMessage = state.lastFinishingMessage;
       // Auto-disable wind slits when size leaves the eligibility band
-      if (finishing.windSlits && !isWindSlitsEligible(size)) {
+      if (
+        PRODUCTS[state.productId].dock.windSlits &&
+        finishing.windSlits &&
+        !isWindSlitsEligible(size)
+      ) {
         finishing = { ...finishing, windSlits: false };
         lastFinishingMessage = "Wind slits were turned off because this size is outside the eligible range.";
       }
@@ -241,7 +261,11 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
   setFinishing: (f) =>
     set((state) => {
       // Gate wind slits by size
-      if (f.windSlits === true && !isWindSlitsEligible(state.size)) {
+      if (
+        PRODUCTS[state.productId].dock.windSlits &&
+        f.windSlits === true &&
+        !isWindSlitsEligible(state.size)
+      ) {
         return {
           lastFinishingMessage:
             "Wind slits require both dimensions greater than 24\" and less than 120\".",
@@ -270,7 +294,9 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
         polePocketPlacement: enabled ? placement ?? state.finishing.polePocketPlacement ?? "TOP" : undefined,
         polePocketDepthIn: enabled ? depth ?? state.finishing.polePocketDepthIn ?? 2 : undefined,
       });
-      const next = updateActive(state, { finishing }, { lastFinishingMessage: message ?? null });
+      const dsPockets =
+        enabled && state.material === "VINYL_18OZ_DOUBLE" ? DS_POCKETS_BLEED_MSG : message ?? null;
+      const next = updateActive(state, { finishing }, { lastFinishingMessage: dsPockets });
       persistSession(next.signs as SignDraft[], state.activeSignId);
       return next;
     }),
@@ -286,7 +312,8 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
   setArtwork: (id, name, previewUrl = null, meta) =>
     set((state) => {
       let size = state.size;
-      if (meta?.autoSize && meta.widthPx && meta.heightPx) {
+      const skipAutoSize = PRODUCTS[state.productId].sizeMode === "fixed";
+      if (!skipAutoSize && meta?.autoSize && meta.widthPx && meta.heightPx) {
         const d = pixelsToDimensions(meta.widthPx, meta.heightPx, meta.dpi);
         size = d;
       }
@@ -338,11 +365,13 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
     }),
 
   clearFinishingMessage: () => set({ lastFinishingMessage: null }),
+  flashMessage: (msg) => set({ lastFinishingMessage: msg }),
 
   addSign: () =>
     set((state) => {
       const active = state.signs.find((s) => s.id === state.activeSignId) ?? state.signs[0]!;
       const created = createDefaultSign({
+        productId: active.productId,
         size: { ...active.size },
         material: active.material,
         finishing: { ...active.finishing, grommetPoints: active.finishing.grommetPoints?.slice() },
@@ -391,7 +420,6 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
       }
     }
     set({
-      product: "vinyl",
       signs: [sign],
       activeSignId: sign.id,
       lastFinishingMessage: null,

@@ -26,7 +26,7 @@ export default function CartPage() {
           <p className="text-body text-ink-muted mt-md">
             Build a banner in under 3 minutes and it will show up here.
           </p>
-          <Link href="/order/vinyl">
+          <Link href="/order">
             <Button variant="cta" size="lg" className="mt-xl">Start an order</Button>
           </Link>
         </div>
@@ -79,7 +79,7 @@ export default function CartPage() {
                 Proceed to checkout
               </Button>
               <Link
-                href="/order/vinyl"
+                href="/order"
                 className="block text-center mt-md text-body-sm text-link hover:underline"
               >
                 Add another banner
