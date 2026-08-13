@@ -21,8 +21,33 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("control-dock")).toBeVisible();
     await expect(page.getByTestId("price-hero")).toBeVisible();
     await expect(page.getByTestId("item-rail")).toBeVisible();
-    // Default 4×8 13oz → $138
-    await expect(page.getByTestId("price-total")).toContainText("$138", { timeout: 10_000 });
+
+    // Stage header: product title, live specs, green price, 48-hour production
+    await expect(page.getByTestId("stage-header")).toBeVisible();
+    await expect(page.getByTestId("stage-header")).toContainText(/HD Banner \(Vinyl\)/i);
+    await expect(page.getByTestId("stage-header-specs")).toContainText(/Vinyl 13 oz Single Sided/i);
+    await expect(page.getByTestId("stage-header-specs")).toContainText("4′");
+    await expect(page.getByTestId("stage-header-specs")).not.toContainText('0" x 0"');
+    await expect(page.getByTestId("stage-header")).toContainText(/48-hour production/i);
+    // Default 4×8 13oz → $138 (header + PriceHero)
+    await expect(page.getByTestId("stage-header-price")).toContainText("$138", { timeout: 10_000 });
+    await expect(page.getByTestId("price-hero").getByTestId("price-total")).toContainText("$138");
+
+    // Real rates (not competitor figures) in both matrices
+    const matrices = page.getByTestId("rate-matrix");
+    await expect(matrices).toHaveCount(2);
+    await expect(matrices.first()).toContainText("$4.00");
+    await expect(matrices.first()).toContainText("$7.50");
+    await expect(matrices.first()).not.toContainText("$1.25");
+
+    // Empty artwork CTA
+    await expect(page.getByTestId("stage-empty-upload")).toBeVisible();
+    await expect(page.getByTestId("stage-empty-upload")).toContainText(
+      /Specify dimensions or click to select an image/i,
+    );
+    await expect(page.getByTestId("stage-empty-upload")).toContainText(
+      /Upload or pick from your library/i,
+    );
 
     const viewport = page.viewportSize();
     const stageSlot = page.getByTestId("builder-stage").locator("..");
@@ -54,7 +79,7 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("size-panel")).toBeVisible();
     await page.getByTestId("popular-size-3x6").click();
     await expect(page.getByTestId("builder-stage")).toContainText("3′");
-    const total = page.getByTestId("price-total");
+    const total = page.getByTestId("price-hero").getByTestId("price-total");
     await expect(total).toBeVisible();
     const text = await total.innerText();
     const amount = Number(text.replace(/[^0-9.]/g, ""));
@@ -142,7 +167,8 @@ test.describe("Vinyl builder", () => {
 
   test("mobile: show options dock and add to cart", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile-webkit", "Mobile only");
-    await expect(page.getByTestId("rate-matrix")).toBeHidden();
+    await expect(page.getByTestId("price-hero").getByTestId("rate-matrix")).toBeHidden();
+    await expect(page.getByTestId("stage-header").getByTestId("rate-matrix")).toBeHidden();
     await expect(page.getByTestId("show-options")).toBeVisible();
     await page.getByTestId("show-options").click();
     await expect(page.getByTestId("dock-size")).toBeVisible();

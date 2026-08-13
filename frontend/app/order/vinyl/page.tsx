@@ -55,7 +55,7 @@ function VinylBuilder() {
   return (
     <>
       <div className="bg-surface-tint border-b border-line">
-        <div className="mx-auto max-w-content px-md lg:px-xl pt-md">
+        <div className="mx-auto max-w-content px-md lg:px-xl pt-md pb-sm">
           <nav className="text-body-sm text-ink-muted mb-sm" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-link no-underline">
               Home
@@ -63,9 +63,6 @@ function VinylBuilder() {
             <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
             <span aria-current="page">Vinyl builder</span>
           </nav>
-          <h1 className="font-display text-section-h2 text-ink leading-none mb-md">
-            Banners In 48
-          </h1>
         </div>
       </div>
 
