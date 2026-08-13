@@ -1,6 +1,6 @@
 # Signs365 BANNER modules — end-to-end map
 
-Captured 2026-08-12–13 from the live portal. Hub context: [signs365-banner-catalog-map.md](signs365-banner-catalog-map.md). Rebuild contract: [signs365-banner-rebuild-contract.md](signs365-banner-rebuild-contract.md). Evidence: [signs365-banner-evidence/](signs365-banner-evidence/).
+Captured 2026-08-12–13 from the live portal. Hub context: [catalog-map.md](catalog-map.md). Rebuild contract: [rebuild-contract.md](rebuild-contract.md). Evidence: [evidence/](evidence/).
 
 Do not copy Signs365 colors, logos, fonts, or marketing copy into the Bannersin48 app. This file is behavior/structure only.
 

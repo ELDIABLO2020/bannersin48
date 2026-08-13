@@ -9,6 +9,8 @@ Speed-first custom banner ordering platform — npm workspaces monorepo.
 | `frontend/` | Next.js 14 app (App Router, Tailwind, GSAP, PWA) |
 | `packages/` | Shared design tokens, schemas, and API client |
 | `backend/` | NestJS API scaffold (not yet implemented) |
+| `docs/` | Plans, research, and design notes — see [docs/README.md](docs/README.md) |
+| `.github/` | CI workflows |
 
 ## Local development
 
@@ -48,9 +50,4 @@ Recommended environment variables:
 | `NEXT_PUBLIC_SITE_URL` | `https://bannersin48.vercel.app` |
 | `NEXT_PUBLIC_API_BASE_URL` | Backend URL when deployed |
 
-## Planning docs
-
-- [`bannersin48-final-website-structured-plan.md`](bannersin48-final-website-structured-plan.md) — product spec
-- [`phase1-build-test-plan.md`](phase1-build-test-plan.md) — engineering plan
-- [`www.housecallpro.com-DESIGN.md`](www.housecallpro.com-DESIGN.md) — **canonical design system** (navy + gold CTAs + blue links). Implemented in [`packages/design-tokens/src/tokens.ts`](packages/design-tokens/src/tokens.ts).
-- [`docs/archive/ecwid-redesign-structured-refactoring-plan.md`](docs/archive/ecwid-redesign-structured-refactoring-plan.md) — deprecated; do not use for styling
+Design tokens (navy foundations, gold CTAs, blue links) live in [`packages/design-tokens/src/tokens.ts`](packages/design-tokens/src/tokens.ts).

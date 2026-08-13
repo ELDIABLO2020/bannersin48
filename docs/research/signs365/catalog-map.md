@@ -2,9 +2,9 @@
 
 Source: live session on 2026-08-12. URL: `https://www.signs365.com/portal/#catalog/2`. Page title: **Banner · Signs365**.
 
-Evidence: [docs/signs365-banner-evidence/hub__banner-catalog.png](signs365-banner-evidence/hub__banner-catalog.png), [hub__banner-catalog-econostand.png](signs365-banner-evidence/hub__banner-catalog-econostand.png).
+Evidence: [evidence/hub__banner-catalog.png](evidence/hub__banner-catalog.png), [hub__banner-catalog-econostand.png](evidence/hub__banner-catalog-econostand.png).
 
-This file maps only the BANNER catalog hub and shared chrome. Per-module builders are in [signs365-banner-modules-e2e.md](signs365-banner-modules-e2e.md). Rebuild notes are in [signs365-banner-rebuild-contract.md](signs365-banner-rebuild-contract.md).
+This file maps only the BANNER catalog hub and shared chrome. Per-module builders are in [modules-e2e.md](modules-e2e.md). Rebuild notes are in [rebuild-contract.md](rebuild-contract.md).
 
 ## Session / access
 

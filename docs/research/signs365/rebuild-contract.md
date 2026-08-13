@@ -1,6 +1,6 @@
 # Bannersin48 BANNER rebuild contract
 
-Implementation contract for a later session. **This session does not implement routes, UI, shared schemas, or MSW.** Source map: [signs365-banner-catalog-map.md](signs365-banner-catalog-map.md), [signs365-banner-modules-e2e.md](signs365-banner-modules-e2e.md).
+Shipped. Source map: [catalog-map.md](catalog-map.md), [modules-e2e.md](modules-e2e.md).
 
 Do not copy Signs365 colors, logos, fonts, or marketing sentences into the app. Housecall Pro tokens stay in `packages/design-tokens`. Behavior and option structure come from the map; Bannersin48 copy and rates are ours.
 

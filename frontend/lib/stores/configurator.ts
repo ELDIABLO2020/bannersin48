@@ -68,7 +68,7 @@ export interface ConfiguratorState {
   colorMatchOpen: boolean;
   mobileDockOpen: boolean;
 
-  /** Flattened active-sign mirrors for existing consumers (PriceSummary, retractable). */
+  /** Flattened active-sign mirrors for existing consumers (retractable page). */
   material: Material;
   size: SizeState;
   finishing: Finishing;

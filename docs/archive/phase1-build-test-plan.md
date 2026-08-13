@@ -1,6 +1,6 @@
 # Banners In 48 — Phase 1 Build & Test Plan (Desktop + Mobile PWA, E2E)
 
-> Companion to [bannersin48-final-website-structured-plan.md](bannersin48-final-website-structured-plan.md).
+> Archived. Companion product-spec and Housecall Pro design markdown files were never checked into this repo; tokens in `packages/design-tokens` are the design source of truth.
 > Scope: **Phase 1 Revenue MVP**, built end-to-end as one responsive Next.js application serving the desktop website and the mobile PWA.
 > **Visual design — single source:** the design system in `www.housecallpro.com-DESIGN.md` (navy foundations, gold CTAs, blue interactives, Open Sans / Headline Gothic). It governs **all** colors, typography, components, spacing, radii, and shadows on both desktop and mobile.
 > **Layout/IA reference — mobile only:** the 48HR Banners mobile mockup screenshots are used **only for how things are positioned** — the app-like structure (bottom tab bar, screen composition, step flow, card arrangement). None of the mockup's colors, fonts, or copy carry over.
