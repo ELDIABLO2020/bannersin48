@@ -1,21 +1,17 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
-import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
-import { placeholders, type PlaceholderKey } from "@/content/placeholders";
+import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
+import { imageForUseCase } from "@/content/catalogImages";
 import { catalogFilterHref, type CatalogUseCaseId } from "@bannersin48/shared";
 
-const INDUSTRIES: ReadonlyArray<{
-  filterId: CatalogUseCaseId;
-  label: string;
-  imageKey: PlaceholderKey;
-}> = [
-  { filterId: "contractor", label: "Contractor", imageKey: "industryContractor" },
-  { filterId: "restaurant", label: "Restaurant", imageKey: "industryRestaurant" },
-  { filterId: "school", label: "School & Sports", imageKey: "industrySchool" },
-  { filterId: "events", label: "Events", imageKey: "industryEvents" },
-  { filterId: "business", label: "Business", imageKey: "industryBusiness" },
-  { filterId: "real-estate", label: "Real Estate", imageKey: "industryRealEstate" },
+const INDUSTRIES: ReadonlyArray<{ id: CatalogUseCaseId; label: string }> = [
+  { id: "contractor", label: "Contractor" },
+  { id: "restaurant", label: "Restaurant" },
+  { id: "school", label: "School & Sports" },
+  { id: "events", label: "Events" },
+  { id: "business", label: "Business" },
+  { id: "real-estate", label: "Real Estate" },
 ];
 
 export function IndustriesGrid() {
@@ -42,32 +38,16 @@ export function IndustriesGrid() {
           </Link>
         </ScrollReveal>
         <ScrollReveal className="grid grid-cols-2 md:grid-cols-3 gap-md">
-          {INDUSTRIES.map((ind) => {
-            const image = placeholders[ind.imageKey];
-            return (
-              <Link
-                key={ind.label}
-                href={catalogFilterHref(ind.filterId)}
-                className="group rounded-card overflow-hidden border border-line bg-surface shadow-elev-1 hover:shadow-elev-2 hover:-translate-y-0.5 transition-all no-underline"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <PlaceholderImage
-                    src={image.src}
-                    alt={image.alt}
-                    width={image.width}
-                    height={image.height}
-                    rounded="none"
-                    overlay
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-darkest/80 via-darkest/20 to-transparent" />
-                  <span className="absolute bottom-md left-md text-sm font-bold text-white drop-shadow-sm group-hover:underline font-body">
-                    {ind.label}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+          {INDUSTRIES.map((ind) => (
+            <VisualCategoryCard
+              key={ind.id}
+              href={catalogFilterHref(ind.id)}
+              title={ind.label}
+              image={imageForUseCase(ind.id)}
+              cta="Shop"
+              sizes="(max-width: 768px) 50vw, 33vw"
+            />
+          ))}
         </ScrollReveal>
       </div>
     </section>

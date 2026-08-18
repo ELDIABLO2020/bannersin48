@@ -54,6 +54,26 @@ test.describe("M4: HCP design parity", () => {
     expect(await images.count()).toBeGreaterThanOrEqual(8);
   });
 
+  test("product catalog cards render images and link to order", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
+    const catalog = page.getByRole("region", { name: /every banner we print/i });
+    await expect(catalog.locator("img").first()).toBeVisible();
+    await expect(catalog.getByRole("link", { name: /order hd banner/i })).toHaveAttribute(
+      "href",
+      "/order/hd-banner",
+    );
+  });
+
+  test("industry cards link to catalog need filters", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
+    const industries = page.getByRole("region", { name: /customized banners for every use case/i });
+    await expect(industries.locator("img").first()).toBeVisible();
+    await expect(industries.getByRole("link", { name: /shop contractor/i })).toHaveAttribute(
+      "href",
+      "/order?need=contractor",
+    );
+  });
+
   test("display typography uses Bebas Neue on hero headline", async ({ page }) => {
     const h1 = page.getByRole("heading", { level: 1 });
     const fontFamily = await h1.evaluate((el) => getComputedStyle(el).fontFamily.toLowerCase());

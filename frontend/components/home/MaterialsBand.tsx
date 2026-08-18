@@ -1,53 +1,44 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
-import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
-import { placeholders, type PlaceholderKey } from "@/content/placeholders";
+import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
+import { catalogImage } from "@/content/catalogImages";
 import { PRODUCTS, productOrderHref, type ProductId } from "@bannersin48/shared";
 
 const FAMILIES: ReadonlyArray<{
   id: ProductId;
-  imageKey: PlaceholderKey;
   points: readonly string[];
 }> = [
   {
     id: "HD_BANNER",
-    imageKey: "material13oz",
     points: ["13, 15, or 18 oz vinyl", "Indoor and outdoor", "Double-sided on 18 oz"],
   },
   {
     id: "MESH",
-    imageKey: "industryContractor",
     points: ["Lets wind pass through", "Fences and jobsites", "Webbing reinforcement"],
   },
   {
     id: "HDPE",
-    imageKey: "material15oz",
     points: ["Water- and tear-resistant", "Lightweight", "Short-term indoor or outdoor"],
   },
   {
     id: "POSTER",
-    imageKey: "industryBusiness",
     points: ["Satin paper", "Indoor POP", "Short-term events"],
   },
   {
     id: "NO_CURL",
-    imageKey: "industryEvents",
     points: ["Lays flat and stays flat", "Indoor or outdoor", 'Shorter side up to 35"'],
   },
   {
     id: "CANVAS",
-    imageKey: "material18oz",
     points: ["Poly-cotton canvas", "Stretch and frame", "Indoor displays"],
   },
   {
     id: "ECONOSTAND",
-    imageKey: "industryRestaurant",
     points: ['Fixed 33.5" × 80"', "Stand included", "Indoor floors"],
   },
   {
     id: "RETRACTABLE",
-    imageKey: "industryRealEstate",
     points: ["Stand, graphic, and case", "Trade shows and retail", "Portable"],
   },
 ];
@@ -83,41 +74,25 @@ export function MaterialsBand() {
         <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
           {FAMILIES.map((family) => {
             const product = PRODUCTS[family.id];
-            const image = placeholders[family.imageKey];
             return (
-              <Link
+              <VisualCategoryCard
                 key={family.id}
                 href={productOrderHref(family.id)}
-                className="overflow-hidden rounded-card border border-line bg-surface shadow-elev-1 no-underline transition-all hover:-translate-y-0.5 hover:shadow-elev-2"
-              >
-                <article>
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <PlaceholderImage
-                      src={image.src}
-                      alt={image.alt}
-                      width={image.width}
-                      height={image.height}
-                      rounded="none"
-                      overlay
-                      sizes="(max-width: 768px) 100vw, 25vw"
-                    />
-                  </div>
-                  <div className="p-lg">
-                    <h3 className="font-bold text-heading-h4 text-ink font-body">{product.title}</h3>
-                    <p className="mt-sm text-sm text-ink-muted leading-relaxed font-body">
-                      {product.subtitle}
-                    </p>
-                    <ul className="mt-md space-y-xs text-sm text-ink font-body">
-                      {family.points.map((point) => (
-                        <li key={point} className="flex items-center gap-xs">
-                          <CheckCircle2 className="h-4 w-4 text-ink-muted" aria-hidden />
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              </Link>
+                title={product.title}
+                subtitle={product.subtitle}
+                image={catalogImage(family.id)}
+                sizes="(max-width: 768px) 100vw, 25vw"
+                footer={
+                  <ul className="space-y-xs text-sm text-ink font-body">
+                    {family.points.map((point) => (
+                      <li key={point} className="flex items-center gap-xs">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden />
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                }
+              />
             );
           })}
         </ScrollReveal>

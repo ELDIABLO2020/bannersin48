@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
+import { catalogImage } from "@/content/catalogImages";
 import { PRODUCTS, CATALOG_NAV_PRODUCTS, productOrderHref } from "@bannersin48/shared";
 
 export function ProductStrip() {
@@ -32,18 +34,14 @@ export function ProductStrip() {
           {CATALOG_NAV_PRODUCTS.map((id) => {
             const product = PRODUCTS[id];
             return (
-              <Link
+              <VisualCategoryCard
                 key={id}
                 href={productOrderHref(id)}
-                className="group rounded-card border border-line bg-surface p-lg shadow-elev-1 no-underline transition-all hover:-translate-y-0.5 hover:border-strong-accent hover:shadow-elev-2"
-              >
-                <h3 className="font-bold text-ink font-body">{product.title}</h3>
-                <p className="mt-xs text-sm text-ink-muted leading-relaxed font-body">{product.subtitle}</p>
-                <span className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-link font-body">
-                  Order
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
-                </span>
-              </Link>
+                title={product.title}
+                subtitle={product.subtitle}
+                image={catalogImage(id)}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              />
             );
           })}
         </ScrollReveal>

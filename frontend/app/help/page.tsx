@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
+import { catalogImage } from "@/content/catalogImages";
+import { placeholders, type PlaceholderAsset } from "@/content/placeholders";
 import { ChevronRight, Mail } from "lucide-react";
-import { catalogFilterHref, productOrderHref, UPLOAD_REJECT } from "@bannersin48/shared";
+import { catalogFilterHref, productOrderHref, PRODUCTS, UPLOAD_REJECT } from "@bannersin48/shared";
 
 export const metadata = {
   title: "Help center — Banners In 48",
@@ -31,6 +34,50 @@ const FAQS = [
   { q: "Do you ship outside the US &amp; Canada?", a: "Not yet. Expansion is on the roadmap." },
 ];
 
+const HELP_NEEDS: ReadonlyArray<{
+  title: string;
+  subtitle: string;
+  href: string;
+  image: PlaceholderAsset;
+}> = [
+  {
+    title: "Windy or fence",
+    subtitle: PRODUCTS.MESH.title,
+    href: productOrderHref("MESH"),
+    image: catalogImage("MESH"),
+  },
+  {
+    title: "Indoor short-term",
+    subtitle: PRODUCTS.POSTER.title,
+    href: productOrderHref("POSTER"),
+    image: catalogImage("POSTER"),
+  },
+  {
+    title: "Must lay flat",
+    subtitle: PRODUCTS.NO_CURL.title,
+    href: productOrderHref("NO_CURL"),
+    image: catalogImage("NO_CURL"),
+  },
+  {
+    title: "Art to frame",
+    subtitle: PRODUCTS.CANVAS.title,
+    href: productOrderHref("CANVAS"),
+    image: catalogImage("CANVAS"),
+  },
+  {
+    title: "Need a stand",
+    subtitle: "Econostand or Retractable",
+    href: catalogFilterHref("stand"),
+    image: catalogImage("ECONOSTAND"),
+  },
+  {
+    title: "Not sure",
+    subtitle: "See all products",
+    href: "/order",
+    image: placeholders.hero,
+  },
+];
+
 export default function HelpPage() {
   return (
     <div className="bg-surface-tint min-h-[60vh]">
@@ -42,35 +89,20 @@ export default function HelpPage() {
           We support via email. No inbound phone calls.
         </p>
 
-        <section className="max-w-3xl mx-auto mb-2xl" aria-labelledby="which-banner-h">
+        <section className="mb-2xl" aria-labelledby="which-banner-h">
           <h2 id="which-banner-h" className="font-bold text-heading-h4 text-ink mb-md text-center">
             Which banner?
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
-            <Link href={productOrderHref("MESH")} className="rounded-card border border-line bg-surface p-md no-underline hover:border-link">
-              <p className="font-bold text-ink">Windy or fence</p>
-              <p className="text-body-sm text-ink-muted mt-xs">Mesh Banner</p>
-            </Link>
-            <Link href={productOrderHref("POSTER")} className="rounded-card border border-line bg-surface p-md no-underline hover:border-link">
-              <p className="font-bold text-ink">Indoor short-term</p>
-              <p className="text-body-sm text-ink-muted mt-xs">Poster</p>
-            </Link>
-            <Link href={productOrderHref("NO_CURL")} className="rounded-card border border-line bg-surface p-md no-underline hover:border-link">
-              <p className="font-bold text-ink">Must lay flat</p>
-              <p className="text-body-sm text-ink-muted mt-xs">No-Curl Banner</p>
-            </Link>
-            <Link href={productOrderHref("CANVAS")} className="rounded-card border border-line bg-surface p-md no-underline hover:border-link">
-              <p className="font-bold text-ink">Art to frame</p>
-              <p className="text-body-sm text-ink-muted mt-xs">Canvas</p>
-            </Link>
-            <Link href={catalogFilterHref("stand")} className="rounded-card border border-line bg-surface p-md no-underline hover:border-link">
-              <p className="font-bold text-ink">Need a stand</p>
-              <p className="text-body-sm text-ink-muted mt-xs">Econostand or Retractable</p>
-            </Link>
-            <Link href="/order" className="rounded-card border border-line bg-surface p-md no-underline hover:border-link">
-              <p className="font-bold text-ink">Not sure</p>
-              <p className="text-body-sm text-ink-muted mt-xs">See all products</p>
-            </Link>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+            {HELP_NEEDS.map((need) => (
+              <VisualCategoryCard
+                key={need.title}
+                href={need.href}
+                title={need.title}
+                subtitle={need.subtitle}
+                image={need.image}
+              />
+            ))}
           </div>
         </section>
 

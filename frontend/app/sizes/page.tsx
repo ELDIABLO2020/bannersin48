@@ -9,6 +9,9 @@ import {
   Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
+import { catalogImage } from "@/content/catalogImages";
+import { placeholders, type PlaceholderKey } from "@/content/placeholders";
 import { formatUsd } from "@/lib/utils/format";
 import {
   ADDON_RATES,
@@ -62,29 +65,31 @@ const FINISHING_ADDONS = [
   },
 ];
 
-const MATERIAL_GUIDE = [
+const MATERIAL_GUIDE: ReadonlyArray<{
+  name: string;
+  imageKey: PlaceholderKey;
+  price: string;
+  description: string;
+}> = [
   {
     name: "13 oz vinyl",
-    image: "/images/placeholders/material-13oz.jpg",
-    alt: "13 oz matte vinyl banner material with a finished grommet",
+    imageKey: "material13oz",
     price: `${formatUsd(MATERIAL_RATES.VINYL_13OZ_SINGLE)} / sq ft`,
     description: "The everyday choice for events, retail, contractors, and general signage.",
   },
   {
     name: "15 oz premium",
-    image: "/images/placeholders/material-15oz.jpg",
-    alt: "15 oz premium gloss vinyl banner material",
+    imageKey: "material15oz",
     price: `${formatUsd(MATERIAL_RATES.VINYL_15OZ_SINGLE)} / sq ft`,
     description: "A heavier, more substantial option for demanding outdoor displays.",
   },
   {
     name: "18 oz blockout",
-    image: "/images/placeholders/material-18oz.jpg",
-    alt: "18 oz blockout vinyl showing its opaque inner layer",
+    imageKey: "material18oz",
     price: `From ${formatUsd(MATERIAL_RATES.VINYL_18OZ_SINGLE)} / sq ft`,
     description: "Maximum durability and opacity, with single- or double-sided printing.",
   },
-] as const;
+];
 
 const CONSTRAINTS = [
   {
@@ -201,38 +206,20 @@ function MaterialGuide() {
       />
       <div className="grid grid-cols-1 gap-lg md:grid-cols-3">
         {MATERIAL_GUIDE.map((material) => (
-          <Link
+          <VisualCategoryCard
             key={material.name}
             href="/order/hd-banner"
-            className="group overflow-hidden rounded-card border border-line-subtle bg-surface shadow-elev-1 no-underline transition-all hover:-translate-y-1 hover:border-strong-accent hover:shadow-elev-2"
-          >
-            <article>
-              <div className="relative h-44 overflow-hidden">
-                <Image
-                  src={material.image}
-                  alt={material.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <div className="p-lg">
-                <div className="flex items-start justify-between gap-md">
-                  <h3 className="font-display text-heading-h4 font-bold uppercase text-ink">
-                    {material.name}
-                  </h3>
-                  <ArrowRight
-                    className="mt-xs h-5 w-5 shrink-0 text-strong-accent transition-transform group-hover:translate-x-1"
-                    aria-hidden
-                  />
-                </div>
-                <p className="mt-xs font-bold text-link">{material.price}</p>
+            title={material.name}
+            image={placeholders[material.imageKey]}
+            footer={
+              <>
+                <p className="font-bold text-link">{material.price}</p>
                 <p className="mt-sm text-body-sm leading-relaxed text-ink-muted">
                   {material.description}
                 </p>
-              </div>
-            </article>
-          </Link>
+              </>
+            }
+          />
         ))}
       </div>
     </section>
@@ -476,26 +463,23 @@ function OtherProductsSection() {
           const rate = product.ratePerSqFt(product.materials[0]);
           const maxShort = product.limits.maxShortSideIn;
           return (
-            <article
+            <VisualCategoryCard
               key={id}
-              className="flex min-h-[200px] flex-col rounded-card border border-line bg-surface p-lg shadow-elev-1"
-            >
-              <h3 className="font-display font-extrabold tracking-tight text-[24px] leading-none text-ink">
-                {product.title}
-              </h3>
-              <p className="mt-sm text-body-sm text-ink-muted">{product.subtitle}</p>
-              <p className="mt-md font-bold text-link">{formatUsd(rate)} / sq ft</p>
-              {maxShort && (
-                <p className="mt-xs text-body-sm text-ink-muted">
-                  Shorter side max {maxShort}&quot;
-                </p>
-              )}
-              <Link href={productOrderHref(id)} className="mt-auto pt-lg inline-block">
-                <span className="inline-flex w-full items-center justify-center gap-xs rounded-btn bg-strong-accent px-md py-sm text-body-sm font-bold text-strong-accent-text transition-colors hover:bg-strong-accent-hover">
-                  Order {product.title} <ArrowRight className="h-4 w-4" aria-hidden />
-                </span>
-              </Link>
-            </article>
+              href={productOrderHref(id)}
+              title={product.title}
+              subtitle={product.subtitle}
+              image={catalogImage(id)}
+              footer={
+                <>
+                  <p className="font-bold text-link">{formatUsd(rate)} / sq ft</p>
+                  {maxShort && (
+                    <p className="mt-xs text-body-sm text-ink-muted">
+                      Shorter side max {maxShort}&quot;
+                    </p>
+                  )}
+                </>
+              }
+            />
           );
         })}
       </div>
@@ -532,37 +516,36 @@ function StandsSection() {
         {stands.map((stand) => {
           const product = PRODUCTS[stand.id];
           return (
-            <article
+            <VisualCategoryCard
               key={stand.id}
-              className="rounded-card border border-line-subtle bg-surface p-xl shadow-elev-2"
-            >
-              <p className="text-body-sm text-ink-muted uppercase tracking-widest">{product.title}</p>
-              <h3 className="font-display text-2xl font-bold text-ink mt-xs">
-                {RETRACTABLE.widthIn}&rdquo; × {RETRACTABLE.heightIn}&rdquo;
-              </h3>
-              <ul className="mt-md space-y-xs text-body text-ink-muted">
-                <li className="flex items-center gap-sm">
-                  <Package className="h-4 w-4 text-strong-accent" aria-hidden />
-                  {stand.extra}
-                </li>
-                <li className="flex items-center gap-sm">
-                  <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
-                  {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} flat shipping per unit via FedEx
-                </li>
-                <li className="flex items-center gap-sm">
-                  <BadgeCheck className="h-4 w-4 text-strong-accent" aria-hidden />
-                  Same 48-hour delivery guarantee
-                </li>
-              </ul>
-              <p className="mt-lg font-display text-[48px] leading-none font-bold text-ink tabular-nums">
-                {formatUsd(stand.price)}
-              </p>
-              <Link href={productOrderHref(stand.id)} className="inline-block mt-lg">
-                <Button variant="cta" size="lg">
-                  Order {product.title} <ArrowRight className="ml-sm h-4 w-4" aria-hidden />
-                </Button>
-              </Link>
-            </article>
+              href={productOrderHref(stand.id)}
+              title={product.title}
+              image={catalogImage(stand.id)}
+              footer={
+                <>
+                  <p className="font-display text-2xl font-bold text-ink">
+                    {RETRACTABLE.widthIn}&rdquo; × {RETRACTABLE.heightIn}&rdquo;
+                  </p>
+                  <ul className="mt-md space-y-xs text-body text-ink-muted">
+                    <li className="flex items-center gap-sm">
+                      <Package className="h-4 w-4 text-strong-accent" aria-hidden />
+                      {stand.extra}
+                    </li>
+                    <li className="flex items-center gap-sm">
+                      <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
+                      {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} flat shipping per unit via FedEx
+                    </li>
+                    <li className="flex items-center gap-sm">
+                      <BadgeCheck className="h-4 w-4 text-strong-accent" aria-hidden />
+                      Same 48-hour delivery guarantee
+                    </li>
+                  </ul>
+                  <p className="mt-lg font-display text-[48px] leading-none font-bold text-ink tabular-nums">
+                    {formatUsd(stand.price)}
+                  </p>
+                </>
+              }
+            />
           );
         })}
       </div>
