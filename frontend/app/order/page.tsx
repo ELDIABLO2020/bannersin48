@@ -4,10 +4,11 @@ import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, X } from "lucide-react";
+import { ArrowRight, ChevronRight, X } from "lucide-react";
 import { getApiClient } from "@/lib/api/client";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CategoryCard } from "@/components/order/CategoryCard";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import {
   HUB_TITLE,
   HUB_SUBTITLE,
@@ -17,11 +18,9 @@ import {
   catalogFilterHref,
   catalogFilterLabel,
   catalogFilterProductIds,
-  isStandProduct,
   productOrderHref,
   type ProductId,
 } from "@bannersin48/shared";
-import type { BannerCatalogCard } from "@bannersin48/api-client";
 
 export default function OrderHubPage() {
   return (
@@ -31,27 +30,25 @@ export default function OrderHubPage() {
   );
 }
 
-function HubSkeleton() {
+function HubCardSkeletonGrid() {
   return (
-    <div className="bg-surface-tint min-h-[60vh]">
-      <div className="mx-auto max-w-content px-md py-xl">
-        <div className="h-10 w-64 bg-line rounded animate-pulse-slow mb-md" />
-        <div className="h-64 bg-line rounded animate-pulse-slow" />
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+      {Array.from({ length: 7 }, (_, i) => (
+        <div key={i} className="aspect-video rounded-card bg-line animate-pulse-slow" />
+      ))}
     </div>
   );
 }
 
-function retractableCard(): BannerCatalogCard {
-  const p = PRODUCTS.RETRACTABLE;
-  return {
-    id: p.id,
-    slug: p.slug,
-    title: p.title,
-    subtitle: p.subtitle,
-    hasMoreInfo: p.hasMoreInfo,
-    route: productOrderHref("RETRACTABLE"),
-  };
+function HubSkeleton() {
+  return (
+    <div className="bg-surface-tint min-h-[60vh]">
+      <div className="mx-auto max-w-content px-md lg:px-xl py-xl">
+        <div className="h-10 w-64 bg-line rounded animate-pulse-slow mb-md" />
+        <HubCardSkeletonGrid />
+      </div>
+    </div>
+  );
 }
 
 function OrderHub() {
@@ -69,16 +66,10 @@ function OrderHub() {
   const allowedIds = catalogFilterProductIds(need);
   const filterLabel = catalogFilterLabel(need);
 
-  const allCards = useMemo(() => {
-    const withRetractable = cards.some((c) => c.slug === "retractable")
-      ? cards
-      : [...cards, retractableCard()];
-    if (!allowedIds) return withRetractable;
-    return withRetractable.filter((c) => allowedIds.includes(c.id as ProductId));
+  const hubCards = useMemo(() => {
+    if (!allowedIds) return cards;
+    return cards.filter((c) => allowedIds.includes(c.id as ProductId));
   }, [cards, allowedIds]);
-
-  const bannerCards = allCards.filter((c) => !isStandProduct(c.id as ProductId));
-  const standCards = allCards.filter((c) => isStandProduct(c.id as ProductId));
 
   return (
     <div className="bg-surface-tint min-h-[60vh]">
@@ -122,22 +113,30 @@ function OrderHub() {
           </p>
         )}
 
-        {isLoading && <p className="text-body text-ink-muted">Loading catalog…</p>}
+        {isLoading && <HubCardSkeletonGrid />}
 
-        {bannerCards.length > 0 && (
-          <CardGrid cards={bannerCards} onMoreInfo={setInfoSlug} />
+        {hubCards.length > 0 && (
+          <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+            {hubCards.map((card) => (
+              <CategoryCard key={card.slug} card={card} onMoreInfo={setInfoSlug} />
+            ))}
+          </ScrollReveal>
         )}
 
-        {standCards.length > 0 && (
-          <div className="mt-2xl">
-            <h2 className="font-display text-heading-h4 text-ink mb-md">Banner stands</h2>
-            <CardGrid cards={standCards} onMoreInfo={setInfoSlug} />
-          </div>
-        )}
-
-        {!isLoading && allCards.length === 0 && (
+        {!isLoading && hubCards.length === 0 && (
           <p className="text-body text-ink-muted">No products match this filter.</p>
         )}
+
+        <p className="mt-lg text-body-sm text-ink-muted font-body">
+          Need a retractable stand?{" "}
+          <Link
+            href={productOrderHref("RETRACTABLE")}
+            className="inline-flex items-center gap-xs font-semibold text-link no-underline hover:underline"
+          >
+            Order a retractable banner
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </p>
 
         {!need && <ComparisonStrip />}
       </div>
@@ -171,43 +170,6 @@ function Chip({
     >
       {children}
     </button>
-  );
-}
-
-function CardGrid({
-  cards,
-  onMoreInfo,
-}: {
-  cards: BannerCatalogCard[];
-  onMoreInfo: (slug: string) => void;
-}) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
-      {cards.map((card) => (
-        <Card key={card.slug} data-testid={`hub-card-${card.slug}`} className="bg-surface flex flex-col">
-          <h2 className="font-display text-heading-h4 text-ink">{card.title}</h2>
-          <p className="text-body-sm text-ink-muted mt-xs flex-1">{card.subtitle}</p>
-          <div className="flex flex-wrap gap-sm mt-lg">
-            {card.hasMoreInfo && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                data-testid={`hub-more-info-${card.slug}`}
-                onClick={() => onMoreInfo(card.slug)}
-              >
-                More info
-              </Button>
-            )}
-            <Link href={card.route} data-testid={`hub-order-${card.slug}`}>
-              <Button variant="cta" size="sm">
-                Order
-              </Button>
-            </Link>
-          </div>
-        </Card>
-      ))}
-    </div>
   );
 }
 

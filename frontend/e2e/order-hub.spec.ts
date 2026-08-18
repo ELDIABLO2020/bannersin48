@@ -15,7 +15,7 @@ test.describe("BANNER order hub", () => {
     await page.goto("/order");
     await waitForHub(page);
     const cards = page.locator("[data-testid^='hub-card-']");
-    await expect(cards).toHaveCount(8);
+    await expect(cards).toHaveCount(7);
     await expect(page.getByTestId("hub-card-hd-banner")).toBeVisible();
     await expect(page.getByTestId("hub-card-hdpe")).toBeVisible();
     await expect(page.getByTestId("hub-card-canvas")).toBeVisible();
@@ -23,7 +23,8 @@ test.describe("BANNER order hub", () => {
     await expect(page.getByTestId("hub-card-poster")).toBeVisible();
     await expect(page.getByTestId("hub-card-no-curl")).toBeVisible();
     await expect(page.getByTestId("hub-card-econostand")).toBeVisible();
-    await expect(page.getByTestId("hub-card-retractable")).toBeVisible();
+    await expect(page.getByTestId("hub-card-retractable")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /order a retractable banner/i })).toBeVisible();
   });
 
   test("mesh more info opens modal with webbing", async ({ page }, testInfo) => {

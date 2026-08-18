@@ -139,6 +139,42 @@ export const placeholders = {
     width: 400,
     height: 240,
   },
+  catalogHdpe: {
+    src: "/images/catalog/hdpe.jpg",
+    alt: "Lightweight outdoor banner on a yard frame at a suburban home",
+    width: 1600,
+    height: 900,
+  },
+  catalogCanvas: {
+    src: "/images/catalog/canvas.jpg",
+    alt: "Framed canvas print hanging on a gallery wall",
+    width: 1600,
+    height: 900,
+  },
+  catalogMesh: {
+    src: "/images/catalog/mesh.jpg",
+    alt: "Perforated mesh banner on a chain-link construction fence",
+    width: 1600,
+    height: 900,
+  },
+  catalogPoster: {
+    src: "/images/catalog/poster.jpg",
+    alt: "Indoor retail poster displayed in a cafe window",
+    width: 1600,
+    height: 900,
+  },
+  catalogNoCurl: {
+    src: "/images/catalog/no-curl.jpg",
+    alt: "Lay-flat no-curl banner on a trade-show table display",
+    width: 1600,
+    height: 900,
+  },
+  catalogEconostand: {
+    src: "/images/catalog/econostand.jpg",
+    alt: "Indoor banner stand in a corporate lobby",
+    width: 1600,
+    height: 900,
+  },
 } as const satisfies Record<string, PlaceholderAsset>;
 
 export type PlaceholderKey = keyof typeof placeholders;
