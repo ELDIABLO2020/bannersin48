@@ -3,18 +3,19 @@ import { ArrowRight } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders, type PlaceholderKey } from "@/content/placeholders";
+import { catalogFilterHref, type CatalogUseCaseId } from "@bannersin48/shared";
 
 const INDUSTRIES: ReadonlyArray<{
-  href: string;
+  filterId: CatalogUseCaseId;
   label: string;
   imageKey: PlaceholderKey;
 }> = [
-  { href: "/order/hd-banner?use=contractor", label: "Contractor", imageKey: "industryContractor" },
-  { href: "/order/hd-banner?use=restaurant", label: "Restaurant", imageKey: "industryRestaurant" },
-  { href: "/order/hd-banner?use=school", label: "School & Sports", imageKey: "industrySchool" },
-  { href: "/order/hd-banner?use=events", label: "Events", imageKey: "industryEvents" },
-  { href: "/order/hd-banner?use=business", label: "Business", imageKey: "industryBusiness" },
-  { href: "/order/hd-banner?use=real-estate", label: "Real Estate", imageKey: "industryRealEstate" },
+  { filterId: "contractor", label: "Contractor", imageKey: "industryContractor" },
+  { filterId: "restaurant", label: "Restaurant", imageKey: "industryRestaurant" },
+  { filterId: "school", label: "School & Sports", imageKey: "industrySchool" },
+  { filterId: "events", label: "Events", imageKey: "industryEvents" },
+  { filterId: "business", label: "Business", imageKey: "industryBusiness" },
+  { filterId: "real-estate", label: "Real Estate", imageKey: "industryRealEstate" },
 ];
 
 export function IndustriesGrid() {
@@ -30,13 +31,13 @@ export function IndustriesGrid() {
             Customized banners for every use case
           </h2>
           <p className="mt-md mx-auto max-w-2xl text-body text-ink-muted font-body">
-            From jobsites to grand openings, pick the path that matches your banner job.
+            From jobsites to grand openings, we recommend the products that fit the job.
           </p>
           <Link
-            href="/order/hd-banner"
+            href="/order"
             className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
           >
-            View all use cases
+            View all products
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </ScrollReveal>
@@ -46,7 +47,7 @@ export function IndustriesGrid() {
             return (
               <Link
                 key={ind.label}
-                href={ind.href}
+                href={catalogFilterHref(ind.filterId)}
                 className="group rounded-card overflow-hidden border border-line bg-surface shadow-elev-1 hover:shadow-elev-2 hover:-translate-y-0.5 transition-all no-underline"
               >
                 <div className="relative aspect-[4/3] overflow-hidden">

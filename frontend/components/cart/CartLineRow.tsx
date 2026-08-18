@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { formatUsd } from "@/lib/utils/format";
 import { Trash2 } from "lucide-react";
 import type { CartLine } from "@/lib/stores/cart";
-import { PRODUCTS, productIdForMaterial, type ProductId } from "@bannersin48/shared";
+import { PRODUCTS, productIdForMaterial, finishingSummary, type ProductId } from "@bannersin48/shared";
 import { materialLabel } from "@/components/builder/builderRules";
 
 interface CartLineRowProps {
@@ -22,6 +22,7 @@ export function CartLineRow({ line: l, onRemove, onUpdateQty, bare = false }: Ca
   const productId: ProductId = (l.productId as ProductId | undefined) ?? productIdForMaterial(l.material);
   const productTitle = PRODUCTS[productId].title;
   const mat = materialLabel(l.material);
+  const finish = finishingSummary(productId, l.finishing);
   const heading =
     productId === "RETRACTABLE"
       ? 'Retractable Banner (33.5" × 80")'
@@ -36,7 +37,11 @@ export function CartLineRow({ line: l, onRemove, onUpdateQty, bare = false }: Ca
           Requested: {l.display.requestedLabel} · Billable: {l.display.billableLabel}
           {l.billableSqFt > 0 && ` · ${l.billableSqFt} sq ft`}
         </p>
-        <p className="text-body-sm text-ink-muted mt-xs">Finishing: {finishLabel(l.finishing)}</p>
+        {finish && (
+          <p className="text-body-sm text-ink-muted mt-xs">
+            Finishing: {finish}
+          </p>
+        )}
         <div className="flex items-center gap-sm mt-md">
           <label className="text-body-sm text-ink-muted" htmlFor={`qty-${l.id}`}>
             Qty
@@ -70,18 +75,4 @@ export function CartLineRow({ line: l, onRemove, onUpdateQty, bare = false }: Ca
 
   if (bare) return body;
   return <Card className="bg-surface">{body}</Card>;
-}
-
-function finishLabel(f: {
-  welding: boolean;
-  grommets: boolean;
-  windSlits: boolean;
-  polePockets: boolean;
-  polePocketPlacement?: string;
-}) {
-  const parts: string[] = [];
-  parts.push(f.polePockets ? `Pole pockets${f.polePocketPlacement ? ` (${f.polePocketPlacement})` : ""}` : "Welded");
-  parts.push(f.polePockets ? "— (pockets)" : f.grommets ? "Grommets" : "No grommets");
-  if (f.windSlits) parts.push("Wind slits");
-  return parts.join(" · ");
 }

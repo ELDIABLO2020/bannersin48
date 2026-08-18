@@ -4,18 +4,18 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Artwork is handled in-builder. Redirect legacy /order/artwork into the vinyl
- * builder with the image picker open.
+ * Artwork is handled in-builder. Send legacy /order/artwork to the catalog hub
+ * so the shopper picks a product first.
  */
 export default function ArtworkPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/order/hd-banner?picker=1");
+    router.replace("/order");
   }, [router]);
 
   return (
     <div className="bg-surface-tint min-h-[40vh] flex items-center justify-center">
-      <p className="text-body text-ink-muted">Opening artwork library…</p>
+      <p className="text-body text-ink-muted">Opening the product catalog…</p>
     </div>
   );
 }

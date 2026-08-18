@@ -196,9 +196,9 @@ test.describe("Vinyl builder", () => {
   });
 });
 
-test("artwork route redirects into builder picker", async ({ page }, testInfo) => {
+test("artwork route redirects to the catalog hub", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
   await page.goto("/order/artwork");
-  await expect(page).toHaveURL(/\/order\/hd-banner\?picker=1/, { timeout: 10_000 });
-  await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 15_000 });
+  await expect(page).toHaveURL(/\/order\/?$/, { timeout: 10_000 });
+  await expect(page.getByTestId("hub-card-hd-banner")).toBeVisible({ timeout: 15_000 });
 });

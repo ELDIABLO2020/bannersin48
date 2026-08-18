@@ -5,14 +5,14 @@ import { ChevronRight } from "lucide-react";
 
 export const metadata = {
   title: "How it works — Banners In 48",
-  description: "Order a custom banner in under 3 minutes with our 48-hour delivery promise.",
+  description: "Pick a banner product, upload artwork, approve the proof, and get 48-hour delivery.",
 };
 
 const STEPS = [
-  { n: 1, kind: "size", title: "Pick your size & material", body: "Use a quick-pick or enter custom feet & inches. We round up to billable size and show the live price." },
-  { n: 2, kind: "upload", title: "Upload your artwork", body: "PDF, JPG, or JPEG. We'll show an instant proof — what you upload is what we print." },
-  { n: 3, kind: "proof", title: "Approve your instant proof", body: "Five quick acknowledgements. A 10-minute cancellation window starts after approval." },
-  { n: 4, kind: "delivery", title: "Delivered by noon, guaranteed", body: "FedEx only, anywhere in the US & Canada. If we miss, the $10 shipping fee is refunded." },
+  { n: 1, kind: "size" as const, title: "Pick your product", body: "Choose HD Banner, mesh, poster, canvas, no-curl, or a stand. Custom products take size next; stands are a fixed 33.5\" × 80\"." },
+  { n: 2, kind: "upload" as const, title: "Upload your artwork", body: "PDF, JPEG, PNG, TIFF, or EPS. We'll show an instant proof — what you upload is what we print." },
+  { n: 3, kind: "proof" as const, title: "Approve your instant proof", body: "Five quick acknowledgements. A 10-minute cancellation window starts after approval." },
+  { n: 4, kind: "delivery" as const, title: "Delivered by noon, guaranteed", body: "FedEx only, anywhere in the US & Canada. If we miss, the $10 shipping fee is refunded." },
 ] as const;
 
 export default function HowItWorksPage() {

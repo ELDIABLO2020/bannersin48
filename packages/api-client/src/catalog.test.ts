@@ -2,7 +2,6 @@ import { setupServer } from "msw/node";
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { handlers } from "./mocks/handlers";
 import { createApiClient } from "./apiClient";
-import { ApiClientError } from "./apiClient";
 
 const server = setupServer(...handlers);
 
@@ -18,7 +17,7 @@ describe("banner catalog + quote", () => {
     expect(cards).toHaveLength(7);
     expect(cards[0]?.slug).toBe("hd-banner");
     expect(cards[6]?.slug).toBe("econostand");
-    expect(cards[6]?.hasMoreInfo).toBe(false);
+    expect(cards[6]?.hasMoreInfo).toBe(true);
   });
 
   it("returns mesh more-info including webbing", async () => {
@@ -26,9 +25,10 @@ describe("banner catalog + quote", () => {
     expect(info.options.some((o) => o.includes("Webbing reinforcement"))).toBe(true);
   });
 
-  it("404s econostand more-info", async () => {
-    await expect(client().getBannerCatalogInfo("econostand")).rejects.toBeInstanceOf(ApiClientError);
-    await expect(client().getBannerCatalogInfo("econostand")).rejects.toMatchObject({ status: 404 });
+  it("returns econostand more-info", async () => {
+    const info = await client().getBannerCatalogInfo("econostand");
+    expect(info.commonUses.length).toBeGreaterThan(0);
+    expect(info.options.some((o) => o.includes("33.5"))).toBe(true);
   });
 
   it("quotes poster 3×6 at $118", async () => {

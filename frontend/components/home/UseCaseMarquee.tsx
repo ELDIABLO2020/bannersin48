@@ -1,18 +1,8 @@
 import Link from "next/link";
-
-const USE_CASES = [
-  { label: "Contractors", href: "/order/hd-banner?use=contractor" },
-  { label: "Restaurants", href: "/order/hd-banner?use=restaurant" },
-  { label: "Schools", href: "/order/hd-banner?use=school" },
-  { label: "Real Estate", href: "/order/hd-banner?use=real-estate" },
-  { label: "Events", href: "/order/hd-banner?use=events" },
-  { label: "Retail", href: "/order/hd-banner?use=business" },
-  { label: "Sports Teams", href: "/order/hd-banner?use=school" },
-  { label: "Grand Openings", href: "/order/hd-banner?use=business" },
-] as const;
+import { CATALOG_MARQUEE, catalogFilterHref } from "@bannersin48/shared";
 
 export function UseCaseMarquee() {
-  const items = [...USE_CASES, ...USE_CASES];
+  const items = [...CATALOG_MARQUEE, ...CATALOG_MARQUEE];
 
   return (
     <section className="overflow-hidden bg-soft-accent text-ink border-y border-line" aria-label="Popular banner use cases">
@@ -20,7 +10,7 @@ export function UseCaseMarquee() {
         {items.map((item, index) => (
           <span key={`${item.label}-${index}`} className="inline-flex items-center gap-md whitespace-nowrap">
             <Link
-              href={item.href}
+              href={catalogFilterHref(item.filterId)}
               className="rounded-pill border border-line bg-surface px-md py-xs text-ink no-underline hover:border-link hover:text-link transition-colors"
             >
               {item.label}

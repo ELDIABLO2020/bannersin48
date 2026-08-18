@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, FileCheck2, FileUp, Printer, Ruler, Truck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, FileCheck2, FileUp, LayoutGrid, Printer, Truck } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
@@ -10,15 +10,15 @@ import { placeholders } from "@/content/placeholders";
 const STEPS = [
   {
     n: 1,
-    icon: Ruler,
-    title: "Choose your size",
-    body: "Pick a standard banner size or enter a custom dimension up to 10' x 10'.",
+    icon: LayoutGrid,
+    title: "Pick a product",
+    body: "Choose vinyl, mesh, paper, canvas, or a stand — then set size when the product is custom.",
   },
   {
     n: 2,
     icon: FileUp,
     title: "Upload artwork",
-    body: "Submit a PDF, JPG, or JPEG file and review the proof before production starts.",
+    body: "Submit a PDF, JPEG, PNG, TIFF, or EPS file and review the proof before production starts.",
   },
   {
     n: 3,
@@ -141,8 +141,8 @@ export function HowItWorks() {
             <div>
               <p className="text-sm font-semibold text-strong-accent">Production promise</p>
               <p className="mt-xs max-w-2xl text-ink-muted">
-                The workflow is intentionally narrow: banner size, artwork upload, proof approval,
-                production, and shipment.
+                The workflow is intentionally narrow: pick a product, set size, upload artwork,
+                approve the proof, then we produce and ship.
               </p>
             </div>
             <div className="flex items-center gap-sm text-sm font-bold text-ink">

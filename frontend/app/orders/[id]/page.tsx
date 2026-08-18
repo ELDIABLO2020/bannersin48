@@ -10,6 +10,7 @@ import { formatUsd } from "@/lib/utils/format";
 import { ChevronRight } from "lucide-react";
 import { StatusHeroCard } from "@/components/orders/StatusHeroCard";
 import { OrderTimeline } from "@/components/orders/OrderTimeline";
+import { PRODUCTS, finishingSummary, productIdForMaterial, type ProductId } from "@bannersin48/shared";
 
 export default function OrderDetailPage() {
   const params = useParams<{ id: string }>();
@@ -72,22 +73,27 @@ export default function OrderDetailPage() {
             <Card className="bg-surface">
               <h2 className="font-bold text-heading-h4 text-ink mb-md">Order details</h2>
               <ul className="space-y-md">
-                {order.lines.map((l) => (
+                {order.lines.map((l) => {
+                  const productId: ProductId =
+                    (l.productId as ProductId | undefined) ?? productIdForMaterial(l.material);
+                  const finish = finishingSummary(productId, l.finishing);
+                  return (
                   <li key={l.id} className="border-t border-line first:border-0 pt-md first:pt-0">
                     <div className="flex justify-between gap-md">
                       <div>
                         <p className="font-bold text-ink">
-                          {l.billableDims.widthFt}&prime; × {l.billableDims.heightFt}&prime; · {l.material.replaceAll("_", " ")}
+                          {PRODUCTS[productId].title} · {l.billableDims.widthFt}&prime; × {l.billableDims.heightFt}&prime;
                         </p>
                         <p className="text-body-sm text-ink-muted mt-xs">
-                          Qty {l.quantity} · {l.finishing.polePockets ? `Pole pockets (${l.finishing.polePocketPlacement})` : "Welded + grommets"}
-                          {l.finishing.windSlits && " · Wind slits"}
+                          Qty {l.quantity}
+                          {finish ? ` · ${finish}` : ""}
                         </p>
                       </div>
                       <p className="text-heading-h4 font-bold text-ink tabular-nums">{formatUsd(l.totalBeforeTax)}</p>
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </Card>
 

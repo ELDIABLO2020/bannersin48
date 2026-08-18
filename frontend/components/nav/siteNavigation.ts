@@ -1,3 +1,5 @@
+import { PRODUCTS, CATALOG_NAV_PRODUCTS } from "@bannersin48/shared";
+
 export type SiteNavigationItem = {
   href: string;
   label: string;
@@ -8,33 +10,35 @@ export type SiteNavigationGroup = {
   items: ReadonlyArray<SiteNavigationItem>;
 };
 
+const PRODUCT_ITEMS: ReadonlyArray<SiteNavigationItem> = [
+  { href: "/order", label: "All banners" },
+  ...CATALOG_NAV_PRODUCTS.map((id) => ({
+    href: `/order/${PRODUCTS[id].slug}`,
+    label: PRODUCTS[id].title,
+  })),
+  { href: "/sizes", label: "All Sizes & Pricing" },
+  { href: "/order", label: "Upload Artwork" },
+  { href: "/help", label: "Artwork Guidelines" },
+];
+
 export const SITE_NAVIGATION_GROUPS: ReadonlyArray<SiteNavigationGroup> = [
   {
     title: "Products",
-    items: [
-      { href: "/order/hd-banner", label: "HD Banners" },
-      { href: "/order/retractable", label: "Retractable Banners" },
-      { href: "/sizes", label: "All Sizes & Pricing" },
-      { href: "/order/artwork", label: "Upload Artwork" },
-      { href: "/help", label: "Artwork Guidelines" },
-    ],
+    items: PRODUCT_ITEMS,
   },
   {
     title: "Company",
     items: [
-      { href: "/about", label: "About Us" },
       { href: "/reviews", label: "Reviews" },
-      { href: "/guarantee", label: "Delivery Guarantee" },
-      { href: "/quality", label: "Production & Quality" },
+      { href: "/#guarantee", label: "Delivery Guarantee" },
     ],
   },
   {
     title: "Support",
     items: [
       { href: "/help", label: "Help Center" },
-      { href: "/faq", label: "FAQs" },
+      { href: "/help", label: "FAQs" },
       { href: "/orders/lookup", label: "Track Your Order" },
-      { href: "/chat", label: "Chat With Us" },
       { href: "mailto:support@bannersin48.com", label: "Email Support" },
     ],
   },
@@ -44,7 +48,6 @@ export const SITE_NAVIGATION_GROUPS: ReadonlyArray<SiteNavigationGroup> = [
       { href: "/login", label: "Log In" },
       { href: "/register", label: "Create Account" },
       { href: "/dashboard", label: "Reorder" },
-      { href: "/tax-exempt", label: "Tax-Exempt Program" },
     ],
   },
-] as const;
+];

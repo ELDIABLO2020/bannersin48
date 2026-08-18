@@ -9,22 +9,19 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { useCart } from "@/lib/stores/cart";
 import { useCartDrawer } from "@/lib/stores/cart-drawer";
+import {
+  PRODUCTS,
+  CATALOG_NAV_PRODUCTS,
+  CATALOG_USE_CASES,
+  catalogFilterHref,
+  productOrderHref,
+} from "@bannersin48/shared";
 
 const CENTER_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: "/order", label: "Banners" },
   { href: "/sizes", label: "Sizes & Pricing" },
-  { href: "/order/retractable", label: "Retractable" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/help", label: "Help Center" },
-];
-
-const USE_CASES: ReadonlyArray<{ href: string; label: string }> = [
-  { href: "/order/hd-banner?use=business", label: "Business" },
-  { href: "/order/hd-banner?use=restaurant", label: "Restaurant" },
-  { href: "/order/hd-banner?use=contractor", label: "Contractor" },
-  { href: "/order/hd-banner?use=school", label: "School & Sports" },
-  { href: "/order/hd-banner?use=events", label: "Events" },
-  { href: "/order/hd-banner?use=real-estate", label: "Real Estate" },
 ];
 
 function navLinkClass(active: boolean) {
@@ -38,9 +35,10 @@ function navLinkClass(active: boolean) {
 export function TopNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const lineCount = useCart((s) => s.lines.reduce((n, l) => n + l.quantity, 0));
   const toggleDrawer = useCartDrawer((s) => s.toggle);
+  const bannersActive = pathname === "/order" || pathname.startsWith("/order/");
 
   return (
     <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav" aria-label="Banners In 48 home">
@@ -51,44 +49,62 @@ export function TopNav() {
           {CENTER_LINKS.map((l) => (
             <div key={l.href} className="relative">
               {l.label === "Banners" ? (
-                <button
-                  type="button"
-                  onMouseEnter={() => setTemplatesOpen(true)}
-                  onMouseLeave={() => setTemplatesOpen(false)}
-                  onFocus={() => setTemplatesOpen(true)}
-                  className={navLinkClass(
-                    pathname === "/order" ||
-                      (pathname.startsWith("/order/") && !pathname.startsWith("/order/retractable")),
-                  )}
+                <div
+                  onMouseEnter={() => setCatalogOpen(true)}
+                  onMouseLeave={() => setCatalogOpen(false)}
                 >
-                  {l.label}
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
+                  <Link
+                    href="/order"
+                    className={navLinkClass(bannersActive)}
+                    onFocus={() => setCatalogOpen(true)}
+                  >
+                    {l.label}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </Link>
+                  {catalogOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-[34rem] bg-surface rounded-card shadow-elev-2 border border-line p-md z-dropdown grid grid-cols-2 gap-md">
+                      <div>
+                        <p className="px-sm pb-xs text-xs font-bold uppercase tracking-wide text-ink-muted font-body">
+                          Products
+                        </p>
+                        {CATALOG_NAV_PRODUCTS.map((id) => (
+                          <Link
+                            key={id}
+                            href={productOrderHref(id)}
+                            className="flex items-center justify-between gap-xs px-sm py-xs text-body text-ink no-underline hover:bg-soft-accent hover:text-link font-body"
+                          >
+                            <span>{PRODUCTS[id].title}</span>
+                          </Link>
+                        ))}
+                        <Link
+                          href="/order"
+                          className="mt-xs flex items-center gap-xs px-sm py-xs text-sm font-semibold text-link no-underline hover:underline font-body"
+                        >
+                          All banners
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                        </Link>
+                      </div>
+                      <div>
+                        <p className="px-sm pb-xs text-xs font-bold uppercase tracking-wide text-ink-muted font-body">
+                          Shop by need
+                        </p>
+                        {CATALOG_USE_CASES.map((s) => (
+                          <Link
+                            key={s.id}
+                            href={catalogFilterHref(s.id)}
+                            className="flex items-center justify-between gap-xs px-sm py-xs text-body text-ink no-underline hover:bg-soft-accent hover:text-link font-body"
+                          >
+                            <span>{s.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <Link href={l.href} className={navLinkClass(pathname === l.href || pathname.startsWith(`${l.href}/`))}>
                   {l.label}
                 </Link>
-              )}
-
-              {l.label === "Banners" && templatesOpen && (
-                <div
-                  onMouseEnter={() => setTemplatesOpen(true)}
-                  onMouseLeave={() => setTemplatesOpen(false)}
-                  className="absolute top-full left-0 mt-1 w-56 bg-surface rounded-card shadow-elev-2 border border-line py-sm z-dropdown"
-                >
-                  {USE_CASES.map((s) => (
-                    <Link
-                      key={s.label}
-                      href={s.href}
-                      className="flex items-center justify-between gap-xs px-md py-sm text-body text-ink no-underline hover:bg-soft-accent hover:text-link font-body"
-                    >
-                      <span>{s.label}</span>
-                    </Link>
-                  ))}
-                  <p className="px-md pt-xs text-xs text-ink-muted border-t border-line mt-xs font-body">
-                    Use-case quick starts
-                  </p>
-                </div>
               )}
             </div>
           ))}

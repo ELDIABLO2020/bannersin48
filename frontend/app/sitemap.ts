@@ -14,7 +14,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/order/no-curl`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/order/econostand`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/order/retractable`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/sizes`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/how-it-works`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/help`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/reviews`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
   ];
 }

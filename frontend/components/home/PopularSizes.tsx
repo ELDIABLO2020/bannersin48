@@ -89,19 +89,29 @@ export function PopularSizes() {
               id="popular-sizes-h"
               className="font-display font-extrabold tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink uppercase"
             >
-              Popular sizes &amp; pricing
+              HD Banner popular sizes
             </h2>
             <p className="text-body text-ink-muted mt-md max-w-2xl">
-              High quality, fast turnaround, and clear pricing before checkout.
+              Vinyl pricing for the sizes teams order most. Mesh, paper, canvas, and stands are
+              priced on their product pages.
             </p>
           </div>
-          <Link
-            href="/sizes"
-            className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
-          >
-            View all sizes
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
+          <div className="flex flex-col gap-sm sm:items-end">
+            <Link
+              href="/sizes"
+              className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
+            >
+              View all sizes
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link
+              href="/order"
+              className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
+            >
+              Other products
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
         </ScrollReveal>
 
         <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md">

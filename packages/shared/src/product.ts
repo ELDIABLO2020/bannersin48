@@ -250,7 +250,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     slug: "econostand",
     title: "Econostand",
     subtitle: "All-in-one 33.5″ × 80″ banner stand",
-    hasMoreInfo: false,
+    hasMoreInfo: true,
     sizeMode: "fixed",
     fixedSizeIn: { ...FIXED_33_5_X_80 },
     flatPriceUsd: ECONOSTAND_FLAT_USD,
@@ -261,25 +261,33 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     defaultFinishing: { ...NONE_FINISHING },
     defaultSize: { ...SIZE_FIXED },
     limits: { minAxisIn: 12, maxBillableFt: 10 },
-    hubCopy: { commonUses: [], environment: [], options: [] },
+    hubCopy: {
+      commonUses: ["Trade shows", "Retail floors", "Lobby and reception displays"],
+      environment: ["Indoor"],
+      options: ['Fixed 33.5" × 80"', "Stand and graphic included", "Flat-priced"],
+    },
   },
   RETRACTABLE: {
     id: "RETRACTABLE",
     slug: "retractable",
     title: "Retractable Banner",
     subtitle: "Portable stand with printed graphic",
-    hasMoreInfo: false,
+    hasMoreInfo: true,
     sizeMode: "fixed",
     fixedSizeIn: { widthIn: RETRACTABLE.widthIn, heightIn: RETRACTABLE.heightIn },
     flatPriceUsd: RETRACTABLE.priceUsd,
     materials: ["RETRACTABLE"],
     ratePerSqFt: constantRate(0),
-    printSides: "singleOnly",
     dock: { ...DOCK_NONE },
+    printSides: "singleOnly",
     defaultFinishing: { ...NONE_FINISHING },
     defaultSize: { ...SIZE_FIXED },
     limits: { minAxisIn: 12, maxBillableFt: 10 },
-    hubCopy: { commonUses: [], environment: [], options: [] },
+    hubCopy: {
+      commonUses: ["Trade shows", "Presentations", "Retail and events"],
+      environment: ["Indoor"],
+      options: ['Fixed 33.5" × 80"', "Stand, graphic, and carrying case included", "Flat-priced"],
+    },
   },
 };
 
@@ -329,4 +337,37 @@ export function validateProductSize(config: ProductConfig, d: Dimensions): SizeV
     };
   }
   return { ok: true };
+}
+
+export function finishingSummary(
+  productId: ProductId,
+  finishing: Pick<
+    Finishing,
+    "welding" | "grommets" | "windSlits" | "polePockets" | "polePocketPlacement" | "webbing" | "rope"
+  >,
+): string | null {
+  const dock = PRODUCTS[productId].dock;
+  if (
+    !dock.welding &&
+    !dock.grommets &&
+    !dock.windSlits &&
+    !dock.polePockets &&
+    !dock.webbing &&
+    !dock.rope
+  ) {
+    return null;
+  }
+  const parts: string[] = [];
+  if (dock.polePockets && finishing.polePockets) {
+    parts.push(
+      `Pole pockets${finishing.polePocketPlacement ? ` (${finishing.polePocketPlacement})` : ""}`,
+    );
+  } else {
+    if (dock.welding) parts.push(finishing.welding ? "Welded" : "No welding");
+    if (dock.grommets) parts.push(finishing.grommets ? "Grommets" : "No grommets");
+  }
+  if (dock.webbing) parts.push(finishing.webbing ? "Webbing" : "No webbing");
+  if (dock.rope && finishing.rope) parts.push("Rope");
+  if (dock.windSlits && finishing.windSlits) parts.push("Wind slits");
+  return parts.length > 0 ? parts.join(" · ") : null;
 }

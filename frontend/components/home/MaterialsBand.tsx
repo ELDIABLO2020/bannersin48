@@ -3,32 +3,52 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders, type PlaceholderKey } from "@/content/placeholders";
+import { PRODUCTS, productOrderHref, type ProductId } from "@bannersin48/shared";
 
-const MATERIALS: ReadonlyArray<{
-  name: string;
-  label?: string;
-  description: string;
+const FAMILIES: ReadonlyArray<{
+  id: ProductId;
   imageKey: PlaceholderKey;
   points: readonly string[];
 }> = [
   {
-    name: "13 oz Vinyl",
-    label: "Most ordered",
-    description: "Standard indoor and outdoor vinyl for events, retail, contractors, and general signage.",
+    id: "HD_BANNER",
     imageKey: "material13oz",
-    points: ["Water resistant", "Strong color", "Great everyday durability"],
+    points: ["13, 15, or 18 oz vinyl", "Indoor and outdoor", "Double-sided on 18 oz"],
   },
   {
-    name: "15 oz Premium Vinyl",
-    description: "A heavier option when the banner needs a more substantial outdoor feel.",
+    id: "MESH",
+    imageKey: "industryContractor",
+    points: ["Lets wind pass through", "Fences and jobsites", "Webbing reinforcement"],
+  },
+  {
+    id: "HDPE",
     imageKey: "material15oz",
-    points: ["Thicker hand feel", "Premium finish", "Outdoor-ready"],
+    points: ["Water- and tear-resistant", "Lightweight", "Short-term indoor or outdoor"],
   },
   {
-    name: "18 oz Blockout",
-    description: "Heavy-duty opaque vinyl and the material option for double-sided work.",
+    id: "POSTER",
+    imageKey: "industryBusiness",
+    points: ["Satin paper", "Indoor POP", "Short-term events"],
+  },
+  {
+    id: "NO_CURL",
+    imageKey: "industryEvents",
+    points: ["Lays flat and stays flat", "Indoor or outdoor", 'Shorter side up to 35"'],
+  },
+  {
+    id: "CANVAS",
     imageKey: "material18oz",
-    points: ["Opaque construction", "Double-sided available", "Maximum durability"],
+    points: ["Poly-cotton canvas", "Stretch and frame", "Indoor displays"],
+  },
+  {
+    id: "ECONOSTAND",
+    imageKey: "industryRestaurant",
+    points: ['Fixed 33.5" × 80"', "Stand included", "Indoor floors"],
+  },
+  {
+    id: "RETRACTABLE",
+    imageKey: "industryRealEstate",
+    points: ["Stand, graphic, and case", "Trade shows and retail", "Portable"],
   },
 ];
 
@@ -40,64 +60,64 @@ export function MaterialsBand() {
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <ScrollReveal className="mb-2xl text-center">
-          <p className="text-strong-accent font-semibold text-sm mb-md font-body">Materials</p>
+          <p className="text-strong-accent font-semibold text-sm mb-md font-body">Products</p>
           <h2
             id="materials-h"
             className="font-display tracking-tight text-[clamp(34px,4.5vw,68px)] leading-[1.05] text-ink uppercase"
           >
-            Choose the right material
+            Choose the right product
           </h2>
           <p className="text-body text-ink-muted mt-md mx-auto max-w-2xl font-body">
-            Durable vinyl options for different environments, visibility needs, and handling.
+            HD vinyl for everyday installs, mesh for wind, paper and canvas for indoor work, and
+            stands when you need hardware.
           </p>
           <Link
-            href="/order/hd-banner"
+            href="/sizes"
             className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
           >
-            Compare materials
+            Compare products and pricing
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </ScrollReveal>
 
-        <ScrollReveal className="grid grid-cols-1 md:grid-cols-3 gap-lg">
-          {MATERIALS.map((material) => {
-            const image = placeholders[material.imageKey];
+        <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+          {FAMILIES.map((family) => {
+            const product = PRODUCTS[family.id];
+            const image = placeholders[family.imageKey];
             return (
-              <article
-                key={material.name}
-                className="overflow-hidden rounded-card border border-line bg-surface shadow-elev-1"
+              <Link
+                key={family.id}
+                href={productOrderHref(family.id)}
+                className="overflow-hidden rounded-card border border-line bg-surface shadow-elev-1 no-underline transition-all hover:-translate-y-0.5 hover:shadow-elev-2"
               >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <PlaceholderImage
-                    src={image.src}
-                    alt={image.alt}
-                    width={image.width}
-                    height={image.height}
-                    rounded="none"
-                    overlay
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  {material.label && (
-                    <span className="absolute bottom-md right-md rounded-pill bg-strong-accent px-md py-sm text-xs font-bold text-strong-accent-text font-body">
-                      {material.label}
-                    </span>
-                  )}
-                </div>
-                <div className="p-lg">
-                  <h3 className="font-bold text-heading-h4 text-ink font-body">{material.name}</h3>
-                  <p className="mt-sm text-sm text-ink-muted leading-relaxed font-body">
-                    {material.description}
-                  </p>
-                  <ul className="mt-md space-y-xs text-sm text-ink font-body">
-                    {material.points.map((point) => (
-                      <li key={point} className="flex items-center gap-xs">
-                        <CheckCircle2 className="h-4 w-4 text-ink-muted" aria-hidden />
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </article>
+                <article>
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <PlaceholderImage
+                      src={image.src}
+                      alt={image.alt}
+                      width={image.width}
+                      height={image.height}
+                      rounded="none"
+                      overlay
+                      sizes="(max-width: 768px) 100vw, 25vw"
+                    />
+                  </div>
+                  <div className="p-lg">
+                    <h3 className="font-bold text-heading-h4 text-ink font-body">{product.title}</h3>
+                    <p className="mt-sm text-sm text-ink-muted leading-relaxed font-body">
+                      {product.subtitle}
+                    </p>
+                    <ul className="mt-md space-y-xs text-sm text-ink font-body">
+                      {family.points.map((point) => (
+                        <li key={point} className="flex items-center gap-xs">
+                          <CheckCircle2 className="h-4 w-4 text-ink-muted" aria-hidden />
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              </Link>
             );
           })}
         </ScrollReveal>

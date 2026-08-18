@@ -32,10 +32,13 @@ export const metadata: Metadata = {
     template: "%s | Banners In 48",
   },
   description:
-    "Order custom vinyl and retractable banners online. $4/sq ft. $10 flat shipping. Delivered by noon in 48 business hours. Order by 9 PM ET.",
+    "Order custom vinyl, mesh, poster, canvas, and banner stands online. $10 flat shipping. Delivered by noon in 48 business hours. Order by 9 PM ET.",
   keywords: [
     "custom banners",
     "vinyl banners",
+    "mesh banners",
+    "poster printing",
+    "canvas prints",
     "retractable banners",
     "48 hour banner delivery",
     "fast custom banners",
@@ -47,7 +50,7 @@ export const metadata: Metadata = {
     siteName: "Banners In 48",
     title: "Banners In 48 — Custom Banners Delivered in 48 Business Hours",
     description:
-      "Order custom vinyl and retractable banners. $4/sq ft. $10 flat shipping. Delivered by noon in 48 business hours.",
+      "Order custom vinyl, mesh, poster, canvas, and banner stands. $10 flat shipping. Delivered by noon in 48 business hours.",
   },
   twitter: {
     card: "summary_large_image",

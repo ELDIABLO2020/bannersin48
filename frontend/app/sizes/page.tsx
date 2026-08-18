@@ -5,7 +5,6 @@ import {
   BadgeCheck,
   ChevronRight,
   Package,
-  Ruler,
   Scissors,
   Truck,
 } from "lucide-react";
@@ -19,18 +18,25 @@ import {
   MAX_QUANTITY_PER_LINE,
   MIN_BILLABLE_FT,
   POPULAR_SIZES,
+  PRODUCTS,
+  ECONOSTAND_FLAT_USD,
   RETRACTABLE,
   SHIPPING_FLAT_PER_UNIT_USD,
+  isVinyl,
+  productOrderHref,
   type Material,
+  type ProductId,
 } from "@bannersin48/shared";
 
 export const metadata = {
   title: "Sizes & pricing — Banners In 48",
   description:
-    "Transparent per-square-foot pricing for vinyl banners. Free welding and grommets, $10 flat shipping per banner, and a 10 ft × 10 ft instant-pricing ceiling.",
+    "Transparent pricing for HD vinyl, mesh, HDPE, poster, canvas, no-curl, and banner stands. $10 flat shipping per banner.",
 };
 
-const VINYL_MATERIALS = MATERIALS.filter((m) => m.id !== "RETRACTABLE");
+const VINYL_MATERIALS = MATERIALS.filter((m) => isVinyl(m.id));
+
+const SQFT_PRODUCTS: ReadonlyArray<ProductId> = ["HDPE", "MESH", "POSTER", "NO_CURL", "CANVAS"];
 
 const FINISHING_ADDONS = [
   {
@@ -127,22 +133,22 @@ export default function SizesAndPricingPage() {
                 Sizes &amp; pricing
               </h1>
               <p className="text-body text-ink-muted mt-md max-w-2xl">
-                Transparent per-square-foot pricing. Welding and grommets are always included,
-                add-ons are listed up front, and shipping is a flat{" "}
-                {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} per banner.
+                HD Banner vinyl has a size matrix below. Other products are priced per square foot
+                or as a flat stand. Shipping is {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} per banner.
+                Welding and grommets apply to HD Banner and Mesh only.
               </p>
               <div className="mt-lg flex flex-wrap gap-sm">
                 <a
                   href="#all-sizes-h"
                   className="inline-flex items-center gap-xs rounded-btn bg-strong-accent px-lg py-sm text-body-sm font-bold text-strong-accent-text no-underline transition-colors hover:bg-strong-accent-hover"
                 >
-                  Browse standard sizes <ArrowRight className="h-4 w-4" aria-hidden />
+                  Browse HD Banner sizes <ArrowRight className="h-4 w-4" aria-hidden />
                 </a>
                 <a
-                  href="#material-guide-h"
+                  href="#other-products-h"
                   className="inline-flex items-center gap-xs rounded-btn border border-line px-lg py-sm text-body-sm font-bold text-ink no-underline transition-colors hover:border-strong-accent hover:text-link"
                 >
-                  Compare materials
+                  Other products
                 </a>
               </div>
             </div>
@@ -168,12 +174,13 @@ export default function SizesAndPricingPage() {
         <PricingMatrix />
         <MaterialGuide />
         <AllSizesGrid />
+        <OtherProductsSection />
         <FinishingSection />
-        <RetractableSection />
+        <StandsSection />
         <ConstraintsSection />
 
         <div className="text-center mt-3xl">
-          <Link href="/order/hd-banner">
+          <Link href="/order">
             <Button variant="cta" size="lg">
               Start your order <ChevronRight className="ml-sm h-5 w-5" aria-hidden />
             </Button>
@@ -189,8 +196,8 @@ function MaterialGuide() {
     <section className="mb-3xl" aria-labelledby="material-guide-h">
       <SectionHeading
         id="material-guide-h"
-        title="Choose the right material"
-        subtitle="A quick visual guide to the vinyl options shown in the pricing matrix."
+        title="HD Banner vinyl weights"
+        subtitle="13, 15, and 18 oz options shown in the pricing matrix. Order HD Banner to configure finishing."
       />
       <div className="grid grid-cols-1 gap-lg md:grid-cols-3">
         {MATERIAL_GUIDE.map((material) => (
@@ -259,8 +266,8 @@ function PricingMatrix() {
     <section className="mb-3xl" aria-labelledby="pricing-matrix-h">
       <SectionHeading
         id="pricing-matrix-h"
-        title="Pricing matrix"
-        subtitle={`Per-unit product price by size and material. Quantity 1, no add-ons. Add ${formatUsd(
+        title="HD Banner pricing matrix"
+        subtitle={`Per-unit vinyl price by size and weight. Quantity 1, no add-ons. Add ${formatUsd(
           SHIPPING_FLAT_PER_UNIT_USD,
         )} flat shipping per banner.`}
       />
@@ -349,8 +356,8 @@ function AllSizesGrid() {
     <section className="mb-3xl" aria-labelledby="all-sizes-h">
       <SectionHeading
         id="all-sizes-h"
-        title="All standard sizes"
-        subtitle="Every size below is eligible for instant pricing and the 48-hour delivery promise."
+        title="HD Banner standard sizes"
+        subtitle="Every size below is eligible for instant HD Banner pricing and the 48-hour delivery promise."
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
         {POPULAR_SIZES.map((s) => (
@@ -419,8 +426,8 @@ function FinishingSection() {
     <section className="mb-3xl" aria-labelledby="finishing-h">
       <SectionHeading
         id="finishing-h"
-        title="Finishing options & add-ons"
-        subtitle="Welding and grommets are always included. Charged add-ons scale with billable square footage."
+        title="HD Banner and Mesh finishing"
+        subtitle="Welding and grommets are included on HD Banner and Mesh. Paper, canvas, HDPE, and stands have no finishing dock."
       />
       <div className="rounded-card border border-line-subtle bg-surface shadow-elev-1 overflow-hidden">
         <ul className="divide-y divide-line-subtle">
@@ -455,55 +462,110 @@ function FinishingSection() {
   );
 }
 
-function RetractableSection() {
+function OtherProductsSection() {
   return (
-    <section className="mb-3xl" aria-labelledby="retractable-h">
+    <section className="mb-3xl" aria-labelledby="other-products-h">
       <SectionHeading
-        id="retractable-h"
-        title="Retractable banner"
-        subtitle="Fixed size, flat price. Hardware and carrying case included."
+        id="other-products-h"
+        title="Other banner products"
+        subtitle="Per-square-foot rates with product-specific size limits. Order the product to see the live quote."
       />
-      <article className="rounded-card border border-line-subtle bg-surface p-xl shadow-elev-2">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-center">
-          <div className="lg:col-span-7">
-            <p className="text-body-sm text-ink-muted uppercase tracking-widest">
-              BI48-019 · Retractable banner
-            </p>
-            <h3 className="font-display text-2xl font-bold text-ink mt-xs">
-              {RETRACTABLE.widthIn}&rdquo; × {RETRACTABLE.heightIn}&rdquo;
-            </h3>
-            <ul className="mt-md space-y-xs text-body text-ink-muted">
-              <li className="flex items-center gap-sm">
-                <Package className="h-4 w-4 text-strong-accent" aria-hidden />
-                Hardware stand and carrying case included
-              </li>
-              <li className="flex items-center gap-sm">
-                <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
-                {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} flat shipping per unit via FedEx
-              </li>
-              <li className="flex items-center gap-sm">
-                <BadgeCheck className="h-4 w-4 text-strong-accent" aria-hidden />
-                Same Banners In 48 delivery guarantee schedule
-              </li>
-              <li className="flex items-center gap-sm">
-                <Ruler className="h-4 w-4 text-strong-accent" aria-hidden />
-                Max {MAX_QUANTITY_PER_LINE} per line — add more lines for larger quantities
-              </li>
-            </ul>
-          </div>
-          <div className="lg:col-span-5 text-center lg:text-right">
-            <p className="text-body-sm text-ink-muted">Price per unit</p>
-            <p className="font-display text-[56px] leading-none font-bold text-ink tabular-nums">
-              {formatUsd(RETRACTABLE.priceUsd)}
-            </p>
-            <Link href="/order/retractable" className="inline-block mt-lg">
-              <Button variant="cta" size="lg">
-                Order retractable <ArrowRight className="ml-sm h-4 w-4" aria-hidden />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </article>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+        {SQFT_PRODUCTS.map((id) => {
+          const product = PRODUCTS[id];
+          const rate = product.ratePerSqFt(product.materials[0]);
+          const maxShort = product.limits.maxShortSideIn;
+          return (
+            <article
+              key={id}
+              className="flex min-h-[200px] flex-col rounded-card border border-line bg-surface p-lg shadow-elev-1"
+            >
+              <h3 className="font-display font-extrabold tracking-tight text-[24px] leading-none text-ink">
+                {product.title}
+              </h3>
+              <p className="mt-sm text-body-sm text-ink-muted">{product.subtitle}</p>
+              <p className="mt-md font-bold text-link">{formatUsd(rate)} / sq ft</p>
+              {maxShort && (
+                <p className="mt-xs text-body-sm text-ink-muted">
+                  Shorter side max {maxShort}&quot;
+                </p>
+              )}
+              <Link href={productOrderHref(id)} className="mt-auto pt-lg inline-block">
+                <span className="inline-flex w-full items-center justify-center gap-xs rounded-btn bg-strong-accent px-md py-sm text-body-sm font-bold text-strong-accent-text transition-colors hover:bg-strong-accent-hover">
+                  Order {product.title} <ArrowRight className="h-4 w-4" aria-hidden />
+                </span>
+              </Link>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function StandsSection() {
+  const stands: ReadonlyArray<{
+    id: ProductId;
+    price: number;
+    extra: string;
+  }> = [
+    {
+      id: "ECONOSTAND",
+      price: ECONOSTAND_FLAT_USD,
+      extra: "Stand and graphic included",
+    },
+    {
+      id: "RETRACTABLE",
+      price: RETRACTABLE.priceUsd,
+      extra: "Stand, graphic, and carrying case included",
+    },
+  ];
+
+  return (
+    <section className="mb-3xl" aria-labelledby="stands-h">
+      <SectionHeading
+        id="stands-h"
+        title="Banner stands"
+        subtitle='Fixed 33.5" × 80" size. Flat price plus $10 shipping per unit.'
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-md">
+        {stands.map((stand) => {
+          const product = PRODUCTS[stand.id];
+          return (
+            <article
+              key={stand.id}
+              className="rounded-card border border-line-subtle bg-surface p-xl shadow-elev-2"
+            >
+              <p className="text-body-sm text-ink-muted uppercase tracking-widest">{product.title}</p>
+              <h3 className="font-display text-2xl font-bold text-ink mt-xs">
+                {RETRACTABLE.widthIn}&rdquo; × {RETRACTABLE.heightIn}&rdquo;
+              </h3>
+              <ul className="mt-md space-y-xs text-body text-ink-muted">
+                <li className="flex items-center gap-sm">
+                  <Package className="h-4 w-4 text-strong-accent" aria-hidden />
+                  {stand.extra}
+                </li>
+                <li className="flex items-center gap-sm">
+                  <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
+                  {formatUsd(SHIPPING_FLAT_PER_UNIT_USD)} flat shipping per unit via FedEx
+                </li>
+                <li className="flex items-center gap-sm">
+                  <BadgeCheck className="h-4 w-4 text-strong-accent" aria-hidden />
+                  Same 48-hour delivery guarantee
+                </li>
+              </ul>
+              <p className="mt-lg font-display text-[48px] leading-none font-bold text-ink tabular-nums">
+                {formatUsd(stand.price)}
+              </p>
+              <Link href={productOrderHref(stand.id)} className="inline-block mt-lg">
+                <Button variant="cta" size="lg">
+                  Order {product.title} <ArrowRight className="ml-sm h-4 w-4" aria-hidden />
+                </Button>
+              </Link>
+            </article>
+          );
+        })}
+      </div>
     </section>
   );
 }

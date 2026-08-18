@@ -3,6 +3,7 @@ export * from "./dimensions";
 export * from "./material";
 export * from "./finishing";
 export * from "./product";
+export * from "./catalogIa";
 export * from "./quantity";
 export * from "./artwork";
 export * from "./address";

@@ -29,8 +29,7 @@ const STATUS_TONE: Record<OrderStatus, "info" | "success" | "warning" | "error" 
 
 const QUICK_ACTIONS = [
   { href: "/order", icon: Package, label: "New banner order", soon: false },
-  { href: "/order/retractable", icon: Package, label: "New retractable", soon: false },
-  { href: "/order/artwork", icon: Upload, label: "Upload artwork", soon: false },
+  { href: "/order", icon: Upload, label: "Upload artwork", soon: false },
   { href: "/design", icon: PenTool, label: "Design online", soon: true },
   { href: "/templates", icon: LayoutGrid, label: "Templates", soon: true },
 ];
@@ -117,10 +116,10 @@ export default function DashboardPage() {
               </Card>
             );
             if (a.soon) {
-              return <div key={a.href}>{content}</div>;
+              return <div key={a.label}>{content}</div>;
             }
             return (
-              <Link key={a.href} href={a.href} className="no-underline">
+              <Link key={a.label} href={a.href} className="no-underline">
                 {content}
               </Link>
             );

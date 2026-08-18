@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PRODUCTS, productIdForMaterial, validateProductSize } from "./product";
+import { PRODUCTS, productIdForMaterial, validateProductSize, finishingSummary } from "./product";
 import { materialSchema, type Material } from "./material";
 
 describe("validateProductSize", () => {
@@ -92,5 +92,28 @@ describe("productIdForMaterial", () => {
     for (const m of materialSchema.options) {
       expect(productIdForMaterial(m)).toBe(expected[m]);
     }
+  });
+});
+
+describe("finishingSummary", () => {
+  const none = {
+    welding: false,
+    grommets: false,
+    windSlits: false,
+    polePockets: false,
+    webbing: false,
+    rope: false,
+  };
+
+  it("returns null for paper modules with no finishing dock", () => {
+    expect(finishingSummary("POSTER", none)).toBeNull();
+    expect(finishingSummary("HDPE", none)).toBeNull();
+    expect(finishingSummary("ECONOSTAND", none)).toBeNull();
+  });
+
+  it("names webbing on mesh", () => {
+    expect(
+      finishingSummary("MESH", { ...none, welding: true, grommets: true, webbing: true }),
+    ).toContain("Webbing");
   });
 });

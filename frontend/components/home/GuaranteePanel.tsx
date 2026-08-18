@@ -8,12 +8,12 @@ const METRICS = [
   { icon: Clock3, value: "9 PM ET", label: "daily order cutoff" },
   { icon: Truck, value: "48 hr", label: "business-hour delivery promise" },
   { icon: MapPinned, value: "US + CA", label: "FedEx delivery region" },
-  { icon: FileCheck2, value: "3 files", label: "PDF, JPG, and JPEG accepted" },
+  { icon: FileCheck2, value: "5 types", label: "PDF, JPEG, PNG, TIFF, EPS" },
 ] as const;
 
 export function GuaranteePanel() {
   return (
-    <section className="bg-surface" aria-labelledby="guarantee-h">
+    <section id="guarantee" className="bg-surface" aria-labelledby="guarantee-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <ScrollReveal
           className="grid grid-cols-1 gap-lg lg:grid-cols-[1fr_420px]"

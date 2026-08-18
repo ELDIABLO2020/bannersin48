@@ -10,12 +10,12 @@ async function waitForHub(page: import("@playwright/test").Page) {
 }
 
 test.describe("BANNER order hub", () => {
-  test("renders 7 cards in map order", async ({ page }, testInfo) => {
+  test("renders hub cards including stands", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
     await page.goto("/order");
     await waitForHub(page);
     const cards = page.locator("[data-testid^='hub-card-']");
-    await expect(cards).toHaveCount(7);
+    await expect(cards).toHaveCount(8);
     await expect(page.getByTestId("hub-card-hd-banner")).toBeVisible();
     await expect(page.getByTestId("hub-card-hdpe")).toBeVisible();
     await expect(page.getByTestId("hub-card-canvas")).toBeVisible();
@@ -23,6 +23,7 @@ test.describe("BANNER order hub", () => {
     await expect(page.getByTestId("hub-card-poster")).toBeVisible();
     await expect(page.getByTestId("hub-card-no-curl")).toBeVisible();
     await expect(page.getByTestId("hub-card-econostand")).toBeVisible();
+    await expect(page.getByTestId("hub-card-retractable")).toBeVisible();
   });
 
   test("mesh more info opens modal with webbing", async ({ page }, testInfo) => {
@@ -34,12 +35,33 @@ test.describe("BANNER order hub", () => {
     await expect(page.getByTestId("hub-info-modal")).toContainText(/Webbing/i);
   });
 
-  test("econostand has no more info button", async ({ page }, testInfo) => {
+  test("econostand has more info", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
     await page.goto("/order");
     await waitForHub(page);
-    await expect(page.getByTestId("hub-card-econostand")).toBeVisible();
-    await expect(page.getByTestId("hub-more-info-econostand")).toHaveCount(0);
+    await page.getByTestId("hub-more-info-econostand").click();
+    await expect(page.getByTestId("hub-info-modal")).toBeVisible();
+    await expect(page.getByTestId("hub-info-modal")).toContainText(/33\.5/);
+  });
+
+  test("contractor need filter shows mesh and HD Banner", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
+    await page.goto("/order?need=contractor");
+    await waitForHub(page);
+    await expect(page.getByTestId("hub-filter-label")).toContainText(/Contractor/);
+    await expect(page.getByTestId("hub-card-mesh")).toBeVisible();
+    await expect(page.getByTestId("hub-card-hd-banner")).toBeVisible();
+    await expect(page.getByTestId("hub-card-canvas")).toHaveCount(0);
+  });
+
+  test("windy chip filters to mesh", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
+    await page.goto("/order");
+    await waitForHub(page);
+    await page.getByTestId("hub-filter-windy").click();
+    await expect(page).toHaveURL(/need=windy/);
+    await expect(page.getByTestId("hub-card-mesh")).toBeVisible();
+    await expect(page.getByTestId("hub-card-poster")).toHaveCount(0);
   });
 
   test("poster order opens builder", async ({ page }, testInfo) => {

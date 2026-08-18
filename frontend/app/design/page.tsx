@@ -11,7 +11,7 @@ export const metadata = {
 const FEATURES = [
   { icon: PenTool, label: "Start from blank canvas" },
   { icon: ImageIcon, label: "Upload logo, photos, and artwork" },
-  { icon: Grid, label: "Print-safe zones for grommets &amp; pole pockets" },
+  { icon: Grid, label: "Print-safe zones" },
   { icon: Sparkles, label: "AI print check (Phase 3)" },
 ];
 
@@ -25,8 +25,7 @@ export default function DesignPage() {
         </h1>
         <p className="text-body text-ink-muted mt-md">
           The web-to-print editor is in development. We&rsquo;ll embed a production-grade editor
-          that supports templates, image uploads, text editing, brand assets, and print-safe zones
-          for grommets &amp; pole pockets.
+          that supports templates, image uploads, text editing, and brand assets.
         </p>
 
         <ul className="grid grid-cols-2 gap-sm mt-2xl">
@@ -44,7 +43,7 @@ export default function DesignPage() {
         </ul>
 
         <Link
-          href="/order/hd-banner"
+          href="/order"
           className="inline-block mt-2xl bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover"
         >
           Skip ahead &mdash; order a banner now <ChevronRight className="inline h-4 w-4" aria-hidden />

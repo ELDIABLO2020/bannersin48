@@ -10,7 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
 import { useAuth } from "@/lib/stores/auth";
 import { useCart, cartTotals } from "@/lib/stores/cart";
-import { addressSchema } from "@bannersin48/shared";
+import { addressSchema, PRODUCTS, productIdForMaterial, type ProductId } from "@bannersin48/shared";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -272,17 +272,19 @@ export default function CheckoutPage() {
             <Card className="bg-surface sticky top-20">
               <h2 className="font-bold text-heading-h4 text-ink mb-md">Order summary</h2>
               <ul className="text-sm space-y-sm mb-md">
-                {lines.map((l) => (
+                {lines.map((l) => {
+                  const productId: ProductId =
+                    (l.productId as ProductId | undefined) ?? productIdForMaterial(l.material);
+                  return (
                   <li key={l.id} className="flex justify-between gap-sm">
                     <span className="text-ink">
-                      {l.product === "retractable"
-                        ? "Retractable"
-                        : `${l.display.billableLabel}`}{" "}
+                      {PRODUCTS[productId].title} · {l.display.billableLabel}{" "}
                       <span className="text-ink-muted">× {l.quantity}</span>
                     </span>
                     <span className="text-ink tabular-nums">{formatUsd(l.totalBeforeTax)}</span>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
               <dl className="text-sm space-y-xs">
                 <Row label="Subtotal" value={formatUsd(totals.subtotal)} />

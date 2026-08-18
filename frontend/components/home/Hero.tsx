@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Clock, FileUp, ShieldCheck, Truck, Upload } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, FileUp, ShieldCheck, Truck } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/gsap/registry";
@@ -12,8 +12,8 @@ import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { placeholders } from "@/content/placeholders";
 
 const PROOF_POINTS = [
-  { icon: CheckCircle2, label: "High-resolution vinyl printing" },
-  { icon: ShieldCheck, label: "Weather-ready finishing" },
+  { icon: CheckCircle2, label: "Vinyl, mesh, paper, canvas, and stands" },
+  { icon: ShieldCheck, label: "Weather-ready finishing where it counts" },
   { icon: Truck, label: "FedEx delivery across US & Canada" },
 ] as const;
 
@@ -64,9 +64,9 @@ export function Hero() {
               <span className="text-strong-accent">48 business hours</span>
             </h1>
             <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-xl leading-relaxed font-body">
-              Premium Vinyl Banners Printed, Finished, Shipped and Delivered in 48 Hours
-              Guaranteed. Choose your size, upload artwork, approve proof, and keep your event
-              moving.
+              Custom banners printed, finished, shipped, and delivered in 48 business hours.
+              Pick the product, choose your size, upload artwork, approve proof, and keep your
+              event moving.
             </p>
             <div className="hero-actions mt-xl flex flex-col sm:flex-row gap-sm">
               <Link href="/order">
@@ -75,10 +75,10 @@ export function Hero() {
                   <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
                 </Button>
               </Link>
-              <Link href="/order/artwork">
+              <Link href="/#products">
                 <Button variant="outline" size="lg">
-                  <Upload className="mr-sm h-5 w-5" aria-hidden />
-                  Upload artwork
+                  See products
+                  <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
                 </Button>
               </Link>
             </div>

@@ -1,12 +1,46 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, type ReactNode } from "react";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/gsap/registry";
+import { catalogFilterHref, productOrderHref } from "@bannersin48/shared";
 
-const FAQS = [
+const FAQS: ReadonlyArray<{ q: string; a: ReactNode }> = [
+  {
+    q: "Which banner do I need?",
+    a: (
+      <>
+        Windy fences and jobsites →{" "}
+        <Link href={productOrderHref("MESH")} className="text-link hover:underline">
+          Mesh
+        </Link>
+        . Indoor short-term POP →{" "}
+        <Link href={productOrderHref("POSTER")} className="text-link hover:underline">
+          Poster
+        </Link>
+        . Must lay flat →{" "}
+        <Link href={productOrderHref("NO_CURL")} className="text-link hover:underline">
+          No-Curl
+        </Link>
+        . Art to frame →{" "}
+        <Link href={productOrderHref("CANVAS")} className="text-link hover:underline">
+          Canvas
+        </Link>
+        . Need a stand →{" "}
+        <Link href={catalogFilterHref("stand")} className="text-link hover:underline">
+          Econostand or Retractable
+        </Link>
+        . Not sure?{" "}
+        <Link href="/order" className="text-link hover:underline">
+          See all products
+        </Link>
+        .
+      </>
+    ),
+  },
   {
     q: "When will my banner arrive?",
     a: "By 12:00 PM noon on the guaranteed delivery date — that's 48 business hours after your order and proof approval, anywhere in the US or Canada. FedEx only; we pick the service that meets the guarantee.",
@@ -17,7 +51,7 @@ const FAQS = [
   },
   {
     q: "What file types can I upload?",
-    a: "PDF, JPG, and JPEG. We print exactly what you upload after proof approval — no manual re-proofing.",
+    a: "PDF, JPEG, PNG, TIFF, and EPS. We print exactly what you upload after proof approval — no manual re-proofing.",
   },
   {
     q: "What if my artwork has a problem?",

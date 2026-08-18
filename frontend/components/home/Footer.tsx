@@ -12,7 +12,7 @@ export function Footer() {
           <div className="sm:col-span-2 lg:col-span-1">
             <BrandLogo className="mb-md" onDark />
             <p className="text-sm text-white/70 mb-md">
-              Custom vinyl banners printed and shipped in 48 business hours.
+              Custom banners printed and shipped in 48 business hours.
             </p>
             <p className="text-sm text-white/70">
               <span className="text-white font-semibold">Get in touch:</span>
@@ -45,11 +45,6 @@ export function Footer() {
           <p className="text-sm text-white/60">
             &copy; 2026 Banners In 48 &middot; BannersIn48.com
           </p>
-          <nav className="flex flex-wrap gap-md text-sm text-white/60">
-            <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-white">Terms of Service</Link>
-            <Link href="/refunds" className="hover:text-white">Refund &amp; Reprint Policy</Link>
-          </nav>
           <div className="lg:ml-auto flex flex-wrap gap-xs">
             {PAYMENT_METHODS.map((m) => (
               <span

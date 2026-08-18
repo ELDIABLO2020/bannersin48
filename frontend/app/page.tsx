@@ -1,4 +1,5 @@
 import { Hero } from "@/components/home/Hero";
+import { ProductStrip } from "@/components/home/ProductStrip";
 import { UseCaseMarquee } from "@/components/home/UseCaseMarquee";
 import { PopularSizes } from "@/components/home/PopularSizes";
 import { HowItWorks } from "@/components/home/HowItWorks";
@@ -13,6 +14,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <ProductStrip />
       <UseCaseMarquee />
       <PopularSizes />
       <HowItWorks />

@@ -32,6 +32,10 @@ export default function RetractableConfiguratorPage() {
       <div className="mx-auto max-w-content px-md lg:px-2xl py-xl">
         <nav className="text-body-sm text-ink-muted mb-md" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-link no-underline">Home</Link>
+          <span className="mx-1" aria-hidden>/</span>
+          <Link href="/order" className="hover:text-link no-underline">Order</Link>
+          <span className="mx-1" aria-hidden>/</span>
+          <span className="text-ink">Retractable</span>
         </nav>
         <h1 className="font-display text-section-h2 text-ink leading-section-h2 mb-md">
           Retractable banner
@@ -50,7 +54,7 @@ export default function RetractableConfiguratorPage() {
               <dl className="text-body-sm space-y-xs">
                 <Row label="Size" value={`${RETRACTABLE.widthIn}" × ${RETRACTABLE.heightIn}"`} />
                 <Row label="Hardware" value="Retractable stand + carrying case (included)" />
-                <Row label="Artwork" value="PDF or JPEG only" />
+                <Row label="Artwork" value="PDF, JPEG, PNG, TIFF, or EPS" />
                 <Row label="Delivery" value="By 12:00 PM, 48 business hours" />
               </dl>
             </Card>
@@ -122,6 +126,17 @@ export default function RetractableConfiguratorPage() {
                 <ShoppingCart className="mr-sm h-5 w-5" aria-hidden />
                 Add to cart
               </Button>
+              <p className="mt-md text-body-sm text-ink-muted text-center">
+                Looking for a lower-priced stand?{" "}
+                <Link href="/order/econostand" className="text-link hover:underline">
+                  Also consider Econostand
+                </Link>
+                .{" "}
+                <Link href="/order" className="text-link hover:underline">
+                  See all banner types
+                </Link>
+                .
+              </p>
             </Card>
           </div>
         </div>
