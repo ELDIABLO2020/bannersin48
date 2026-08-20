@@ -1,10 +1,11 @@
 /**
  * CSS custom property names for the design tokens.
- * The root layout writes these to :root via a style tag.
+ * Synced into the :root block of frontend/app/globals.css by
+ * scripts/sync-globals-css.ts.
  *
- * HCP-inspired: every semantic role is exposed as a CSS variable so
- * components can read them at runtime (e.g. inline styles for the
- * floating countdown island and StatusHeroCard).
+ * Every semantic role is exposed as a CSS variable so components can read
+ * them at runtime (e.g. inline styles for the floating countdown island
+ * and StatusHeroCard).
  */
 
 import { colors, radius, shadow, spacing, breakpoints, container, zIndex } from "./tokens";
@@ -18,30 +19,35 @@ export const cssVarName = {
   bgStrongAccent: "--color-bg-strong-accent",
   bgDarkest: "--color-bg-darkest",
 
-  // ── Legacy background tokens (still consumed by some components) ────────
-  bgNavyBase: "--color-bg-navy-base",
-  bgNavyDeep: "--color-bg-navy-deep",
-  bgNavyDark: "--color-bg-navy-dark",
-  bgNavyDarkest: "--color-bg-navy-darkest",
+  // ── Dark surfaces ──────────────────────────────────────────────────────
+  bgInkBlack: "--color-bg-ink-black",
+  bgSurfaceDark: "--color-bg-surface-dark",
+  bgSurfaceDarkRaised: "--color-bg-surface-dark-raised",
+
   bgSurface: "--color-bg-surface",
   bgSurfaceTint: "--color-bg-surface-tint",
   bgSurfaceVeryLight: "--color-bg-surface-very-light",
   bgInfoTint: "--color-bg-info-tint",
   bgBlack: "--color-bg-black",
-  bgNavyMid: "--color-bg-navy-mid",
-  bgGoldTint: "--color-bg-gold-tint",
+  bgAccentTint: "--color-bg-accent-tint",
 
   // ── Strong Accent (CTA) ────────────────────────────────────────────────
   strongAccent: "--color-strong-accent",
   strongAccentHover: "--color-strong-accent-hover",
   strongAccentActive: "--color-strong-accent-active",
   strongAccentText: "--color-strong-accent-text",
+  strongAccentOnDark: "--color-strong-accent-on-dark",
 
   // CTA role
   ctaPrimary: "--color-cta-primary",
   ctaAccent: "--color-cta-accent",
   ctaActive: "--color-cta-active",
   ctaText: "--color-cta-text",
+
+  // ── Secondary Accent (brand green) ─────────────────────────────────────
+  brandGreen: "--color-brand-green",
+  brandGreenHover: "--color-brand-green-hover",
+  greenText: "--color-green-text",
 
   // ── Link ───────────────────────────────────────────────────────────────
   link: "--color-link",
@@ -137,30 +143,35 @@ export const cssVars: Record<string, string> = {
   [cssVarName.bgStrongAccent]: colors.strongAccent,
   [cssVarName.bgDarkest]: colors.darkest,
 
-  // Legacy backgrounds
-  [cssVarName.bgNavyBase]: colors.navyBase,
-  [cssVarName.bgNavyDeep]: colors.navyDeep,
-  [cssVarName.bgNavyDark]: colors.navyDark,
-  [cssVarName.bgNavyDarkest]: colors.navyDarkest,
+  // Dark surfaces
+  [cssVarName.bgInkBlack]: colors.inkBlack,
+  [cssVarName.bgSurfaceDark]: colors.surfaceDark,
+  [cssVarName.bgSurfaceDarkRaised]: colors.surfaceDarkRaised,
+
   [cssVarName.bgSurface]: colors.surface,
   [cssVarName.bgSurfaceTint]: colors.surfaceTint,
   [cssVarName.bgSurfaceVeryLight]: colors.surfaceVeryLight,
   [cssVarName.bgInfoTint]: colors.infoTint,
   [cssVarName.bgBlack]: colors.black,
-  [cssVarName.bgNavyMid]: colors.navyMid,
-  [cssVarName.bgGoldTint]: colors.goldTint,
+  [cssVarName.bgAccentTint]: colors.accentTint,
 
   // Strong accent
   [cssVarName.strongAccent]: colors.strongAccent,
   [cssVarName.strongAccentHover]: colors.strongAccentHover,
   [cssVarName.strongAccentActive]: colors.strongAccentActive,
   [cssVarName.strongAccentText]: colors.strongAccentText,
+  [cssVarName.strongAccentOnDark]: colors.strongAccentOnDark,
 
   // CTA role
   [cssVarName.ctaPrimary]: colors.ctaPrimary,
   [cssVarName.ctaAccent]: colors.ctaAccent,
   [cssVarName.ctaActive]: colors.ctaActive,
   [cssVarName.ctaText]: colors.ctaText,
+
+  // Secondary accent
+  [cssVarName.brandGreen]: colors.brandGreen,
+  [cssVarName.brandGreenHover]: colors.brandGreenHover,
+  [cssVarName.greenText]: colors.greenText,
 
   // Link
   [cssVarName.link]: colors.link,

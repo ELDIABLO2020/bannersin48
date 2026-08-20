@@ -17,7 +17,7 @@ export function Footer() {
             <p className="text-sm text-white/70">
               <span className="text-white font-semibold">Get in touch:</span>
               <br />
-              <a href="mailto:support@bannersin48.com" className="text-strong-accent hover:underline no-underline">
+              <a href="mailto:support@bannersin48.com" className="text-strong-accent-on-dark hover:underline no-underline">
                 support@bannersin48.com
               </a>
             </p>

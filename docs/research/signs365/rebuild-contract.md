@@ -2,7 +2,7 @@
 
 Shipped. Source map: [catalog-map.md](catalog-map.md), [modules-e2e.md](modules-e2e.md).
 
-Do not copy Signs365 colors, logos, fonts, or marketing sentences into the app. Housecall Pro tokens stay in `packages/design-tokens`. Behavior and option structure come from the map; Bannersin48 copy and rates are ours.
+Do not copy Signs365 colors, logos, fonts, or marketing sentences into the app. Brand tokens stay in `packages/design-tokens`. Behavior and option structure come from the map; Bannersin48 copy and rates are ours.
 
 ## Routes
 
@@ -118,7 +118,7 @@ No NestJS. Keep MSW in `packages/api-client/src/mocks/handlers.ts`.
 - No Fabric / Retractable Plus / Roll Up (not on BANNER hub)
 - No implementing product pages in the mapping session (already true)
 - No paid checkout against Signs365
-- Do not restyle to HCP in the mapping session; rebuild session uses existing tokens only
+- Do not restyle in the mapping session; rebuild session uses existing tokens only
 - Do not treat Econostand as `/order/retractable`
 
 ## Implementation order (later session)

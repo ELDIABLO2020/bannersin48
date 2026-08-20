@@ -8,7 +8,7 @@ const MOCK_STRINGS = [
   "Mobile order view",
 ];
 
-test.describe("M4: HCP design parity", () => {
+test.describe("M4: brand design parity", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
@@ -18,11 +18,11 @@ test.describe("M4: HCP design parity", () => {
     await expect(hero.locator("img").first()).toBeVisible();
   });
 
-  test("primary accent surfaces use live HCP gold (#FF9B24)", async ({ page }) => {
+  test("primary accent surfaces use brand magenta (#CB1079)", async ({ page }) => {
     const accent = page.locator(".bg-strong-accent").locator("visible=true").first();
     await expect(accent).toBeVisible();
     const bg = await accent.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe("rgb(255, 155, 36)");
+    expect(bg).toBe("rgb(203, 16, 121)");
   });
 
   test("email CTA uses attached pill form styling", async ({ page }) => {

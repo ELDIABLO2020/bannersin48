@@ -9,10 +9,18 @@ Working notes for Banners In 48. The running app is the source of truth; these f
 | [`archive/`](archive/) | Completed or superseded plans and audits |
 | [`research/signs365/`](research/signs365/) | Competitor catalog research used for the BANNER rebuild |
 
+## Design tokens
+
+Colors, type, spacing, and radii live in `packages/design-tokens/src/tokens.ts` and
+sync into `frontend/app/globals.css` via `npm run sync-css -w @bannersin48/design-tokens`.
+The palette is sampled from the client brand board (magenta `#CB1079`, green `#3EAF2C`,
+black `#000000`). The Housecall Pro palette that preceded it is archived below and is no
+longer authoritative.
+
 ## Archive
 
 - [Phase 1 build & test plan](archive/phase1-build-test-plan.md)
-- [HCP design audit (2026-06-20)](archive/design-audit-hcp-2026-06-20.md)
+- [HCP design audit (2026-06-20)](archive/design-audit-hcp-2026-06-20.md) — superseded
 - [GSAP animation plan (2026-06-21)](archive/gsap-animation-implementation-plan-2026-06-21.md)
 
 ## Signs365 research

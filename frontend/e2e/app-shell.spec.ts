@@ -25,12 +25,12 @@ test.describe("M3: app shell", () => {
     expect(body.display).toBe("standalone");
   });
 
-  test("primary accent surfaces use live HCP gold (#FFB706)", async ({ page }) => {
+  test("primary accent surfaces use brand magenta (#CB1079)", async ({ page }) => {
     await page.goto("/");
     const accent = page.locator(".bg-strong-accent").locator("visible=true").first();
     await expect(accent).toBeVisible();
     const bg = await accent.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe("rgb(255, 155, 36)");
+    expect(bg).toBe("rgb(203, 16, 121)");
   });
 
   test("robots.txt is served and disallows /api/ and /admin/", async ({ request }) => {

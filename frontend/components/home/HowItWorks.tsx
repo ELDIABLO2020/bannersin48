@@ -99,7 +99,7 @@ export function HowItWorks() {
             </div>
             <div className="mt-md flex justify-between text-xs text-white/70 font-body px-sm">
               <span>Proof approved</span>
-              <span className="text-strong-accent font-semibold">In production</span>
+              <span className="text-strong-accent-on-dark font-semibold">In production</span>
             </div>
           </div>
         </ScrollReveal>

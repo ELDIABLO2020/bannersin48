@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
-const LOGO_WIDTH = 500;
-const LOGO_HEIGHT = 150;
+const LOGO_WIDTH = 502;
+const LOGO_HEIGHT = 116;
 
 type BrandLogoProps = {
   className?: string;

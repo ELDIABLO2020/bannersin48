@@ -126,7 +126,7 @@ export function PopularSizes() {
                 <article
                   className={`relative flex min-h-[240px] flex-col rounded-card border p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2 ${
                     isCustom
-                      ? "border-navy-deep bg-navy-base"
+                      ? "border-ink-black bg-surface-dark"
                       : idx === 0
                         ? "border-strong-accent bg-surface ring-1 ring-strong-accent"
                         : "border-line bg-surface hover:border-strong-accent"
@@ -158,7 +158,7 @@ export function PopularSizes() {
                   </p>
                   <div className="mt-auto pt-lg">
                     {isCustom ? (
-                      <p className="text-heading-h4 font-bold text-strong-accent">Built to fit</p>
+                      <p className="text-heading-h4 font-bold text-strong-accent-on-dark">Built to fit</p>
                     ) : (
                       <>
                         <p className="text-sm text-ink-muted">{s.sqFt} sq ft</p>
@@ -170,7 +170,7 @@ export function PopularSizes() {
                     <span
                       className={`mt-md inline-flex w-full items-center justify-center gap-xs rounded-btn px-md py-sm text-sm font-bold transition-colors ${
                         isCustom
-                          ? "bg-lightest text-navy-base group-hover:bg-ink-light"
+                          ? "bg-lightest text-surface-dark group-hover:bg-ink-light"
                           : "bg-strong-accent text-strong-accent-text group-hover:bg-strong-accent-hover"
                       }`}
                     >

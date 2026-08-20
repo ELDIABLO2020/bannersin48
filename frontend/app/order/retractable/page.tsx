@@ -164,7 +164,7 @@ function ProductGallery() {
           sizes="(max-width: 1024px) 100vw, 58vw"
           className="object-cover object-[65%_center]"
         />
-        <div className="absolute inset-x-md bottom-md max-w-sm rounded-card bg-navy-base/90 p-md text-ink-light backdrop-blur-sm">
+        <div className="absolute inset-x-md bottom-md max-w-sm rounded-card bg-surface-dark/90 p-md text-ink-light backdrop-blur-sm">
           <p className="font-display text-heading-h4 font-bold uppercase">Made to stand out</p>
           <p className="mt-xs text-body-sm text-ink-light/80">
             Portable full-height event display.

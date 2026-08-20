@@ -44,8 +44,8 @@ export function AnnouncementStrip() {
           <Image
             src="/images/logo-mobile-header.png"
             alt="Banners In 48"
-            width={500}
-            height={150}
+            width={502}
+            height={116}
             priority
             className="h-9 w-auto"
           />

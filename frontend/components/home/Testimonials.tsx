@@ -31,7 +31,7 @@ export function Testimonials() {
               />
             </div>
             <div>
-              <p className="text-strong-accent font-semibold text-sm mb-md font-body">
+              <p className="text-strong-accent-on-dark font-semibold text-sm mb-md font-body">
                 {featured.industry}
               </p>
               <blockquote
@@ -49,7 +49,7 @@ export function Testimonials() {
                 <div className="mt-lg flex flex-wrap gap-md">
                   {featured.metrics.map((m) => (
                     <div key={m.label} className="rounded-card bg-white/10 px-lg py-md">
-                      <p className="font-display text-2xl text-strong-accent uppercase">{m.value}</p>
+                      <p className="font-display text-2xl text-strong-accent-on-dark uppercase">{m.value}</p>
                       <p className="text-xs text-white/70 mt-xs font-body">{m.label}</p>
                     </div>
                   ))}
@@ -68,7 +68,7 @@ export function Testimonials() {
           </h2>
           <Link
             href="/reviews"
-            className="inline-flex items-center gap-xs text-sm font-semibold text-strong-accent no-underline hover:underline"
+            className="inline-flex items-center gap-xs text-sm font-semibold text-strong-accent-on-dark no-underline hover:underline"
           >
             View all testimonials
             <ArrowRight className="h-4 w-4" aria-hidden />

@@ -10,13 +10,13 @@ export function EmailCapture() {
       aria-labelledby="capture-h"
     >
       <div
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_50%,var(--color-bg-gold-tint)_0%,transparent_45%)] opacity-40"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_50%,var(--color-bg-accent-tint)_0%,transparent_45%)] opacity-40"
         aria-hidden
       />
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <ScrollReveal className="grid grid-cols-1 gap-xl lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="ec-copy max-w-2xl text-center lg:text-left">
-            <p className="text-strong-accent font-semibold text-sm mb-md font-body">
+            <p className="text-strong-accent-on-dark font-semibold text-sm mb-md font-body">
               Ready when you are
             </p>
             <h2

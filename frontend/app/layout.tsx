@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Open_Sans } from "next/font/google";
+import { colors } from "@bannersin48/design-tokens";
 import { Providers } from "./providers";
 import { TopNav } from "@/components/nav/TopNav";
 import { BottomTabBar } from "@/components/nav/BottomTabBar";
@@ -75,7 +76,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "var(--color-bg-lightest)",
+  // Must be a literal — CSS custom properties do not resolve in a meta tag.
+  themeColor: colors.lightest,
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

@@ -166,7 +166,7 @@ export default function SizesAndPricingPage() {
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 className="object-cover object-[68%_center]"
               />
-              <div className="absolute inset-x-md bottom-md rounded-card bg-navy-base/90 p-md text-ink-light backdrop-blur-sm">
+              <div className="absolute inset-x-md bottom-md rounded-card bg-surface-dark/90 p-md text-ink-light backdrop-blur-sm">
                 <p className="font-bold">Printed, finished, and shipped fast</p>
                 <p className="mt-xs text-body-sm text-ink-light/80">
                   Pick a size below to start with instant pricing.
@@ -385,7 +385,7 @@ function AllSizesGrid() {
         ))}
 
         <Link href="/order/hd-banner" className="ps-card group block no-underline">
-          <article className="relative flex min-h-[200px] flex-col rounded-card border border-navy-deep bg-navy-base p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2">
+          <article className="relative flex min-h-[200px] flex-col rounded-card border border-ink-black bg-surface-dark p-lg shadow-elev-1 transition-all hover:-translate-y-1 hover:shadow-elev-2">
             <span className="absolute -top-sm left-lg rounded-sm bg-strong-accent px-sm py-micro text-[11px] font-bold uppercase text-strong-accent-text">
               Made to order
             </span>
@@ -396,8 +396,8 @@ function AllSizesGrid() {
               Any size up to {MAX_BILLABLE_FT}&rsquo; × {MAX_BILLABLE_FT}&rsquo;.
             </p>
             <div className="mt-auto pt-lg">
-              <p className="text-heading-h4 font-bold text-strong-accent">Built to fit</p>
-              <span className="mt-sm inline-flex w-full items-center justify-center gap-xs rounded-btn bg-lightest px-md py-sm text-body-sm font-bold text-navy-base transition-colors group-hover:bg-ink-light">
+              <p className="text-heading-h4 font-bold text-strong-accent-on-dark">Built to fit</p>
+              <span className="mt-sm inline-flex w-full items-center justify-center gap-xs rounded-btn bg-lightest px-md py-sm text-body-sm font-bold text-surface-dark transition-colors group-hover:bg-ink-light">
                 Configure <ArrowRight className="h-4 w-4" aria-hidden />
               </span>
             </div>

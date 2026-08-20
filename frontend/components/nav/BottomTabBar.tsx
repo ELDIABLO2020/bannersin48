@@ -40,7 +40,7 @@ export function BottomTabBar() {
               aria-expanded={menuOpen}
               className={cn(
                 "relative flex min-h-[56px] w-full flex-col items-center justify-center py-sm",
-                menuOpen ? "text-strong-accent" : "text-white/70 hover:text-white",
+                menuOpen ? "text-strong-accent-on-dark" : "text-white/70 hover:text-white",
               )}
             >
               <Menu className="h-6 w-6" strokeWidth={2} aria-hidden />
@@ -57,7 +57,7 @@ export function BottomTabBar() {
                   href={tab.href}
                   className={cn(
                     "relative flex min-h-[56px] flex-col items-center justify-center py-sm no-underline",
-                    active ? "text-strong-accent" : "text-white/70 hover:text-white",
+                    active ? "text-strong-accent-on-dark" : "text-white/70 hover:text-white",
                   )}
                   aria-current={active ? "page" : undefined}
                 >

@@ -1,12 +1,15 @@
 /**
  * Banners In 48 design tokens.
  *
- * Transcribed from www.housecallpro.com-DESIGN.md (Housecall Pro design system):
- *  - Navy base #13191E, deep navy #002942, dark navy #0E2634, darkest #0A2443
- *  - CTA gold #FF9B24 (hover #FFB706, active #FCB900), text on gold #13191E
- *  - Link/interactive blue #0F77CC (hover #0055FF, active #002942)
- *  - Info tint #DEF0FF, neutrals #212121 / #979797 / #ECEFF1 / #F5F5F5
- *  - Borders #BDBDBD (dividers), #E0E0E0 (inputs/cards)
+ * Sampled from the client brand board (logo lockups, marks, QR):
+ *  - Brand magenta #CB1079 — primary accent, CTAs, links
+ *  - Brand green #3EAF2C — secondary accent, speed/success signals
+ *  - Black #000000 and near-black #100F0D — dark sections, footer, nav
+ *
+ * Accent ramps are darkened rather than lightened so every step keeps
+ * WCAG AA against white. Brand green is only 2.85:1 on white, so
+ * `greenText` (#2B7A1F, 5.4:1) carries small text on light surfaces
+ * while `brandGreen` is reserved for fills, large graphics, and dark bgs.
  *
  * Components reference semantic names — never raw hex.
  */
@@ -22,45 +25,51 @@ export const colors = {
 
   softAccent: "#ECEFF1",
   softAccent2: "#F5F5F5",
-  infoTint: "#DEF0FF",
+  infoTint: "#FCE7F2",
 
-  // ── Strong Accent (HCP gold) — CTAs, highlights ────────────────────────
-  strongAccent: "#FF9B24",
-  strongAccentHover: "#FFB706",
-  strongAccentActive: "#FCB900",
-  strongAccentText: "#13191E",
+  // ── Strong Accent (brand magenta) — CTAs, highlights ───────────────────
+  strongAccent: "#CB1079",
+  strongAccentHover: "#AD0E67",
+  strongAccentActive: "#920C57",
+  strongAccentText: "#FFFFFF",
+  // Brand magenta is only 3.55:1 on the near-black surfaces, so accent *text*
+  // sitting on a dark background uses this lightened step instead (5.0:1+).
+  strongAccentOnDark: "#EF2E9A",
 
-  ctaPrimary: "#FF9B24",
-  ctaAccent: "#FFB706",
-  ctaActive: "#FCB900",
-  ctaText: "#13191E",
+  ctaPrimary: "#CB1079",
+  ctaAccent: "#AD0E67",
+  ctaActive: "#920C57",
+  ctaText: "#FFFFFF",
+
+  // ── Secondary Accent (brand green) ─────────────────────────────────────
+  brandGreen: "#3EAF2C",
+  brandGreenHover: "#328C23",
+  greenText: "#2B7A1F",
 
   // ── Interactive (links) ────────────────────────────────────────────────
-  link: "#13191E",
-  linkHover: "#13191E",
-  linkActive: "#13191E",
-  linkElectric: "#0055FF",
+  link: "#CB1079",
+  linkHover: "#AD0E67",
+  linkActive: "#920C57",
 
   // ── Dark text & footer backgrounds ─────────────────────────────────────
   dark: "#212121",
   darkMuted: "#979797",
-  darkest: "#13191E",
+  darkest: "#000000",
 
   textDark: "#212121",
   textCharcoal: "#13181A",
   textLight: "#FFFFFF",
   textMedium: "#979797",
   textOnDark: "#FFFFFF",
-  textOnAccent: "#13191E",
+  textOnAccent: "#FFFFFF",
   muted: "#979797",
 
-  navyBase: "#13191E",
-  navyDeep: "#002942",
-  navyDark: "#0E2634",
-  navyDarkest: "#0A2443",
-  navyMid: "#0E2634",
+  // ── Dark surfaces ──────────────────────────────────────────────────────
+  inkBlack: "#000000",
+  surfaceDark: "#100F0D",
+  surfaceDarkRaised: "#1C1A18",
 
-  goldTint: "#FFF3E0",
+  accentTint: "#FCE7F2",
   borderOnDark: "rgba(255,255,255,0.15)",
 
   // ── Borders & dividers ─────────────────────────────────────────────────
@@ -70,22 +79,21 @@ export const colors = {
   divider: "#BDBDBD",
 
   // ── Semantic / status (NOT brand accent — never use for CTAs or nav) ───
-  // success / badgeSuccess* are validation & order-status only (#00B545 ≠ strongAccent).
-  success: "#00B545",
+  success: "#2B7A1F",
   warning: "#F57C00",
   error: "#CF2E2E",
 
-  badgeSuccessBg: "#E8F5E9",
-  badgeSuccessText: "#2E7D32",
+  badgeSuccessBg: "#E8F6E4",
+  badgeSuccessText: "#226018",
   badgeWarningBg: "#FFF3E0",
   badgeWarningText: "#F57C00",
   badgeErrorBg: "#FFEBEE",
   badgeErrorText: "#CF2E2E",
 
   // ── Timeline markers ───────────────────────────────────────────────────
-  timelineDone: "#13191E",
-  timelineCurrent: "#13191E",
-  timelineCurrentRing: "#DEF0FF",
+  timelineDone: "#2B7A1F",
+  timelineCurrent: "#CB1079",
+  timelineCurrentRing: "#FCE7F2",
   timelinePending: "#BDBDBD",
 } as const;
 
@@ -162,8 +170,8 @@ export const shadow = {
   level2: "0 4px 12px rgba(16, 24, 40, 0.08)",
   level3: "0 8px 24px rgba(16, 24, 40, 0.12)",
   level4: "0 16px 40px rgba(16, 24, 40, 0.16)",
-  focusGlow: "0 0 0 4px rgba(19, 25, 30, 0.2)",
-  focusGlowSmall: "0 0 0 3px rgba(19, 25, 30, 0.16)",
+  focusGlow: "0 0 0 4px rgba(203, 16, 121, 0.25)",
+  focusGlowSmall: "0 0 0 3px rgba(203, 16, 121, 0.2)",
   tabBarBorder: "rgba(255, 255, 255, 0.15)",
 } as const;
 

@@ -2,8 +2,9 @@
  * Tailwind CSS preset derived from design tokens.
  * Consumed by frontend/tailwind.config.ts.
  *
- * HCP palette: semantic utility names point at the Housecall Pro color system.
- * Legacy utility names (`bg-navy-base`, `bg-info-tint`, etc.) are preserved
+ * Semantic utility names only — `bg-strong-accent`, `bg-surface-dark`,
+ * `text-ink`. Components must never reach for a raw hex or an arbitrary
+ * value like `bg-[#eceff1]`.
  */
 
 import type { Config } from "tailwindcss";
@@ -17,20 +18,21 @@ export const tailwindPreset: Partial<Config> = {
   theme: {
     extend: {
       colors: {
-        // ── HCP backgrounds ───────────────────────────────────────────────
+        // ── Backgrounds ───────────────────────────────────────────────────
         lightest: colors.lightest,
         light: colors.light,
         "soft-accent": colors.softAccent,
         "soft-accent-2": colors.softAccent2,
         darkest: colors.darkest,
 
-        // Strong accent (HCP gold)
+        // Strong accent (brand magenta)
         "strong-accent": {
           DEFAULT: colors.strongAccent,
           hover: colors.strongAccentHover,
           active: colors.strongAccentActive,
           fg: colors.strongAccentText,
           text: colors.strongAccentText,
+          "on-dark": colors.strongAccentOnDark,
         },
         cta: {
           DEFAULT: colors.ctaPrimary,
@@ -40,13 +42,20 @@ export const tailwindPreset: Partial<Config> = {
           text: colors.ctaText,
         },
 
-        // Legacy background utilities — aliases for downstream components.
-        "navy-base": colors.navyBase,
-        "navy-deep": colors.navyDeep,
-        "navy-dark": colors.navyDark,
-        "navy-darkest": colors.navyDarkest,
-        "navy-mid": colors.navyMid,
-        "gold-tint": colors.goldTint,
+        // Secondary accent (brand green). `text` is the AA-safe variant for
+        // small text on light surfaces; DEFAULT is fills and dark surfaces.
+        "brand-green": {
+          DEFAULT: colors.brandGreen,
+          hover: colors.brandGreenHover,
+          text: colors.greenText,
+        },
+
+        // Dark surfaces
+        "ink-black": colors.inkBlack,
+        "surface-dark": colors.surfaceDark,
+        "surface-dark-raised": colors.surfaceDarkRaised,
+
+        "accent-tint": colors.accentTint,
         "border-on-dark": colors.borderOnDark,
         surface: colors.surface,
         "surface-tint": colors.surfaceTint,
@@ -54,7 +63,7 @@ export const tailwindPreset: Partial<Config> = {
         "info-tint": colors.infoTint,
         black: colors.black,
 
-        // Links — HCP blue
+        // Links — brand magenta
         link: {
           DEFAULT: colors.link,
           hover: colors.linkHover,

@@ -2,7 +2,7 @@
   "name": "@bannersin48/design-tokens",
   "version": "0.1.0",
   "private": true,
-  "description": "Design tokens for Banners In 48, transcribed from www.housecallpro.com-DESIGN.md",
+  "description": "Design tokens for Banners In 48, sampled from the client brand board",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {

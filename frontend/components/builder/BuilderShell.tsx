@@ -20,7 +20,7 @@ export function BuilderShell({
     <div
       data-testid="builder-shell"
       className={cn(
-        "min-h-[calc(100vh-4rem)] bg-[#eceff1]",
+        "min-h-[calc(100vh-4rem)] bg-soft-accent",
         className,
       )}
     >

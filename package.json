@@ -18,7 +18,6 @@
     "lint": "npm run lint --workspaces --if-present",
     "e2e": "npm run e2e -w frontend",
     "ci": "npm run typecheck && npm run lint && npm test && NEXT_PUBLIC_ENABLE_MOCKS=1 npm run build && PORT=3010 NEXT_PUBLIC_ENABLE_MOCKS=1 CI=1 npm run e2e",
-    "audit:hcp-design": "npm run audit:hcp-design -w frontend",
     "clean": "rimraf packages/*/dist packages/*/.turbo frontend/.next"
   },
   "devDependencies": {
