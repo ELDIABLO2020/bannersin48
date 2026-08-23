@@ -14,7 +14,11 @@ import { formatUsd } from "@/lib/utils/format";
 import { Package, Upload, PenTool, LayoutGrid, ShoppingBag, User as UserIcon, LogOut } from "lucide-react";
 
 const STATUS_TONE: Record<OrderStatus, "info" | "success" | "warning" | "error" | "neutral"> = {
+  RECEIVED: "warning",
   AWAITING_PAYMENT: "warning",
+  IN_PROCESSING: "info",
+  ACCEPTED: "info",
+  ON_HOLD: "warning",
   AWAITING_PROOF_APPROVAL: "info",
   CANCELLATION_WINDOW: "warning",
   READY_FOR_TRANSFER: "info",

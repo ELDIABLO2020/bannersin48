@@ -10,7 +10,12 @@ import { colorMatchingSchema } from "./artwork";
  * Order status state machine from the plan §18.2.
  */
 export const orderStatusSchema = z.enum([
+  // Real V1 backend statuses (§4)
+  "RECEIVED",
   "AWAITING_PAYMENT",
+  "IN_PROCESSING",
+  "ACCEPTED",
+  "ON_HOLD",
   "AWAITING_PROOF_APPROVAL",
   "CANCELLATION_WINDOW",
   "READY_FOR_TRANSFER",
@@ -92,7 +97,11 @@ export type Order = z.infer<typeof orderSchema>;
  * Human-readable labels for the timeline UI.
  */
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  RECEIVED: "Order Received",
   AWAITING_PAYMENT: "Awaiting Payment",
+  IN_PROCESSING: "In Processing",
+  ACCEPTED: "Accepted · Tracking Ready",
+  ON_HOLD: "On Hold",
   AWAITING_PROOF_APPROVAL: "Awaiting Proof Approval",
   CANCELLATION_WINDOW: "Cancellation Window",
   READY_FOR_TRANSFER: "Ready for Transfer",
@@ -110,10 +119,9 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
  * Each maps to a status that "completes" that checkpoint.
  */
 export const ORDER_TIMELINE: ReadonlyArray<{ key: string; label: string; completedBy: OrderStatus[] }> = [
-  { key: "paid", label: "Payment received", completedBy: ["AWAITING_PROOF_APPROVAL", "CANCELLATION_WINDOW", "READY_FOR_TRANSFER", "TRANSFERRED_TO_PRODUCTION", "IN_PRODUCTION", "SHIPPED", "DELIVERED", "REFUNDED"] },
-  { key: "proof", label: "Proof approved", completedBy: ["CANCELLATION_WINDOW", "READY_FOR_TRANSFER", "TRANSFERRED_TO_PRODUCTION", "IN_PRODUCTION", "SHIPPED", "DELIVERED", "REFUNDED"] },
-  { key: "transfer", label: "Sent to production", completedBy: ["TRANSFERRED_TO_PRODUCTION", "IN_PRODUCTION", "SHIPPED", "DELIVERED"] },
-  { key: "production", label: "In production", completedBy: ["IN_PRODUCTION", "SHIPPED", "DELIVERED"] },
+  { key: "received", label: "Order received", completedBy: ["RECEIVED", "AWAITING_PAYMENT", "IN_PROCESSING", "ACCEPTED", "SHIPPED", "DELIVERED", "ON_HOLD", "AWAITING_PROOF_APPROVAL", "CANCELLATION_WINDOW", "READY_FOR_TRANSFER", "TRANSFERRED_TO_PRODUCTION", "IN_PRODUCTION", "REFUNDED"] },
+  { key: "paid", label: "Payment received", completedBy: ["IN_PROCESSING", "ACCEPTED", "SHIPPED", "DELIVERED", "AWAITING_PROOF_APPROVAL", "CANCELLATION_WINDOW", "READY_FOR_TRANSFER", "TRANSFERRED_TO_PRODUCTION", "IN_PRODUCTION", "REFUNDED"] },
+  { key: "accepted", label: "Accepted · tracking ready", completedBy: ["ACCEPTED", "SHIPPED", "DELIVERED", "READY_FOR_TRANSFER", "TRANSFERRED_TO_PRODUCTION", "IN_PRODUCTION"] },
   { key: "shipped", label: "Shipped", completedBy: ["SHIPPED", "DELIVERED"] },
   { key: "delivered", label: "Delivered", completedBy: ["DELIVERED"] },
 ];

@@ -7,6 +7,7 @@ import { StorageService } from "../storage/storage.service";
 import { EmailService } from "../notifications/email.service";
 import { AuditService } from "../audit/audit.service";
 import { isSlaBreached } from "../common/business-hours";
+import { sniffMime } from "../artwork/artwork-inspect";
 
 const KANBAN_STATUSES: OrderStatus[] = [
   "RECEIVED",
@@ -179,9 +180,24 @@ export class AdminOrdersService {
         message: `Payment was already recorded (${order.paymentStatus}).`,
       });
     }
-    await this.prisma.order.update({
-      where: { id: orderId },
-      data: { paymentStatus: "MARKED_PAID" },
+    // Locked reward rule: 1% of paid spend, stored as integer dollar-cents.
+    // $95.50 earns 95 cents (fractional cents are floored).
+    const totalCents = Math.round(Number(order.total) * 100);
+    const rewardCents = Math.floor(totalCents / 100);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: { paymentStatus: "MARKED_PAID", rewardPointsEarned: rewardCents },
+      });
+      if (rewardCents > 0) {
+        await tx.rewardLedger.create({
+          data: { userId: order.userId, deltaCents: rewardCents, reason: "ORDER_EARN", orderId },
+        });
+        await tx.user.update({
+          where: { id: order.userId },
+          data: { rewardPointsBalance: { increment: rewardCents } },
+        });
+      }
     });
     await this.orders.transition(orderId, "IN_PROCESSING", {
       actorId,
@@ -193,7 +209,10 @@ export class AdminOrdersService {
       action: "order.mark_paid",
       entityType: "order",
       entityId: orderId,
-      diff: AuditService.diffOf({ paymentStatus: order.paymentStatus }, { paymentStatus: "MARKED_PAID" }),
+      diff: AuditService.diffOf(
+        { paymentStatus: order.paymentStatus, rewardPointsEarned: order.rewardPointsEarned },
+        { paymentStatus: "MARKED_PAID", rewardPointsEarned: rewardCents },
+      ),
       ip,
     });
     await this.notifyCustomer(order, "order_paid", "Payment received for your order.");
@@ -254,6 +273,9 @@ export class AdminOrdersService {
 
     let labelFileId: string | undefined;
     if (label && label.size > 0) {
+      if (sniffMime(label.buffer) !== "application/pdf") {
+        throw new BadRequestException({ code: "LABEL_NOT_PDF", message: "Shipment labels must be valid PDF files." });
+      }
       const stored = await this.storage.put(
         StorageService.buildKey(actorId, label.originalname),
         label.buffer,

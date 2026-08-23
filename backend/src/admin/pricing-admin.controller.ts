@@ -7,7 +7,9 @@ import { CurrentUser } from "../common/current-user.decorator";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { PricingAdminService } from "./pricing-admin.service";
 import {
+  CreateFinishingOptionDto,
   CreateMaterialDto,
+  CreateProductDto,
   UpdateMaterialDto,
   UpdateProductDto,
   UpsertFinishingOptionDto,
@@ -20,7 +22,7 @@ import {
  */
 @Controller("admin")
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles("ADMIN")
+@Roles("STAFF", "ADMIN")
 export class PricingAdminController {
   constructor(private readonly pricing: PricingAdminService) {}
 
@@ -30,6 +32,13 @@ export class PricingAdminController {
     return this.pricing.listProducts();
   }
 
+  @Roles("ADMIN")
+  @Post("products")
+  createProduct(@CurrentUser() user: AuthedUser, @Body() dto: CreateProductDto, @Req() req: Request) {
+    return this.pricing.createProduct(user.id, dto, ipOf(req));
+  }
+
+  @Roles("ADMIN")
   @Patch("products/:id")
   updateProduct(
     @CurrentUser() user: AuthedUser,
@@ -40,6 +49,13 @@ export class PricingAdminController {
     return this.pricing.updateProduct(user.id, id, dto, ipOf(req));
   }
 
+  @Roles("ADMIN")
+  @Delete("products/:id")
+  deleteProduct(@CurrentUser() user: AuthedUser, @Param("id") id: string, @Req() req: Request) {
+    return this.pricing.deleteProduct(user.id, id, ipOf(req));
+  }
+
+  @Roles("ADMIN")
   @Post("products/:id/materials")
   createMaterial(
     @CurrentUser() user: AuthedUser,
@@ -50,6 +66,7 @@ export class PricingAdminController {
     return this.pricing.createMaterial(user.id, id, dto, ipOf(req));
   }
 
+  @Roles("ADMIN")
   @Patch("products/:id/materials/:materialId")
   updateMaterial(
     @CurrentUser() user: AuthedUser,
@@ -60,6 +77,7 @@ export class PricingAdminController {
     return this.pricing.updateMaterial(user.id, materialId, dto, ipOf(req));
   }
 
+  @Roles("ADMIN")
   @Delete("products/:id/materials/:materialId")
   deleteMaterial(
     @CurrentUser() user: AuthedUser,
@@ -75,24 +93,17 @@ export class PricingAdminController {
     return this.pricing.listFinishingOptions();
   }
 
+  @Roles("ADMIN")
   @Post("finishing-options")
   createFinishingOption(
     @CurrentUser() user: AuthedUser,
-    @Body() dto: UpsertFinishingOptionDto & { code?: string },
+    @Body() dto: CreateFinishingOptionDto,
     @Req() req: Request,
   ) {
-    if (!dto.code) {
-      return Promise.reject(
-        Object.assign(new Error("code is required when creating."), { status: 400 }),
-      );
-    }
-    return this.pricing.createFinishingOption(
-      user.id,
-      { code: dto.code, name: dto.name!, priceModel: dto.priceModel!, amount: dto.amount!, products: dto.products },
-      ipOf(req),
-    );
+    return this.pricing.createFinishingOption(user.id, dto, ipOf(req));
   }
 
+  @Roles("ADMIN")
   @Patch("finishing-options/:id")
   updateFinishingOption(
     @CurrentUser() user: AuthedUser,
@@ -103,12 +114,23 @@ export class PricingAdminController {
     return this.pricing.updateFinishingOption(user.id, id, dto, ipOf(req));
   }
 
+  @Roles("ADMIN")
+  @Delete("finishing-options/:id")
+  deleteFinishingOption(
+    @CurrentUser() user: AuthedUser,
+    @Param("id") id: string,
+    @Req() req: Request,
+  ) {
+    return this.pricing.deleteFinishingOption(user.id, id, ipOf(req));
+  }
+
   // --- Volume tiers ---
   @Get("volume-tiers")
   listVolumeTiers() {
     return this.pricing.listVolumeTiers();
   }
 
+  @Roles("ADMIN")
   @Post("volume-tiers")
   createVolumeTier(
     @CurrentUser() user: AuthedUser,
@@ -118,6 +140,7 @@ export class PricingAdminController {
     return this.pricing.upsertVolumeTier(user.id, undefined, dto, ipOf(req));
   }
 
+  @Roles("ADMIN")
   @Put("volume-tiers/:id")
   updateVolumeTier(
     @CurrentUser() user: AuthedUser,
@@ -128,6 +151,7 @@ export class PricingAdminController {
     return this.pricing.upsertVolumeTier(user.id, id, dto, ipOf(req));
   }
 
+  @Roles("ADMIN")
   @Delete("volume-tiers/:id")
   deleteVolumeTier(
     @CurrentUser() user: AuthedUser,

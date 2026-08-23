@@ -31,6 +31,13 @@ export default function CheckoutPage() {
   const clearCart = useCart((s) => s.clear);
   const [validated, setValidated] = useState<{ valid: boolean; message?: string } | null>(null);
   const [riskAck, setRiskAck] = useState(false);
+  const [acknowledgements, setAcknowledgements] = useState({
+    artworkCorrect: false,
+    spellingColorsLayoutAccepted: false,
+    printsAsUploaded: false,
+    cancellationWindowUnderstood: false,
+    deliveryDateAndAddressConfirmed: false,
+  });
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<Address>({
@@ -72,13 +79,14 @@ export default function CheckoutPage() {
         shipTo: a,
         shipToUnverified: validated?.valid === false,
         paymentMethod: "stub_card",
+        acknowledgements,
       });
       return order;
     },
     onSuccess: (order) => {
       clearCart();
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      router.push(`/orders/${order.id}/proof`);
+      router.push(`/orders/${order.id}`);
     },
     onError: (err) => setSubmitError((err as Error).message),
   });
@@ -235,14 +243,23 @@ export default function CheckoutPage() {
               </div>
             </Card>
 
-            {/* Acknowledgements */}
+            {/* Liability / proof acknowledgements — persisted in proof_* columns. */}
             <Card className="bg-surface">
               <h2 className="font-bold text-heading-h4 text-ink mb-md">Final acknowledgements</h2>
-              <ul className="text-body-sm text-ink space-y-xs">
-                <li>✓ I confirm the shipping address above and the delivery date shown.</li>
-                <li>✓ I understand orders are non-cancellable after the 10-minute window.</li>
-                <li>✓ I&rsquo;ll approve the instant proof on the next screen before production starts.</li>
-              </ul>
+              <div className="space-y-sm">
+                {([
+                  ["artworkCorrect", "The artwork file and dimensions are correct."],
+                  ["spellingColorsLayoutAccepted", "I accept the spelling, colors, and layout as uploaded."],
+                  ["printsAsUploaded", "I understand the artwork prints exactly as uploaded."],
+                  ["cancellationWindowUnderstood", "I understand paid/in-production orders cannot be cancelled online."],
+                  ["deliveryDateAndAddressConfirmed", "I confirm the delivery date and shipping address above."],
+                ] as const).map(([key, label]) => (
+                  <label key={key} className="flex items-start gap-sm text-body-sm text-ink cursor-pointer">
+                    <input type="checkbox" className="mt-1" checked={acknowledgements[key]} onChange={(e) => setAcknowledgements((current) => ({ ...current, [key]: e.target.checked }))} />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
             </Card>
 
             {submitError && (
@@ -256,7 +273,7 @@ export default function CheckoutPage() {
               type="submit"
               variant="cta"
               size="lg"
-              disabled={isSubmitting || createOrder.isPending || !auth.user || (validated?.valid === false && !riskAck)}
+              disabled={isSubmitting || createOrder.isPending || !auth.user || (validated?.valid === false && !riskAck) || !Object.values(acknowledgements).every(Boolean)}
               className="w-full"
             >
               {createOrder.isPending ? "Placing order…" : `Place order · ${formatUsd(totals.total)}`}

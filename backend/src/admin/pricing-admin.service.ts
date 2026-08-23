@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
-import type { UpdateMaterialDto, UpsertFinishingOptionDto, UpsertVolumeTierDto, UpdateProductDto } from "./pricing-admin.dto";
+import type { CreateProductDto, UpdateMaterialDto, UpsertFinishingOptionDto, UpsertVolumeTierDto, UpdateProductDto } from "./pricing-admin.dto";
 
 /**
  * Pricing control (§3c). ADMIN only. Every mutation is audited (old→new).
@@ -23,6 +23,24 @@ export class PricingAdminService {
     });
   }
 
+  async createProduct(actorId: string, dto: CreateProductDto, ip?: string) {
+    const duplicate = await this.prisma.product.findFirst({
+      where: { OR: [{ code: dto.code }, { slug: dto.slug }] },
+    });
+    if (duplicate) throw new ConflictException({ code: "DUPLICATE", message: "Product code or slug already exists." });
+    const row = await this.prisma.product.create({
+      data: {
+        code: dto.code,
+        slug: dto.slug,
+        name: dto.name,
+        sizeMode: (dto.sizeMode ?? "CUSTOM") as never,
+        active: dto.active ?? true,
+      },
+    });
+    await this.audit.record({ actorId, action: "product.create", entityType: "product", entityId: row.id, diff: { after: row }, ip });
+    return row;
+  }
+
   async updateProduct(actorId: string, id: string, dto: UpdateProductDto, ip?: string) {
     const before = await this.prisma.product.findUnique({ where: { id } });
     if (!before) throw new NotFoundException({ code: "NOT_FOUND", message: "Product not found." });
@@ -36,6 +54,27 @@ export class PricingAdminService {
       ip,
     });
     return after;
+  }
+
+  async deleteProduct(actorId: string, id: string, ip?: string): Promise<{ deleted: boolean; deactivated: boolean }> {
+    const before = await this.prisma.product.findUnique({ where: { id } });
+    if (!before) throw new NotFoundException({ code: "NOT_FOUND", message: "Product not found." });
+    const used = await this.prisma.orderItem.count({ where: { productId: id } });
+    if (used > 0) {
+      const after = await this.prisma.product.update({ where: { id }, data: { active: false } });
+      await this.audit.record({
+        actorId,
+        action: "product.deactivate",
+        entityType: "product",
+        entityId: id,
+        diff: AuditService.diffOf(before as unknown as Record<string, unknown>, after as unknown as Record<string, unknown>),
+        ip,
+      });
+      return { deleted: false, deactivated: true };
+    }
+    await this.prisma.product.delete({ where: { id } });
+    await this.audit.record({ actorId, action: "product.delete", entityType: "product", entityId: id, diff: { removed: before }, ip });
+    return { deleted: true, deactivated: false };
   }
 
   // --- Materials ----------------------------------------------------------------
@@ -170,6 +209,22 @@ export class PricingAdminService {
       ip,
     });
     return after;
+  }
+
+  /** DELETE means deactivate: historical order finishing snapshots remain readable. */
+  async deleteFinishingOption(actorId: string, id: string, ip?: string): Promise<{ deleted: false; deactivated: true }> {
+    const before = await this.prisma.finishingOption.findUnique({ where: { id } });
+    if (!before) throw new NotFoundException({ code: "NOT_FOUND", message: "Finishing option not found." });
+    const after = await this.prisma.finishingOption.update({ where: { id }, data: { active: false } });
+    await this.audit.record({
+      actorId,
+      action: "finishing_option.deactivate",
+      entityType: "finishing_option",
+      entityId: id,
+      diff: AuditService.diffOf(before as unknown as Record<string, unknown>, after as unknown as Record<string, unknown>),
+      ip,
+    });
+    return { deleted: false, deactivated: true };
   }
 
   // --- Volume tiers ------------------------------------------------------------

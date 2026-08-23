@@ -1,6 +1,7 @@
-import { Type } from "class-transformer";
 import {
+  IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsNumber,
   IsObject,
@@ -11,6 +12,23 @@ import {
   Min,
   MinLength,
 } from "class-validator";
+
+export class CreateProductDto {
+  @IsString() @MinLength(2) @MaxLength(60)
+  code!: string;
+
+  @IsString() @MinLength(2) @MaxLength(80)
+  slug!: string;
+
+  @IsString() @MinLength(2) @MaxLength(80)
+  name!: string;
+
+  @IsOptional() @IsIn(["CUSTOM", "FIXED"])
+  sizeMode?: string;
+
+  @IsOptional() @IsBoolean()
+  active?: boolean;
+}
 
 export class UpdateProductDto {
   @IsOptional() @IsString() @MinLength(2) @MaxLength(80)
@@ -79,7 +97,7 @@ export class UpsertFinishingOptionDto {
   @IsOptional() @IsString() @MinLength(2) @MaxLength(80)
   name?: string;
 
-  @IsOptional() @IsObject()
+  @IsOptional() @IsArray() @IsString({ each: true })
   products?: string[];
 
   /** FREE | PER_SQFT | PER_FT | PER_EDGE | FLAT */
@@ -91,6 +109,23 @@ export class UpsertFinishingOptionDto {
 
   @IsOptional() @IsBoolean()
   active?: boolean;
+}
+
+export class CreateFinishingOptionDto {
+  @IsString() @MinLength(2) @MaxLength(60)
+  code!: string;
+
+  @IsString() @MinLength(2) @MaxLength(80)
+  name!: string;
+
+  @IsOptional() @IsArray() @IsString({ each: true })
+  products?: string[];
+
+  @IsIn(["FREE", "PER_SQFT", "PER_FT", "PER_EDGE", "FLAT"])
+  priceModel!: string;
+
+  @IsNumber() @Min(0) @Max(100000)
+  amount!: number;
 }
 
 export class UpsertVolumeTierDto {

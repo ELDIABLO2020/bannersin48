@@ -5,7 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Truck, Clock, CheckCircle2, AlertCircle, XCircle, Package, Send, type LucideIcon } from "lucide-react";
 
 const VARIANT: Record<OrderStatus, { bg: string; icon: LucideIcon; tone: "info" | "success" | "warning" | "error" | "neutral" }> = {
+  RECEIVED: { bg: "var(--color-bg-soft-accent)", icon: Package, tone: "info" },
   AWAITING_PAYMENT: { bg: "var(--color-bg-soft-accent)", icon: Clock, tone: "info" },
+  IN_PROCESSING: { bg: "var(--color-bg-soft-accent)", icon: Package, tone: "info" },
+  ACCEPTED: { bg: "var(--color-strong-accent)", icon: Send, tone: "info" },
+  ON_HOLD: { bg: "var(--color-warning)", icon: AlertCircle, tone: "warning" },
   AWAITING_PROOF_APPROVAL: { bg: "var(--color-bg-soft-accent)", icon: Clock, tone: "info" },
   CANCELLATION_WINDOW: { bg: "var(--color-warning)", icon: Clock, tone: "warning" },
   READY_FOR_TRANSFER: { bg: "var(--color-strong-accent)", icon: Package, tone: "info" },
@@ -29,7 +33,7 @@ export function StatusHeroCard({
 }) {
   const v = VARIANT[status];
   const Icon = v.icon;
-  const isLight = v.tone === "info" && status !== "CANCELLATION_WINDOW";
+  const isLight = ["RECEIVED", "AWAITING_PAYMENT", "IN_PROCESSING", "AWAITING_PROOF_APPROVAL"].includes(status);
   return (
     <Card
       className={isLight ? "text-ink" : "text-white"}

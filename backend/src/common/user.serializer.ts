@@ -19,6 +19,7 @@ export interface SerializedUser {
   taxExemptApproved: boolean;
   rewardsPoints: number;
   savedAddresses: SerializedAddress[];
+  role?: string;
   createdAt: string;
 }
 
@@ -43,6 +44,7 @@ export function serializeUser(
     taxExemptApproved: false,
     rewardsPoints: user.rewardPointsBalance,
     savedAddresses: addresses,
+    role: user.role,
     createdAt: user.createdAt.toISOString(),
   };
 }

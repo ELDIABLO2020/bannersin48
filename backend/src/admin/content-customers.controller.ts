@@ -31,7 +31,7 @@ export class UpsertContentDto {
  */
 @Controller("admin")
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles("ADMIN")
+@Roles("STAFF", "ADMIN", "CONTENT_EDITOR")
 export class AdminContentCustomersController {
   constructor(
     private readonly content: AdminContentService,
@@ -39,37 +39,44 @@ export class AdminContentCustomersController {
   ) {}
 
   // --- CMS ---
+  @Roles("CONTENT_EDITOR", "ADMIN")
   @Get("content")
   listContent() {
     return this.content.listAll();
   }
 
+  @Roles("CONTENT_EDITOR", "ADMIN")
   @Get("content/:key")
   getContent(@Param("key") key: string) {
     return this.content.get(key);
   }
 
+  @Roles("CONTENT_EDITOR", "ADMIN")
   @Put("content/:key")
   upsertContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @Body() dto: UpsertContentDto, @Req() req: Request) {
     return this.content.upsert(user.id, { ...dto, key }, ipOf(req));
   }
 
+  @Roles("CONTENT_EDITOR", "ADMIN")
   @Delete("content/:key")
   deleteContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @Req() req: Request) {
     return this.content.delete(user.id, key, ipOf(req));
   }
 
   // --- Customers ---
+  @Roles("STAFF", "ADMIN")
   @Get("customers")
   searchCustomers(@Query("search") search?: string, @Query("page") page?: string, @Query("pageSize") pageSize?: string) {
     return this.customers.search(search || undefined, page ? Number(page) : 1, pageSize ? Number(pageSize) : 25);
   }
 
+  @Roles("STAFF", "ADMIN")
   @Get("customers/:id")
   customerDetail(@Param("id") id: string) {
     return this.customers.detail(id);
   }
 
+  @Roles("STAFF", "ADMIN")
   @Post("customers/:id/reset-password")
   resetPassword(@CurrentUser() user: AuthedUser, @Param("id") id: string, @Req() req: Request) {
     return this.customers.adminResetPassword(user.id, id, ipOf(req));

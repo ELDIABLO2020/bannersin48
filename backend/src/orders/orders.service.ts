@@ -209,12 +209,25 @@ export class OrdersService {
   async getMineDetail(userId: string, orderId: string): Promise<OrderDetail> {
     const row = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: true, events: { orderBy: { createdAt: "asc" } } },
+      include: { items: true, events: { orderBy: { createdAt: "asc" } }, shipments: true },
     });
     if (!row || row.userId !== userId) {
       throw new NotFoundException({ code: "NOT_FOUND", message: "Order not found." });
     }
-    return this.assembleDetail(row, row.items, row.events);
+    const detail = this.assembleDetail(row, row.items, row.events);
+    const shipment = row.shipments[0];
+    return {
+      ...detail,
+      fedexTracking: shipment?.trackingNumber
+        ? {
+            trackingNumber: shipment.trackingNumber,
+            service: "FedEx",
+            status: row.status,
+            lastUpdate: shipment.updatedAt.toISOString(),
+            labelDownloadUrl: shipment.labelFileId ? `/artwork/${shipment.labelFileId}/download` : null,
+          }
+        : undefined,
+    };
   }
 
   async cancel(userId: string, orderId: string, reason = "Cancelled by customer."): Promise<OrderDetail> {
@@ -347,18 +360,26 @@ export class OrdersService {
   }
 
   private toLinePayload(i: OrderItem) {
-    const snapshot = (i.configSnapshot ?? {}) as { priced?: PricingLine };
+    const snapshot = (i.configSnapshot ?? {}) as {
+      priced?: PricingLine;
+      request?: { productId?: string; dimensions?: Record<string, number>; finishing?: Record<string, unknown> };
+    };
     const dims = snapshot.priced?.billableDims ?? { widthFt: Math.floor(Number(i.widthIn) / 12), heightFt: Math.floor(Number(i.heightIn) / 12) };
     return {
       id: i.id,
-      productId: i.productId,
+      productId: snapshot.request?.productId ?? i.productId,
       productSlug: i.productSlug,
       description: i.description,
       material: i.materialCode,
       printSides: i.printSides,
       quantity: i.qty,
-      dimensions: { widthIn: Number(i.widthIn), heightIn: Number(i.heightIn) },
-      finishing: i.finishings ?? {},
+      dimensions: snapshot.request?.dimensions ?? {
+        widthFt: Math.floor(Number(i.widthIn) / 12),
+        widthIn: Number(i.widthIn) % 12,
+        heightFt: Math.floor(Number(i.heightIn) / 12),
+        heightIn: Number(i.heightIn) % 12,
+      },
+      finishing: snapshot.request?.finishing ?? i.finishings ?? {},
       artworkId: i.artworkFileId,
       unitProduct: round2(Number(i.unitPrice)),
       addons: round2(snapshot.priced?.addons ?? 0),
@@ -415,4 +436,11 @@ export interface OrderDetail {
     note: string | null;
     createdAt: string;
   }>;
+  fedexTracking?: {
+    trackingNumber: string;
+    service: string;
+    status: string;
+    lastUpdate: string;
+    labelDownloadUrl: string | null;
+  };
 }

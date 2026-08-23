@@ -10,6 +10,8 @@ export const userSchema = z
     taxExemptApproved: z.boolean().default(false),
     rewardsPoints: z.number().int().nonnegative().default(0),
     savedAddresses: z.array(addressSchema).default([]),
+    /** Present on real-API responses; MSW fixtures omit it. */
+    role: z.enum(["CUSTOMER", "STAFF", "ADMIN", "CONTENT_EDITOR"]).optional(),
     createdAt: z.string(),
   })
   .strict();

@@ -93,6 +93,7 @@ export interface CreateOrderInput {
   shipTo?: Address;
   shipToUnverified?: boolean;
   paymentMethod: "stub_card" | "stub_paypal" | "stub_apple_pay";
+  acknowledgements: ApproveProofInput["acknowledgements"];
 }
 
 export interface ApproveProofInput {
