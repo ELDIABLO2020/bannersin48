@@ -1,0 +1,644 @@
+// Banners In 48 — Phase 0 schema
+// Implements docs/backend-scope.md §4 in full.
+//
+// Conventions:
+// - Money is stored as Prisma Decimal (never floats) or Int cents where noted.
+// - Orders/quotes snapshot prices & config at creation; they never join catalog tables for money math.
+// - Every FK and status column is indexed.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+  CONTENT_EDITOR
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum SizeMode {
+  CUSTOM
+  FIXED
+}
+
+enum PriceModel {
+  FREE
+  PER_SQFT
+  PER_FT
+  PER_EDGE
+  FLAT
+}
+
+enum PromoType {
+  PERCENT
+  FIXED
+}
+
+enum RewardReason {
+  ORDER_EARN
+  ADJUSTMENT
+  REDEMPTION
+}
+
+enum ScanStatus {
+  PENDING
+  CLEAN
+  FLAGGED
+}
+
+enum OrderStatus {
+  RECEIVED
+  AWAITING_PAYMENT
+  IN_PROCESSING
+  ACCEPTED
+  SHIPPED
+  DELIVERED
+  ON_HOLD
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING_PAYMENT
+  MARKED_PAID
+  PAID
+  REFUNDED
+}
+
+enum BlockType {
+  BANNER_IMAGE
+  TEXT
+  ANNOUNCEMENT
+  PROMO_STRIP
+}
+
+enum EmailStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+enum Carrier {
+  FEDEX
+}
+
+enum TaxProvider {
+  TAXJAR
+}
+
+// ---------------------------------------------------------------------------
+// Identity & accounts
+// ---------------------------------------------------------------------------
+
+model User {
+  id                   String     @id @default(cuid())
+  email                String     @unique
+  passwordHash         String
+  firstName            String?
+  lastName             String?
+  phone                String?
+  role                 Role       @default(CUSTOMER)
+  status               UserStatus @default(ACTIVE)
+  emailVerifiedAt      DateTime?
+  rewardPointsBalance  Int        @default(0) // denormalized; authoritative rows live in RewardLedger
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  refreshTokens    RefreshToken[]
+  passwordResets   PasswordReset[]
+  addresses        Address[]
+  auditLogs        AuditLog[]         @relation("AuditActor")
+  quotes           Quote[]
+  carts            Cart[]
+  savedDesigns     SavedDesign[]
+  artworkFolders   ArtworkFolder[]
+  artworkFiles     ArtworkFile[]
+  orders           Order[]
+  rewardLedger     RewardLedger[]     @relation("RewardLedgerUser")
+  rewardAdjustments RewardLedger[]    @relation("RewardLedgerActor")
+  siteContentEdits SiteContent[]
+
+  @@index([role])
+  @@index([status])
+  @@map("user")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ip        String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_token")
+}
+
+model PasswordReset {
+  id          String    @id @default(cuid())
+  userId      String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  requestedBy String? // null = self-requested; user id = admin-initiated
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset")
+}
+
+model Address {
+  id                String   @id @default(cuid())
+  userId            String
+  label             String?
+  line1             String
+  line2             String?
+  city              String
+  state             String
+  zip               String
+  country           String   @default("US")
+  validated         Boolean  @default(false)
+  isDefaultShipping Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("address")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  diff       Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_log")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog & pricing (admin-editable)
+// ---------------------------------------------------------------------------
+
+model Product {
+  id              String   @id @default(cuid())
+  code            String   @unique // matches shared ProductId, e.g. "HD_BANNER"
+  slug            String   @unique
+  name            String
+  active          Boolean  @default(true)
+  sizeMode        SizeMode @default(CUSTOM)
+  fixedWidthIn    Decimal? @db.Decimal(6, 2)
+  fixedHeightIn   Decimal? @db.Decimal(6, 2)
+  minWidthIn      Int?
+  maxWidthIn      Int?
+  minHeightIn     Int?
+  maxHeightIn     Int?
+  shortSideMaxIn  Int?
+  maxBillableFt   Int?
+  productionHours Int?
+  displayConfig   Json? // subtitle, hasMoreInfo, hubCopy, defaultSize, dock flags…
+  sort            Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  materials    ProductMaterial[]
+  volumeTiers  VolumeTier[]
+  cartItems    CartItem[]
+  savedDesigns SavedDesign[]
+  orderItems   OrderItem[]
+
+  @@index([active])
+  @@map("product")
+}
+
+model ProductMaterial {
+  id                   String   @id @default(cuid())
+  productId            String
+  code                 String // matches shared Material, e.g. "VINYL_15OZ_SINGLE"
+  name                 String
+  ratePerSqft          Decimal  @db.Decimal(10, 2)
+  flatPriceUsd         Decimal? @db.Decimal(10, 2)
+  doubleSideMultiplier Decimal  @default(1) @db.Decimal(6, 2)
+  active               Boolean  @default(true)
+  sort                 Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, code])
+  @@index([productId])
+  @@index([active])
+  @@map("product_material")
+}
+
+model FinishingOption {
+  id         String     @id @default(cuid())
+  code       String     @unique // welding|webbing|rope|grommets|pole_pockets|wind_slits
+  name       String
+  products   Json       // array of Product.code this option applies to
+  priceModel PriceModel
+  amount     Decimal    @default(0) @db.Decimal(10, 2)
+  active     Boolean    @default(true)
+  sort       Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([active])
+  @@map("finishing_option")
+}
+
+model VolumeTier {
+  id               String   @id @default(cuid())
+  productId        String?
+  materialCode     String?
+  minBillableSqft  Decimal  @db.Decimal(8, 2)
+  rates            Json // { materialCode: discountedRatePerSqft }
+  warningCopy      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("volume_tier")
+}
+
+model PromoCode {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  type         PromoType
+  value        Decimal   @db.Decimal(10, 2)
+  minOrder     Decimal   @default(0) @db.Decimal(12, 2)
+  maxUses      Int?
+  perUserLimit Int?
+  timesUsed    Int       @default(0)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  orders Order[]
+
+  @@index([active])
+  @@map("promo_code")
+}
+
+model RewardLedger {
+  id        String       @id @default(cuid())
+  userId    String
+  deltaCents Int // money as integer cents ($1 credit = 100)
+  reason    RewardReason
+  orderId   String?
+  createdBy String? // admin user id for adjustments/redemptions
+  createdAt DateTime     @default(now())
+
+  user User  @relation("RewardLedgerUser", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("RewardLedgerActor", fields: [createdBy], references: [id])
+  order Order? @relation(fields: [orderId], references: [id])
+
+  @@index([userId])
+  @@index([orderId])
+  @@map("reward_ledger")
+}
+
+// ---------------------------------------------------------------------------
+// Selling
+// ---------------------------------------------------------------------------
+
+model Quote {
+  id         String    @id @default(cuid())
+  userId     String? // null = anonymous quote from the public builder
+  request    Json // full quote request payload
+  breakdown  Json // engine result (lines, billable dims, notes)
+  subtotal   Decimal   @db.Decimal(12, 2)
+  discount   Decimal   @default(0) @db.Decimal(12, 2)
+  tax        Decimal   @default(0) @db.Decimal(12, 2)
+  total      Decimal   @db.Decimal(12, 2)
+  validUntil DateTime?
+  createdAt  DateTime  @default(now())
+
+  user      User?       @relation(fields: [userId], references: [id])
+  cartItems CartItem[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("quote")
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique // one active cart per user in V1
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+  @@map("cart")
+}
+
+model CartItem {
+  id            String   @id @default(cuid())
+  cartId        String
+  productId     String
+  qty           Int
+  quoteId       String?
+  artworkFileId String?
+  finishings    Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  cart    Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product       @relation(fields: [productId], references: [id])
+  quote   Quote?        @relation(fields: [quoteId], references: [id])
+  artwork ArtworkFile?  @relation(fields: [artworkFileId], references: [id])
+
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_item")
+}
+
+model SavedDesign {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  productId     String
+  config        Json // builder config snapshot
+  artworkFileId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id])
+  artwork ArtworkFile? @relation(fields: [artworkFileId], references: [id])
+
+  @@index([userId])
+  @@map("saved_design")
+}
+
+model ArtworkFolder {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files ArtworkFile[]
+
+  @@index([userId])
+  @@map("artwork_folder")
+}
+
+model ArtworkFile {
+  id               String      @id @default(cuid())
+  userId           String
+  folderId         String?
+  s3Key            String
+  s3Bucket         String
+  originalFilename String
+  mime             String
+  bytes            Int
+  sha256           String?
+  widthPx          Int?
+  heightPx         Int?
+  dpiReport        Json?
+  scanStatus       ScanStatus  @default(PENDING)
+  deletedAt        DateTime?
+  createdAt        DateTime    @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder       ArtworkFolder? @relation(fields: [folderId], references: [id])
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+  savedDesigns SavedDesign[]
+  shipmentLabels Shipment[]
+
+  @@index([userId])
+  @@index([folderId])
+  @@index([scanStatus])
+  @@index([deletedAt])
+  @@map("artwork_file")
+}
+
+// ---------------------------------------------------------------------------
+// Orders & fulfillment
+// ---------------------------------------------------------------------------
+
+model Order {
+  id                      String        @id @default(cuid())
+  number                  String        @unique // human-readable, e.g. BI48-000123
+  userId                  String
+  status                  OrderStatus   @default(RECEIVED)
+  paymentStatus           PaymentStatus @default(PENDING_PAYMENT)
+  promoCodeId             String?
+  rewardPointsEarned      Int           @default(0)
+  subtotal                Decimal       @db.Decimal(12, 2)
+  discountAmount          Decimal       @default(0) @db.Decimal(12, 2)
+  taxAmount               Decimal       @default(0) @db.Decimal(12, 2)
+  shippingAmount          Decimal       @default(0) @db.Decimal(12, 2)
+  total                   Decimal       @db.Decimal(12, 2)
+  currency                String        @default("USD")
+  shipAddress             Json // address snapshot at placement
+  proofConfirmedAt        DateTime?
+  proofConsentTextVersion String?
+  proofConfirmIp          String?
+  placedAt                DateTime?
+  cancelledAt             DateTime?
+  cancelReason            String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  user       User                 @relation(fields: [userId], references: [id])
+  promoCode  PromoCode?           @relation(fields: [promoCodeId], references: [id])
+  items      OrderItem[]
+  events     OrderEvent[]
+  dropship   DropshipSubmission?
+  shipments  Shipment[]
+  taxRecord  TaxRecord?
+  rewards    RewardLedger[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([placedAt])
+  @@map("order")
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  productId      String
+  productSlug    String // snapshot
+  description    String
+  qty            Int
+  widthIn        Decimal  @db.Decimal(6, 2)
+  heightIn       Decimal  @db.Decimal(6, 2)
+  billableSqft   Decimal  @db.Decimal(8, 2)
+  materialCode   String // snapshot
+  printSides     String?
+  finishings     Json?
+  unitPrice      Decimal  @db.Decimal(12, 2)
+  lineTotal      Decimal  @db.Decimal(12, 2)
+  artworkFileId  String?
+  configSnapshot Json
+  createdAt      DateTime @default(now())
+
+  order    Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product  Product      @relation(fields: [productId], references: [id])
+  artwork  ArtworkFile? @relation(fields: [artworkFileId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_item")
+}
+
+model OrderEvent {
+  id         String       @id @default(cuid())
+  orderId    String
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  actorId    String? // null = system
+  note       String?
+  emailed    Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("order_event")
+}
+
+model DropshipSubmission {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  externalRef String
+  submittedBy String
+  submittedAt DateTime
+  notes       String?
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([submittedBy])
+  @@map("dropship_submission")
+}
+
+model Shipment {
+  id             String        @id @default(cuid())
+  orderId        String
+  carrier        Carrier       @default(FEDEX)
+  trackingNumber String?
+  labelFileId    String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  trackingEvents Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  labelFile ArtworkFile? @relation(fields: [labelFileId], references: [id])
+  trackingJobs TrackingJob[]
+
+  @@unique([orderId])
+  @@index([trackingNumber])
+  @@map("shipment")
+}
+
+model TaxRecord {
+  id                    String      @id @default(cuid())
+  orderId               String      @unique
+  provider              TaxProvider @default(TAXJAR)
+  providerTxnId         String?
+  rate                  Decimal     @db.Decimal(8, 5)
+  amount                Decimal     @db.Decimal(12, 2)
+  jurisdictionBreakdown Json?
+  createdAt             DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@map("tax_record")
+}
+
+// ---------------------------------------------------------------------------
+// Platform
+// ---------------------------------------------------------------------------
+
+model SiteContent {
+  key        String    @id
+  blockType  BlockType
+  payload    Json
+  published  Boolean   @default(true)
+  updatedBy  String?
+  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime  @default(now())
+
+  updater User? @relation(fields: [updatedBy], references: [id])
+
+  @@index([blockType])
+  @@index([published])
+  @@map("site_content")
+}
+
+model EmailLog {
+  id                String      @id @default(cuid())
+  toEmail           String
+  template          String
+  orderId           String?
+  providerMessageId String?
+  status            EmailStatus @default(QUEUED)
+  payload           Json?
+  sentAt            DateTime?
+  createdAt         DateTime    @default(now())
+
+  @@index([toEmail])
+  @@index([status])
+  @@index([orderId])
+  @@map("email_log")
+}
+
+model TrackingJob {
+  id          String   @id @default(cuid())
+  shipmentId  String
+  nextPollAt  DateTime
+  lastStatus  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@index([nextPollAt])
+  @@map("tracking_job")
+}
