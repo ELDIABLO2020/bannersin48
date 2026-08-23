@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { startMocks } from "@/lib/mocks/init";
 
-const USE_MOCKS =
-  process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_ENABLE_MOCKS === "1";
+// Real APIs are the default in local development. Opt into MSW explicitly
+// for isolated frontend/E2E work with NEXT_PUBLIC_ENABLE_MOCKS=1.
+const USE_MOCKS = process.env.NEXT_PUBLIC_ENABLE_MOCKS === "1";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(

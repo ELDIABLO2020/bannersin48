@@ -6,9 +6,7 @@
  */
 export async function startMocks(): Promise<boolean> {
   if (typeof window === "undefined") return false;
-  if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ENABLE_MOCKS !== "1") {
-    return false;
-  }
+  if (process.env.NEXT_PUBLIC_ENABLE_MOCKS !== "1") return false;
   try {
     const { startMockWorker } = await import("@bannersin48/api-client/mocks/browser");
     await startMockWorker();
