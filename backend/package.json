@@ -12,7 +12,9 @@
     "test": "jest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "smoke": "bash scripts/smoke.sh"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",
@@ -31,6 +33,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@nestjs/testing": "^10.4.22",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
