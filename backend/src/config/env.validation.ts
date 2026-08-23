@@ -8,6 +8,8 @@ export interface Env {
   JWT_SECRET: string;
   PORT: number;
   NODE_ENV: string;
+  STORAGE_DRIVER: string;
+  LOCAL_STORAGE_DIR: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): Env {
@@ -37,5 +39,7 @@ export function validateEnv(config: Record<string, unknown>): Env {
     JWT_SECRET: String(config.JWT_SECRET),
     PORT: Number(config.PORT ?? 3001),
     NODE_ENV: String(config.NODE_ENV ?? "development"),
+    STORAGE_DRIVER: String(config.STORAGE_DRIVER ?? "local"),
+    LOCAL_STORAGE_DIR: String(config.LOCAL_STORAGE_DIR ?? "./storage"),
   };
 }

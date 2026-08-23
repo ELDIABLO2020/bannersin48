@@ -5,6 +5,7 @@ import { CatalogService } from "../catalog/catalog.service";
 import { DeliveryService } from "../delivery/delivery.service";
 import type { FinishingDto } from "./quote-request.dto";
 import type { QuoteRequestDto } from "./quote-request.dto";
+import { assertMaterialOffered, assertSizeAllowed, normalizeFinishing } from "./catalog-rules";
 
 const QUOTE_VALIDITY_DAYS = 14;
 
@@ -43,41 +44,11 @@ export class PricingService {
       throw new NotFoundException({ code: "NOT_FOUND", message: "Product not found." });
     }
 
-    // The material must be offered on this product (DB-driven rule).
-    if (!product.materials.some((m) => m.code === dto.material)) {
-      throw new BadRequestException({
-        code: "MATERIAL_NOT_OFFERED",
-        message: `Material ${dto.material} is not available for ${product.name}.`,
-      });
-    }
-
-    // Size limits from the DB (seeded from the shared product configs).
+    // The material must be offered on this product and the size must be in
+    // range (DB-driven rules).
+    assertMaterialOffered(product, dto.material);
+    assertSizeAllowed(product, dto.dimensions);
     const dims = dto.dimensions;
-    const widthIn = dims.widthFt * 12 + dims.widthIn;
-    const heightIn = dims.heightFt * 12 + dims.heightIn;
-    if (product.sizeMode === "CUSTOM") {
-      const min = product.minWidthIn ?? 0;
-      if (widthIn < min || heightIn < min) {
-        throw new BadRequestException({ code: "SIZE_TOO_SMALL", message: 'The minimum size is 12" × 12".' });
-      }
-      const shortSideMax = product.shortSideMaxIn;
-      if (shortSideMax && Math.min(widthIn, heightIn) > shortSideMax) {
-        throw new BadRequestException({
-          code: "SHORT_SIDE_TOO_LONG",
-          message: `The shorter side of a ${product.name} can be at most ${shortSideMax}".`,
-        });
-      }
-      const maxBillableFt = product.maxBillableFt;
-      if (
-        maxBillableFt &&
-        (Math.ceil(widthIn / 12) > maxBillableFt || Math.ceil(heightIn / 12) > maxBillableFt)
-      ) {
-        throw new BadRequestException({
-          code: "SIZE_TOO_LARGE",
-          message: `Billable size exceeds the ${maxBillableFt} ft maximum. Please contact us for a custom quote.`,
-        });
-      }
-    }
 
     // Recompute everything through the shared engine.
     const finishing = normalizeFinishing(dto.finishing);
@@ -124,17 +95,4 @@ export class PricingService {
       cutoffAtEt: estimate.cutoffAtEt,
     };
   }
-}
-
-/** Apply engine defaults so partial finishing payloads behave like the builder. */
-function normalizeFinishing(finishing?: FinishingDto) {
-  return {
-    welding: false,
-    grommets: false,
-    windSlits: false,
-    polePockets: false,
-    rope: false,
-    webbing: false,
-    ...finishing,
-  };
 }

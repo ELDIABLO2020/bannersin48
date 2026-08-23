@@ -30,14 +30,19 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const header: string | undefined = request.headers["authorization"];
+    // Query-param fallback so browser-native requests (<img src>) can pass the
+    // same access token they would otherwise send as a header.
+    const queryToken: unknown =
+      typeof request.query?.access_token === "string" ? request.query.access_token : undefined;
+    const rawToken = queryToken ? String(queryToken) : header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
 
-    if (!header || !header.startsWith("Bearer ")) {
+    if (!rawToken) {
       throw new UnauthorizedException("Missing or malformed Authorization header.");
     }
 
     let payload: JwtPayload;
     try {
-      payload = await this.jwt.verifyAsync(header.slice("Bearer ".length));
+      payload = await this.jwt.verifyAsync(rawToken);
     } catch {
       throw new UnauthorizedException("Invalid or expired token.");
     }

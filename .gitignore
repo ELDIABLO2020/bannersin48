@@ -44,3 +44,6 @@ frontend/lhci-reports/
 .claude/
 .cursor/
 .playwright-cli/
+
+# Local artwork storage (dev driver)
+backend/storage/
