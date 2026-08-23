@@ -67,6 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           auth.clear();
           return;
         }
+        auth.setAuth(res.user, res.token);
         queryClient.clear();
         router.refresh();
       } catch (err) {
