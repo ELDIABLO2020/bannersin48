@@ -5,9 +5,10 @@ import { OrdersService } from "./orders.service";
 import { ArtworkModule } from "../artwork/artwork.module";
 import { CatalogModule } from "../catalog/catalog.module";
 import { DeliveryModule } from "../delivery/delivery.module";
+import { PricingModule } from "../pricing/pricing.module";
 
 @Module({
-  imports: [AuthModule, ArtworkModule, CatalogModule, DeliveryModule],
+  imports: [AuthModule, ArtworkModule, CatalogModule, DeliveryModule, PricingModule],
   controllers: [OrdersController],
   providers: [OrdersService],
   exports: [OrdersService],

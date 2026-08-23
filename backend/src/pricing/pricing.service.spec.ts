@@ -4,6 +4,7 @@ import { PricingService } from "./pricing.service";
 import { CatalogService } from "../catalog/catalog.service";
 import { DeliveryService } from "../delivery/delivery.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { PricingEngineService } from "./pricing-engine.service";
 import type { QuoteRequestDto } from "./quote-request.dto";
 
 /**
@@ -40,7 +41,16 @@ function makeService(quoteCreate: jest.Mock) {
     ),
   };
   return Test.createTestingModule({
-    providers: [PricingService],
+    providers: [
+      PricingService,
+      {
+        provide: PricingEngineService,
+        useValue: {
+          priceLines: async (lines: Parameters<typeof import("@bannersin48/shared").priceOrder>[0]) =>
+            (await import("@bannersin48/shared")).priceOrder(lines),
+        },
+      },
+    ],
   })
     .useMocker((token) => {
       if (token === CatalogService) return Object.assign(catalogMock);

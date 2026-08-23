@@ -5,6 +5,7 @@ import { CatalogService } from "../catalog/catalog.service";
 import { DeliveryService } from "../delivery/delivery.service";
 import { ArtworkService } from "../artwork/artwork.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { PricingEngineService } from "../pricing/pricing-engine.service";
 import { assertTransition } from "./status-machine";
 import type { CreateOrderDto } from "./orders.dto";
 
@@ -97,7 +98,18 @@ function makePrismaMock() {
 async function makeService(opts: { artworkOwnerOk?: boolean } = {}) {
   const { prisma, stored } = makePrismaMock();
   const moduleRef = await Test.createTestingModule({
-    providers: [OrdersService, { provide: PrismaService, useValue: prisma }],
+    providers: [
+      OrdersService,
+      { provide: PrismaService, useValue: prisma },
+      {
+        provide: PricingEngineService,
+        // Real engine math (shared constants) without the DB-rate loader.
+        useValue: {
+          priceLines: async (lines: Parameters<typeof import("@bannersin48/shared").priceOrder>[0]) =>
+            (await import("@bannersin48/shared")).priceOrder(lines),
+        },
+      },
+    ],
   })
     .useMocker((token) => {
       if (token === CatalogService) {

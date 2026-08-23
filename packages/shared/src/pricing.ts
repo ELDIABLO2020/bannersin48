@@ -30,6 +30,23 @@ export interface PricingInput {
   quantity: Quantity;
 }
 
+/**
+ * Optional DB-loaded rates. When omitted the engine falls back to the shipped
+ * constants — the backend passes admin-editable catalog rates here so pricing
+ * control takes effect on new quotes/orders without code changes.
+ */
+export interface PricingRates {
+  materialRatePerSqft?: Partial<Record<Material, number>>;
+  flatPriceUsdByProduct?: Partial<Record<ProductId, number>>;
+  addonPerSqft?: {
+    windSlits?: number;
+    polePockets?: number;
+    rope?: number;
+  };
+  webbingPerWidthFtPerEdge?: number;
+  shippingFlatPerUnit?: number;
+}
+
 export interface PricingLine {
   unitProduct: number;
   addons: number;
@@ -55,13 +72,14 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-export function priceLine(input: PricingInput): PricingLine {
+export function priceLine(input: PricingInput, rates?: PricingRates): PricingLine {
   const notes: string[] = [];
   const productId = input.productId ?? productIdForMaterial(input.material);
   const config = PRODUCTS[productId];
 
   if (config.sizeMode === "fixed") {
-    const unitProduct = config.flatPriceUsd ?? 0;
+    const unitProduct =
+      rates?.flatPriceUsdByProduct?.[productId] ?? config.flatPriceUsd ?? 0;
     const productSubtotal = unitProduct * input.quantity;
     const shipping = input.quantity * SHIPPING_FLAT_PER_UNIT_USD;
     const note =
@@ -89,23 +107,29 @@ export function priceLine(input: PricingInput): PricingLine {
     notes.push(validation.message);
   }
 
-  const rate = config.ratePerSqFt(input.material);
+  const defaultRate = config.ratePerSqFt(input.material);
+  const rate = rates?.materialRatePerSqft?.[input.material] ?? defaultRate;
   const productBase = billable.sqFt * rate;
 
   const windSlits =
-    config.dock.windSlits && input.finishing.windSlits ? billable.sqFt * ADDON_RATES.WIND_SLITS_PER_SQFT : 0;
+    config.dock.windSlits && input.finishing.windSlits
+      ? billable.sqFt * (rates?.addonPerSqft?.windSlits ?? ADDON_RATES.WIND_SLITS_PER_SQFT)
+      : 0;
   const polePockets =
-    config.dock.polePockets && input.finishing.polePockets ? billable.sqFt * ADDON_RATES.POLE_POCKETS_PER_SQFT : 0;
-  const rope = config.dock.rope && input.finishing.rope ? billable.sqFt * ADDON_RATES.ROPE_PER_SQFT : 0;
+    config.dock.polePockets && input.finishing.polePockets
+      ? billable.sqFt * (rates?.addonPerSqft?.polePockets ?? ADDON_RATES.POLE_POCKETS_PER_SQFT)
+      : 0;
+  const rope =
+    config.dock.rope && input.finishing.rope ? billable.sqFt * (rates?.addonPerSqft?.rope ?? ADDON_RATES.ROPE_PER_SQFT) : 0;
   const webbing =
     config.dock.webbing && input.finishing.webbing
-      ? billable.widthFt * WEBBING_PER_WIDTH_FT_PER_EDGE_USD * 2
+      ? billable.widthFt * (rates?.webbingPerWidthFtPerEdge ?? WEBBING_PER_WIDTH_FT_PER_EDGE_USD) * 2
       : 0;
   const addons = windSlits + polePockets + rope + webbing;
 
   const unitProduct = productBase + addons;
   const productSubtotal = unitProduct * input.quantity;
-  const shipping = input.quantity * SHIPPING_FLAT_PER_UNIT_USD;
+  const shipping = input.quantity * (rates?.shippingFlatPerUnit ?? SHIPPING_FLAT_PER_UNIT_USD);
   const totalBeforeTax = productSubtotal + shipping;
 
   return {
@@ -123,8 +147,8 @@ export function priceLine(input: PricingInput): PricingLine {
   };
 }
 
-export function priceOrder(lines: PricingInput[]): PricingResult {
-  const priced = lines.map(priceLine);
+export function priceOrder(lines: PricingInput[], rates?: PricingRates): PricingResult {
+  const priced = lines.map((l) => priceLine(l, rates));
   const subtotal = round2(priced.reduce((acc, l) => acc + l.productSubtotal, 0));
   const shipping = round2(priced.reduce((acc, l) => acc + l.shipping, 0));
   const total = round2(subtotal + shipping);

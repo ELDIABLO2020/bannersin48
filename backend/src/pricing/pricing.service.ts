@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { priceOrder, productIdForMaterial } from "@bannersin48/shared";
+import { productIdForMaterial } from "@bannersin48/shared";
+import { PricingEngineService } from "./pricing-engine.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CatalogService } from "../catalog/catalog.service";
 import { DeliveryService } from "../delivery/delivery.service";
@@ -34,6 +35,7 @@ export class PricingService {
     @Inject(PrismaService) private readonly prisma: PrismaService,
     private readonly catalog: CatalogService,
     private readonly delivery: DeliveryService,
+    private readonly engine: PricingEngineService,
   ) {}
 
   async quote(dto: QuoteRequestDto): Promise<QuoteResponse> {
@@ -50,9 +52,9 @@ export class PricingService {
     assertSizeAllowed(product, dto.dimensions);
     const dims = dto.dimensions;
 
-    // Recompute everything through the shared engine.
+    // Recompute through the shared engine using admin-editable DB rates.
     const finishing = normalizeFinishing(dto.finishing);
-    const result = priceOrder([
+    const result = await this.engine.priceLines([
       {
         productId: productCode as never,
         material: dto.material as never,

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { priceOrder, productIdForMaterial, type PricingLine } from "@bannersin48/shared";
+import { productIdForMaterial, type PricingInput, type PricingLine } from "@bannersin48/shared";
+import { PricingEngineService } from "../pricing/pricing-engine.service";
 import type { Order, OrderItem, OrderEvent } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { CatalogService } from "../catalog/catalog.service";
@@ -25,6 +26,7 @@ export class OrdersService {
     private readonly catalog: CatalogService,
     private readonly delivery: DeliveryService,
     private readonly artwork: ArtworkService,
+    private readonly engine: PricingEngineService,
   ) {}
 
   // --- Creation -------------------------------------------------------------
@@ -42,15 +44,15 @@ export class OrdersService {
       }
     }
 
-    // Re-price server-side through the shared engine — client totals are never trusted.
-    const priced = priceOrder(
+    // Re-price server-side through the shared engine (DB rates) — client totals are never trusted.
+    const priced = await this.engine.priceLines(
       dto.lines.map((line) => ({
         productId: this.productFor(products, line).code,
         material: line.material,
         dimensions: line.dimensions,
         finishing: normalizeFinishing(line.finishing),
         quantity: line.quantity,
-      })) as never,
+      })) as PricingInput[],
     );
 
     if (!priced.lines.every((l) => l.eligible)) {
