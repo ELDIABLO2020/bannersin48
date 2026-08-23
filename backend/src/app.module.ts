@@ -10,6 +10,7 @@ import { CatalogModule } from "./catalog/catalog.module";
 import { PricingModule } from "./pricing/pricing.module";
 import { ArtworkModule } from "./artwork/artwork.module";
 import { OrdersModule } from "./orders/orders.module";
+import { AdminModule } from "./admin/admin.module";
 import { HealthController } from "./health/health.controller";
 
 @Module({
@@ -24,6 +25,7 @@ import { HealthController } from "./health/health.controller";
     PricingModule,
     ArtworkModule,
     OrdersModule,
+    AdminModule,
   ],
   controllers: [HealthController],
 })

@@ -269,6 +269,26 @@ export class OrdersService {
     });
   }
 
+  /** Timeline entry without a status change (e.g. "dropship ref recorded"). */
+  async logActivity(
+    orderId: string,
+    actorId: string | null,
+    note: string,
+    opts: { emailed?: boolean } = {},
+  ): Promise<void> {
+    const order = await this.prisma.order.findUniqueOrThrow({ where: { id: orderId }, select: { status: true } });
+    await this.prisma.orderEvent.create({
+      data: {
+        orderId,
+        fromStatus: order.status,
+        toStatus: order.status,
+        actorId,
+        note,
+        emailed: opts.emailed ?? false,
+      },
+    });
+  }
+
   // --- Serialization ----------------------------------------------------------
 
   toListSummary(o: Order & { items: OrderItem[] }): OrderListItem {
