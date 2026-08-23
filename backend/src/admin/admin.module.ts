@@ -7,10 +7,14 @@ import { AdminOrdersController } from "./admin-orders.controller";
 import { AdminOrdersService } from "./admin-orders.service";
 import { PricingAdminController } from "./pricing-admin.controller";
 import { PricingAdminService } from "./pricing-admin.service";
+import { AdminContentCustomersController, PublicContentController } from "./content-customers.controller";
+import { AdminContentService, ContentService } from "./content-admin.service";
+import { AdminCustomersService } from "./customers-admin.service";
 
 @Module({
   imports: [AuthModule, OrdersModule, ArtworkModule, NotificationsModule],
-  controllers: [AdminOrdersController, PricingAdminController],
-  providers: [AdminOrdersService, PricingAdminService],
+  exports: [ContentService],
+  controllers: [AdminOrdersController, PricingAdminController, AdminContentCustomersController, PublicContentController],
+  providers: [AdminOrdersService, PricingAdminService, AdminContentService, ContentService, AdminCustomersService],
 })
 export class AdminModule {}
