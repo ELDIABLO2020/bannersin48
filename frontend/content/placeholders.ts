@@ -109,12 +109,6 @@ export const placeholders = {
     width: 800,
     height: 800,
   },
-  testimonialFeatured: {
-    src: "/images/placeholders/testimonial-featured.jpg",
-    alt: "Contractor reviewing a finished vinyl banner at a jobsite",
-    width: 960,
-    height: 540,
-  },
   resourceHelp: {
     src: "/images/placeholders/resource-help.jpg",
     alt: "Artwork preparation guide for banner printing",

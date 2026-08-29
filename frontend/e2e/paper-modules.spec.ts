@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { seedDemoAuth } from "./helpers/auth";
 
 async function waitForBuilder(page: import("@playwright/test").Page) {
+  await page.reload(); // hydrate seeded demo auth (account-gated artwork picker)
   await expect(page.getByTestId("builder-shell")).toBeVisible({ timeout: 30_000 });
   await page.waitForFunction(
     () => (window as unknown as { __BI48_MOCKS_READY__?: boolean }).__BI48_MOCKS_READY__ === true,
@@ -15,6 +17,7 @@ test.describe("Paper modules", () => {
       sessionStorage.removeItem("bi48.builder");
       localStorage.removeItem("bi48.cart");
     });
+    seedDemoAuth(page);
   });
 
   test("no-curl default $118; 3×6 errors; 2×6 recovers", async ({ page }, testInfo) => {
@@ -25,6 +28,11 @@ test.describe("Paper modules", () => {
       timeout: 10_000,
     });
     await expect(page.getByTestId("popular-size-3x6")).toHaveCount(0);
+
+    // Select artwork first so the add-to-cart gate reflects size eligibility alone.
+    await page.getByTestId("dock-images").click();
+    await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("library-item-art_sample_2").click();
 
     await page.getByTestId("dock-size").click();
     await page.getByTestId("aspect-lock").uncheck();

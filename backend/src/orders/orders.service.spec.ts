@@ -6,6 +6,8 @@ import { DeliveryService } from "../delivery/delivery.service";
 import { ArtworkService } from "../artwork/artwork.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { PricingEngineService } from "../pricing/pricing-engine.service";
+import { PricingService } from "../pricing/pricing.service";
+import { AddressService } from "../address/address.service";
 import { assertTransition } from "./status-machine";
 import type { CreateOrderDto } from "./orders.dto";
 
@@ -67,6 +69,21 @@ function makePrismaMock() {
   const prisma: any = {
     $queryRaw: jest.fn(async () => [{ nextval: 7n }]),
     $transaction: jest.fn(async (fn: (tx: any) => Promise<unknown>) => fn(prisma)),
+    quote: {
+      findUnique: jest.fn(async () => ({
+        id: "quote_ok",
+        userId: null,
+        request: {
+          productId: "HD_BANNER",
+          material: "VINYL_15OZ_SINGLE",
+          dimensions: { widthFt: 3, widthIn: 0, heightFt: 6, heightIn: 0 },
+          finishing: { welding: true, grommets: true },
+          quantity: 1,
+        },
+        breakdown: { lines: [{ totalBeforeTax: 95.5 }] },
+        validUntil: new Date(Date.now() + 60_000),
+      })),
+    },
     order: {
       create: jest.fn(async ({ data }: any) => {
         Object.assign(stored, { order: data });
@@ -121,6 +138,12 @@ async function makeService(opts: { artworkOwnerOk?: boolean } = {}) {
       if (token === ArtworkService) {
         return { assertUsableBy: jest.fn(async () => undefined) };
       }
+      if (token === PricingService) {
+        return { quote: jest.fn() };
+      }
+      if (token === AddressService) {
+        return { assertToken: jest.fn((address) => ({ ...address, country: "US" })) };
+      }
       return {};
     })
     .compile();
@@ -149,6 +172,7 @@ function validDto(overrides: Partial<CreateOrderDto> = {}): CreateOrderDto {
         finishing: { welding: true, grommets: true },
         quantity: 1,
         artworkId: "art_ok",
+        quoteId: "quote_ok",
       },
     ],
     shipTo: {
@@ -159,6 +183,8 @@ function validDto(overrides: Partial<CreateOrderDto> = {}): CreateOrderDto {
       postalCode: "48197",
       country: "US",
     },
+    addressValidationToken: "address-token",
+    addressRiskAcknowledged: true,
     acknowledgements: {
       artworkCorrect: true,
       spellingColorsLayoutAccepted: true,
@@ -203,11 +229,79 @@ describe("OrdersService.create", () => {
     expect(persisted.placedAt).toBeTruthy();
   });
 
+  it("rejects an unverified address when risk acknowledgement is bypassed", async () => {
+    const { service, prisma } = await makeService();
+    const dto = validDto({ addressRiskAcknowledged: false });
+    await expect(service.create("user_1", dto)).rejects.toMatchObject({
+      response: { code: "ADDRESS_RISK_ACKNOWLEDGEMENT_REQUIRED" },
+    });
+    expect(prisma.order.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects a missing artwork id even when DTO validation is bypassed", async () => {
+    const { service } = await makeService();
+    const dto = validDto();
+    dto.lines[0].artworkId = "";
+    await expect(service.create("user_1", dto)).rejects.toMatchObject({
+      response: { code: "ARTWORK_REQUIRED" },
+    });
+  });
+
   it("rejects artwork that is not owned by / present for the user", async () => {
     const { service } = await makeService({ artworkOwnerOk: false });
     await expect(service.create("user_1", validDto())).rejects.toMatchObject({
       response: { code: "ARTWORK_INVALID" },
     });
+  });
+
+  it("rejects an expired quote before creating an order", async () => {
+    const { service, prisma } = await makeService();
+    prisma.quote.findUnique.mockResolvedValueOnce({
+      id: "quote_ok",
+      userId: null,
+      request: {},
+      breakdown: {},
+      validUntil: new Date(Date.now() - 1_000),
+    });
+    await expect(service.create("user_1", validDto())).rejects.toMatchObject({
+      status: 409,
+      response: { code: "QUOTE_EXPIRED" },
+    });
+    expect(prisma.order.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects a quote that does not match the submitted configuration", async () => {
+    const { service } = await makeService();
+    const dto = validDto();
+    dto.lines[0].quantity = 2;
+    await expect(service.create("user_1", dto)).rejects.toMatchObject({
+      response: { code: "QUOTE_MISMATCH" },
+    });
+  });
+
+  it("returns QUOTE_CHANGED and creates no order when current pricing differs", async () => {
+    const { service, prisma } = await makeService();
+    prisma.quote.findUnique.mockResolvedValueOnce({
+      id: "quote_ok",
+      userId: null,
+      request: {
+        productId: "HD_BANNER",
+        material: "VINYL_15OZ_SINGLE",
+        dimensions: { widthFt: 3, widthIn: 0, heightFt: 6, heightIn: 0 },
+        finishing: { welding: true, grommets: true },
+        quantity: 1,
+      },
+      breakdown: { lines: [{ totalBeforeTax: 90 }] },
+      validUntil: new Date(Date.now() + 60_000),
+    });
+    const pricing = (service as unknown as { pricing: { quote: jest.Mock } }).pricing;
+    pricing.quote.mockResolvedValue({ quoteId: "replacement" });
+
+    await expect(service.create("user_1", validDto())).rejects.toMatchObject({
+      status: 409,
+      response: { code: "QUOTE_CHANGED" },
+    });
+    expect(prisma.order.create).not.toHaveBeenCalled();
   });
 
   it("rejects a material not offered on the product", async () => {

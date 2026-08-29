@@ -23,14 +23,17 @@ function jpegBuf(w = 100, h = 50): Buffer {
 }
 
 describe("artwork MIME sniffing (magic bytes)", () => {
-  it("detects jpeg/png/pdf/tiff/eps", () => {
+  it("detects the V1 JPEG/PNG/PDF formats", () => {
     expect(sniffMime(Buffer.from([0xff, 0xd8, 0xff, 0xe0]))).toBe("image/jpeg");
     expect(sniffMime(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe("image/png");
     expect(sniffMime(Buffer.from("%PDF-1.7\n…"))).toBe("application/pdf");
-    expect(sniffMime(Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x00]))).toBe("image/tiff");
-    expect(sniffMime(Buffer.from([0x4d, 0x4d, 0x00, 0x2a, 0x00]))).toBe("image/tiff");
-    expect(sniffMime(Buffer.from("%!PS-Adobe-3.0 EPSF-3.0"))).toBe("application/postscript");
-    expect(sniffMime(Buffer.from([0xc5, 0xd0, 0xd3, 0xc6]))).toBe("application/postscript");
+  });
+
+  it("rejects TIFF and EPS until trustworthy review derivatives exist", () => {
+    expect(sniffMime(Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x00]))).toBeNull();
+    expect(sniffMime(Buffer.from([0x4d, 0x4d, 0x00, 0x2a, 0x00]))).toBeNull();
+    expect(sniffMime(Buffer.from("%!PS-Adobe-3.0 EPSF-3.0"))).toBeNull();
+    expect(sniffMime(Buffer.from([0xc5, 0xd0, 0xd3, 0xc6]))).toBeNull();
   });
 
   it("rejects disallowed or spoofed files", () => {
@@ -86,14 +89,7 @@ describe("dimension/DPI inspection", () => {
     expect(dims.widthPx).toBeUndefined();
   });
 
-  it("extracts EPS bounding box", () => {
-    const eps = Buffer.from("%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 144 72\n");
-    const dims = inspectDimensions("application/postscript", eps);
-    expect(dims.report.widthPt).toBe(144);
-  });
-
   it("never throws on garbage input", () => {
     expect(() => inspectDimensions("image/png", Buffer.from("garbage"))).not.toThrow();
-    expect(() => inspectDimensions("image/tiff", Buffer.from("\u0000\u0001\u0002"))).not.toThrow();
   });
 });

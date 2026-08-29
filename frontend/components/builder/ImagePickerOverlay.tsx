@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
 import { useConfigurator } from "@/lib/stores/configurator";
@@ -8,6 +10,7 @@ import { ARTWORK_MIME_TYPES, ARTWORK_DEFAULT_DPI, UPLOAD_REJECT, formatBytes } f
 import { Button } from "@/components/ui/button";
 import { X, Upload, Folder } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useAuth } from "@/lib/stores/auth";
 
 const MAX_BYTES = 50 * 1024 * 1024;
 
@@ -15,21 +18,31 @@ export function ImagePickerOverlay() {
   const open = useConfigurator((s) => s.pickerOpen);
   const setPickerOpen = useConfigurator((s) => s.setPickerOpen);
   const setArtwork = useConfigurator((s) => s.setArtwork);
+  const auth = useAuth();
+  const pathname = usePathname();
   const fileInput = useRef<HTMLInputElement>(null);
   const [folderId, setFolderId] = useState("folder_home");
   const [error, setError] = useState<string | null>(null);
   const qc = useQueryClient();
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!auth.user || url.searchParams.get("artwork") !== "1") return;
+    setPickerOpen(true);
+    url.searchParams.delete("artwork");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [auth.user, setPickerOpen]);
+
   const { data: folders = [] } = useQuery({
     queryKey: ["artwork-folders"],
     queryFn: () => getApiClient().listArtworkFolders(),
-    enabled: open,
+    enabled: open && !!auth.user,
   });
 
   const { data: items = [], isFetching } = useQuery({
     queryKey: ["artwork-library", folderId],
     queryFn: () => getApiClient().listArtwork(folderId),
-    enabled: open,
+    enabled: open && !!auth.user,
   });
 
   const upload = useMutation({
@@ -62,6 +75,8 @@ export function ImagePickerOverlay() {
   });
 
   if (!open) return null;
+
+  const returnUrl = `${pathname}?artwork=1`;
 
   function validateAndUpload(file: File) {
     setError(null);
@@ -100,6 +115,22 @@ export function ImagePickerOverlay() {
           </button>
         </div>
 
+        {!auth.user ? (
+          <div className="p-xl text-center">
+            <h3 className="font-bold text-heading-h4 text-ink">Sign in to use artwork</h3>
+            <p className="mt-sm text-body-sm text-ink-muted">
+              Artwork is private to an account. Your current configuration will remain in this browser.
+            </p>
+            <div className="mt-lg flex flex-col sm:flex-row justify-center gap-sm">
+              <Link href={`/login?next=${encodeURIComponent(returnUrl)}`}>
+                <Button variant="cta" size="md">Log in</Button>
+              </Link>
+              <Link href={`/register?next=${encodeURIComponent(returnUrl)}`}>
+                <Button variant="secondary" size="md">Create account</Button>
+              </Link>
+            </div>
+          </div>
+        ) : (
         <div className="flex flex-1 min-h-0">
           <aside className="w-36 shrink-0 border-r border-line p-sm space-y-1 overflow-y-auto">
             {folders.map((f) => (
@@ -135,7 +166,7 @@ export function ImagePickerOverlay() {
               <input
                 ref={fileInput}
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.tif,.tiff,.eps,application/pdf,image/jpeg,image/png,image/tiff,application/postscript"
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
                 className="sr-only"
                 data-testid="image-picker-file"
                 onChange={(e) => {
@@ -144,7 +175,7 @@ export function ImagePickerOverlay() {
                   e.target.value = "";
                 }}
               />
-              <span className="text-xs text-ink-muted">PDF, JPG, PNG, TIFF, EPS · max 50 MB</span>
+              <span className="text-xs text-ink-muted">JPEG, PNG, PDF · max 50 MB</span>
             </div>
 
             {error && (
@@ -187,6 +218,7 @@ export function ImagePickerOverlay() {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

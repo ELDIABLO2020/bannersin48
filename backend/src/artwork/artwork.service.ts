@@ -48,7 +48,7 @@ export class ArtworkService {
     if (!mime || !(ALLOWED_MIME_TYPES as readonly string[]).includes(mime)) {
       throw new BadRequestException({
         code: "UNSUPPORTED_FILE_TYPE",
-        message: "Only PDF, JPG, JPEG, PNG, TIFF, and EPS files are accepted.",
+        message: "Only JPEG, PNG, and PDF files are supported.",
       });
     }
 

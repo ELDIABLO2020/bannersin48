@@ -1,11 +1,12 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/lib/stores/cart";
 import { formatUsd } from "@/lib/utils/format";
 import { ChevronRight } from "lucide-react";
 import { StatusHeroCard } from "@/components/orders/StatusHeroCard";
@@ -14,7 +15,16 @@ import { PRODUCTS, finishingSummary, productIdForMaterial, type ProductId } from
 
 export default function OrderDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const loadFromReorder = useCart((state) => state.loadFromReorder);
   const orderId = params?.id ?? "";
+  const reorder = useMutation({
+    mutationFn: () => getApiClient().reorder(orderId),
+    onSuccess: (response) => {
+      loadFromReorder(response);
+      router.push("/cart");
+    },
+  });
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", orderId],
@@ -109,21 +119,27 @@ export default function OrderDetailPage() {
               </dl>
             </Card>
 
-            <div className="flex flex-col sm:flex-row gap-sm">
-              {order.status === "AWAITING_PROOF_APPROVAL" && (
-                <Link href={`/orders/${order.id}/proof`} className="flex-1">
-                  <Button variant="cta" size="lg" className="w-full">Review &amp; approve proof</Button>
-                </Link>
+            <Card className="bg-info-tint">
+              <p className="text-body-sm text-ink">
+                Uploaded artwork and configuration were confirmed before this order was submitted.
+                This is a record of the supplied file, not a designer-created proof.
+              </p>
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                className="mt-md"
+                onClick={() => reorder.mutate()}
+                disabled={reorder.isPending}
+              >
+                {reorder.isPending ? "Checking current price…" : "Reorder at current price"}
+              </Button>
+              {reorder.isError && (
+                <p role="alert" className="mt-sm text-body-sm text-danger">
+                  {(reorder.error as Error).message}
+                </p>
               )}
-              {order.status === "CANCELLATION_WINDOW" && (
-                <Link href={`/orders/${order.id}/proof`} className="flex-1">
-                  <Button variant="cta" size="lg" className="w-full">View cancellation window</Button>
-                </Link>
-              )}
-              <Link href={`/orders/${order.id}/reorder`} className="flex-1">
-                <Button variant="secondary" size="lg" className="w-full">Reorder this</Button>
-              </Link>
-            </div>
+            </Card>
           </div>
 
           <aside className="lg:col-span-4">

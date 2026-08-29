@@ -65,7 +65,10 @@ export function PriceHero() {
           dimensions: sign.size,
           finishing: sign.finishing,
           quantity: sign.quantity,
-          artworkId: sign.artworkId ?? undefined,
+          artworkId: sign.artworkId!,
+          quoteId: quote.quoteId,
+          quoteValidUntil: quote.validUntil,
+          currency: quote.currency,
           unitProduct: line.unitProduct,
           addons: line.addons,
           productSubtotal: line.productSubtotal,
@@ -135,11 +138,16 @@ export function PriceHero() {
         className="mt-md w-full"
         data-testid="add-to-cart"
         onClick={handleAddAll}
-        disabled={!eligible || adding}
+        disabled={!eligible || adding || signs.some((sign) => !sign.artworkId)}
       >
         <ShoppingCart className="mr-sm h-5 w-5" aria-hidden />
         {signs.length > 1 ? `Add ${signs.length} signs to cart` : "Add to cart"}
       </Button>
+      {signs.some((sign) => !sign.artworkId) && (
+        <p className="mt-sm text-sm text-danger text-center" role="alert">
+          Select JPEG, PNG, or PDF artwork for every sign before adding to cart.
+        </p>
+      )}
       {!eligible && (
         <p className="mt-sm text-sm text-danger text-center">
           {ineligibilityReason ?? "This size exceeds the 10′ maximum."}

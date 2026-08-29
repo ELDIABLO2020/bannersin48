@@ -105,6 +105,9 @@ describe("PricingService.quote — known cases", () => {
     expect(res.subtotal).toBe(85.5); // 18 sqft × $4.75
     expect(res.shipping).toBe(10);
     expect(res.total).toBe(95.5);
+    expect(res.currency).toBe("USD");
+    expect(res.tax).toBe(0);
+    expect(new Date(res.validUntil).getTime()).toBeGreaterThan(Date.now());
     expect(res.eligible).toBe(true);
     expect(res.lines[0]).toEqual(
       expect.objectContaining({ billableSqFt: 18, billableDims: { widthFt: 3, heightFt: 6 } }),

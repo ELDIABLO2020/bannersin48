@@ -10,16 +10,9 @@ const VARIANT: Record<OrderStatus, { bg: string; icon: LucideIcon; tone: "info" 
   IN_PROCESSING: { bg: "var(--color-bg-soft-accent)", icon: Package, tone: "info" },
   ACCEPTED: { bg: "var(--color-strong-accent)", icon: Send, tone: "info" },
   ON_HOLD: { bg: "var(--color-warning)", icon: AlertCircle, tone: "warning" },
-  AWAITING_PROOF_APPROVAL: { bg: "var(--color-bg-soft-accent)", icon: Clock, tone: "info" },
-  CANCELLATION_WINDOW: { bg: "var(--color-warning)", icon: Clock, tone: "warning" },
-  READY_FOR_TRANSFER: { bg: "var(--color-strong-accent)", icon: Package, tone: "info" },
-  TRANSFERRED_TO_PRODUCTION: { bg: "var(--color-strong-accent)", icon: Send, tone: "info" },
-  IN_PRODUCTION: { bg: "var(--color-strong-accent)", icon: Package, tone: "info" },
   SHIPPED: { bg: "var(--color-strong-accent)", icon: Truck, tone: "info" },
   DELIVERED: { bg: "var(--color-success)", icon: CheckCircle2, tone: "success" },
-  EXCEPTION: { bg: "var(--color-error)", icon: AlertCircle, tone: "error" },
   CANCELLED: { bg: "var(--color-error)", icon: XCircle, tone: "error" },
-  REFUNDED: { bg: "var(--color-error)", icon: XCircle, tone: "error" },
 };
 
 export function StatusHeroCard({
@@ -33,7 +26,7 @@ export function StatusHeroCard({
 }) {
   const v = VARIANT[status];
   const Icon = v.icon;
-  const isLight = ["RECEIVED", "AWAITING_PAYMENT", "IN_PROCESSING", "AWAITING_PROOF_APPROVAL"].includes(status);
+  const isLight = ["RECEIVED", "AWAITING_PAYMENT", "IN_PROCESSING"].includes(status);
   return (
     <Card
       className={isLight ? "text-ink" : "text-white"}
@@ -53,7 +46,7 @@ export function StatusHeroCard({
           <h1 className="font-display font-extrabold tracking-tight text-2xl mt-xs">
             {ORDER_STATUS_LABELS[status]}
           </h1>
-          {status !== "CANCELLED" && status !== "REFUNDED" && status !== "EXCEPTION" && (
+          {status !== "CANCELLED" && (
             <p className={isLight ? "text-body-sm text-ink mt-sm" : "text-body-sm text-white/80 mt-sm"}>
               Guaranteed delivery by{" "}
               <strong className={isLight ? "text-strong-accent" : "text-white"}>
@@ -67,7 +60,7 @@ export function StatusHeroCard({
           variant="neutral"
           className={isLight ? "bg-white/70 text-ink" : "bg-white/15 text-white"}
         >
-          {status}
+          {ORDER_STATUS_LABELS[status]}
         </Badge>
       </div>
     </Card>

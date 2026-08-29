@@ -2,8 +2,6 @@ import Link from "next/link";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SITE_NAVIGATION_GROUPS } from "@/components/nav/siteNavigation";
 
-const PAYMENT_METHODS = ["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "PayPal"];
-
 export function Footer() {
   return (
     <footer className="bg-darkest text-white">
@@ -45,16 +43,9 @@ export function Footer() {
           <p className="text-sm text-white/60">
             &copy; 2026 Banners In 48 &middot; BannersIn48.com
           </p>
-          <div className="lg:ml-auto flex flex-wrap gap-xs">
-            {PAYMENT_METHODS.map((m) => (
-              <span
-                key={m}
-                className="text-[10px] font-bold text-white/80 border border-white/25 rounded-sm px-sm py-xs"
-              >
-                {m}
-              </span>
-            ))}
-          </div>
+          <p className="text-sm text-white/60 lg:ml-auto">
+            Internal platform test · USD · Manual payment
+          </p>
         </div>
       </div>
     </footer>

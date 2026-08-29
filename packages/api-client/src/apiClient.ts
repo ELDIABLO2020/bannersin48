@@ -12,8 +12,8 @@ import type {
   ArtworkUploadResponse,
   CreateOrderInput,
   Order,
-  ApproveProofInput,
   OrderListItem,
+  ReorderResponse,
   ApiError,
   BannerCatalogCard,
   BannerCatalogInfo,
@@ -175,15 +175,12 @@ export class ApiClient {
   createOrder(input: CreateOrderInput): Promise<Order> {
     return this.request<Order>("POST", "/orders", input);
   }
-  approveProof(id: string, input: ApproveProofInput): Promise<Order> {
-    return this.request<Order>("POST", `/orders/${encodeURIComponent(id)}/approve-proof`, input);
-  }
   cancelOrder(id: string): Promise<Order> {
     return this.request<Order>("POST", `/orders/${encodeURIComponent(id)}/cancel`);
   }
 
   // --- Reorder ---
-  reorder(id: string): Promise<{ cartLineId: string; order: Order }> {
+  reorder(id: string): Promise<ReorderResponse> {
     return this.request("POST", `/orders/${encodeURIComponent(id)}/reorder`);
   }
 

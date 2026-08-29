@@ -33,11 +33,23 @@ test.describe("M3: app shell", () => {
     expect(bg).toBe("rgb(203, 16, 121)");
   });
 
-  test("robots.txt is served and disallows /api/ and /admin/", async ({ request }) => {
+  test("internal mode is visibly non-production and noindex", async ({ page, request }) => {
+    await page.goto("/");
+    await expect(page.getByText(/internal platform test.*manual payment/i).first()).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /noindex.*nofollow/i,
+    );
+
     const res = await request.get("/robots.txt");
     expect(res.status()).toBe(200);
-    const text = await res.text();
-    expect(text).toMatch(/Disallow:\s*\/api\//);
-    expect(text).toMatch(/Disallow:\s*\/admin\//);
+    expect(await res.text()).toMatch(/Disallow:\s*\/$/m);
+  });
+
+  test("customer shell has no unsupported payment or review claims", async ({ page }) => {
+    await page.goto("/");
+    const body = await page.locator("body").innerText();
+    expect(body).not.toMatch(/Visa|Mastercard|Apple Pay|PayPal/);
+    await expect(page.getByRole("link", { name: /reviews|testimonials/i })).toHaveCount(0);
   });
 });

@@ -28,6 +28,11 @@ export class OrdersController {
     return this.orders.getMineDetail(user.id, id);
   }
 
+  @Post(":id/reorder")
+  reorder(@CurrentUser() user: AuthedUser, @Param("id") id: string) {
+    return this.orders.reorder(user.id, id);
+  }
+
   @Post(":id/cancel")
   cancel(@CurrentUser() user: AuthedUser, @Param("id") id: string): Promise<OrderDetail> {
     return this.orders.cancel(user.id, id);

@@ -17,23 +17,16 @@ const STATUS_TONE: Record<OrderStatus, "info" | "success" | "warning" | "error" 
   IN_PROCESSING: "info",
   ACCEPTED: "info",
   ON_HOLD: "warning",
-  AWAITING_PROOF_APPROVAL: "info",
-  CANCELLATION_WINDOW: "warning",
-  READY_FOR_TRANSFER: "info",
-  TRANSFERRED_TO_PRODUCTION: "info",
-  IN_PRODUCTION: "info",
   SHIPPED: "info",
   DELIVERED: "success",
-  EXCEPTION: "error",
   CANCELLED: "error",
-  REFUNDED: "error",
 };
 
 export default function OrdersListPage() {
   const auth = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const loadFromOrder = useCart((s) => s.loadFromOrder);
+  const loadFromReorder = useCart((s) => s.loadFromReorder);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders"],
@@ -44,7 +37,7 @@ export default function OrdersListPage() {
   const reorder = useMutation({
     mutationFn: (id: string) => getApiClient().reorder(id),
     onSuccess: (res) => {
-      loadFromOrder(res.order);
+      loadFromReorder(res);
       router.push("/cart");
     },
   });

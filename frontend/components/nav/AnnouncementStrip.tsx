@@ -8,6 +8,7 @@ import { Truck } from "lucide-react";
 import { getApiClient } from "@/lib/api/client";
 import { formatCountdown } from "@/lib/utils/time";
 import { getNextCutoffFallback } from "@/lib/utils/countdown-fallback";
+import { isInternalManualCommerce } from "@/lib/config/commerce-mode";
 
 export function AnnouncementStrip() {
   const { data: apiData } = useQuery({
@@ -35,6 +36,14 @@ export function AnnouncementStrip() {
 
   return (
     <div className="bg-darkest text-white text-sm">
+      {isInternalManualCommerce && (
+        <div
+          role="status"
+          className="bg-warning-bg px-md py-xs text-center text-xs font-bold text-ink"
+        >
+          Internal platform test · Orders use manual payment · No online payment is collected
+        </div>
+      )}
       <div className="lg:hidden mx-auto max-w-content px-md pt-sm pb-xs flex justify-center bg-white">
         <Link
           href="/"
@@ -54,8 +63,10 @@ export function AnnouncementStrip() {
       <div className="mx-auto max-w-content px-md lg:px-2xl h-[50px] flex items-center justify-center gap-md">
         <Truck className="h-4 w-4 text-strong-accent" aria-hidden />
         <p className="text-center font-medium">
-          <span className="hidden sm:inline">Order by 9:00 PM ET &rarr; delivered by noon in 48 business hours. US & Canada.</span>
-          <span className="sm:hidden">48-hr delivery. US & Canada.</span>
+          <span className="hidden sm:inline">
+            Delivery timing begins after order submission and manual payment confirmation. USA only.
+          </span>
+          <span className="sm:hidden">Manual payment starts delivery timing. USA only.</span>
         </p>
         <span
           aria-live="polite"

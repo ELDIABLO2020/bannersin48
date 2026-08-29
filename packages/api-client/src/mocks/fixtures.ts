@@ -12,7 +12,6 @@ import {
   CUTOFF_MINUTE_ET,
   type CutoffCycleIndex,
   type Order,
-  type OrderStatus,
   type DeliveryResponse,
   type PopularSize,
   type User,
@@ -24,7 +23,6 @@ export const fixtures = {
 
 interface MockOrderRecord {
   order: Order;
-  cancellationTimeoutId?: ReturnType<typeof setTimeout>;
 }
 
 class MockStore {
@@ -34,6 +32,7 @@ class MockStore {
     string,
     {
       id: string;
+      userId: string;
       folderId: string;
       filename: string;
       previewUrl: string;
@@ -48,18 +47,10 @@ class MockStore {
   artworkFolders: Array<{ id: string; name: string; parentId: string | null }> = [
     { id: "folder_home", name: "Home", parentId: null },
   ];
+  quotes: Map<string, { request: Record<string, unknown>; validUntil: string; total: number }> = new Map();
+  quoteIdCounter = 1;
   orders: Map<string, MockOrderRecord> = new Map();
   orderIdCounter = 1;
-  /**
-   * In a real backend this is in Redis/BullMQ. For the MSW mock we use setTimeout
-   * so E2E can shorten CANCELLATION_WINDOW_MS via env.
-   */
-  cancellationWindowMs(): number {
-    // Read at call time so test overrides are picked up.
-    const v = process?.env?.CANCELLATION_WINDOW_MS;
-    if (v && !Number.isNaN(Number(v))) return Number(v);
-    return 10 * 60 * 1000;
-  }
 }
 
 export const store = new MockStore();
@@ -82,9 +73,10 @@ store.users.set("demo@bannersin48.com", {
 // Seed Image Zone sample assets in Home folder
 store.artwork.set("art_sample_1", {
   id: "art_sample_1",
+  userId: "user_demo",
   folderId: "folder_home",
   filename: "grand-opening.png",
-  previewUrl: "/placeholder-artwork.png",
+  previewUrl: "/mock-artwork-portrait.svg",
   mime: "image/png",
   size: 240_000,
   widthPx: 1800,
@@ -93,9 +85,10 @@ store.artwork.set("art_sample_1", {
 });
 store.artwork.set("art_sample_2", {
   id: "art_sample_2",
+  userId: "user_demo",
   folderId: "folder_home",
   filename: "sale-banner.jpg",
-  previewUrl: "/placeholder-artwork.png",
+  previewUrl: "/mock-artwork-landscape.svg",
   mime: "image/jpeg",
   size: 180_000,
   widthPx: 2400,
@@ -201,8 +194,3 @@ export function computeNextCutoff(now: Date = new Date()): DeliveryResponse {
   };
 }
 
-export function nextStatusOnExpiry(orderId: string, currentStatus: OrderStatus): OrderStatus {
-  // After the cancellation window expires, the order auto-advances
-  if (currentStatus === "CANCELLATION_WINDOW") return "READY_FOR_TRANSFER";
-  return currentStatus;
-}

@@ -28,17 +28,14 @@ export const SITE_NAVIGATION_GROUPS: ReadonlyArray<SiteNavigationGroup> = [
   },
   {
     title: "Company",
-    items: [
-      { href: "/reviews", label: "Reviews" },
-      { href: "/#guarantee", label: "Delivery Guarantee" },
-    ],
+    items: [{ href: "/#guarantee", label: "Delivery information" }],
   },
   {
     title: "Support",
     items: [
       { href: "/help", label: "Help Center" },
       { href: "/help", label: "FAQs" },
-      { href: "/orders/lookup", label: "Track Your Order" },
+      { href: "/orders", label: "Track Your Orders" },
       { href: "mailto:support@bannersin48.com", label: "Email Support" },
     ],
   },

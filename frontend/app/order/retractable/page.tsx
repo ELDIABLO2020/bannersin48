@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useConfigurator } from "@/lib/stores/configurator";
 import { useCart } from "@/lib/stores/cart";
 import { Card } from "@/components/ui/card";
@@ -11,13 +11,19 @@ import { RETRACTABLE, MAX_QUANTITY_PER_LINE } from "@bannersin48/shared";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getApiClient } from "@/lib/api/client";
+import { ImagePickerOverlay } from "@/components/builder/ImagePickerOverlay";
 
 export default function RetractableConfiguratorPage() {
   const setProduct = useConfigurator((s) => s.setProduct);
   const setQuantity = useConfigurator((s) => s.setQuantity);
   const quantity = useConfigurator((s) => s.quantity);
+  const artworkId = useConfigurator((s) => s.artworkId);
+  const artworkFileName = useConfigurator((s) => s.artworkFileName);
+  const setPickerOpen = useConfigurator((s) => s.setPickerOpen);
   const addLine = useCart((s) => s.addLine);
   const router = useRouter();
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     setProduct("RETRACTABLE");
@@ -54,9 +60,19 @@ export default function RetractableConfiguratorPage() {
               <dl className="text-body-sm space-y-xs">
                 <Row label="Size" value={`${RETRACTABLE.widthIn}" × ${RETRACTABLE.heightIn}"`} />
                 <Row label="Hardware" value="Retractable stand + carrying case (included)" />
-                <Row label="Artwork" value="PDF, JPEG, PNG, TIFF, or EPS" />
+                <Row label="Artwork" value="JPEG, PNG, or PDF" />
                 <Row label="Delivery" value="By 12:00 PM, 48 business hours" />
               </dl>
+            </Card>
+
+            <Card className="bg-surface">
+              <h2 className="font-bold text-heading-h4 text-ink mb-sm">Artwork (required)</h2>
+              <p className="text-body-sm text-ink-muted mb-md">
+                {artworkFileName ?? "Select the completed file to print."}
+              </p>
+              <Button variant="secondary" size="md" onClick={() => setPickerOpen(true)}>
+                {artworkId ? "Change artwork" : "Select artwork"}
+              </Button>
             </Card>
 
             <Card className="bg-surface">
@@ -99,33 +115,60 @@ export default function RetractableConfiguratorPage() {
                 variant="cta"
                 size="block"
                 className="mt-lg w-full"
-                onClick={() => {
-                  addLine({
-                    id: `cart_${Date.now()}`,
-                    product: "retractable",
-                    productId: "RETRACTABLE",
-                    material: "RETRACTABLE",
-                    dimensions: { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 },
-                    finishing: { welding: false, grommets: false, windSlits: false, polePockets: false, rope: false, webbing: false },
-                    quantity,
-                    unitProduct: unitPrice,
-                    addons: 0,
-                    productSubtotal: unitPrice * quantity,
-                    shipping,
-                    totalBeforeTax: total,
-                    billableSqFt: 0,
-                    billableDims: { widthFt: 0, heightFt: 0 },
-                    display: {
-                      requestedLabel: `${RETRACTABLE.widthIn}" × ${RETRACTABLE.heightIn}"`,
-                      billableLabel: "Fixed size",
-                    },
-                  });
-                  router.push("/cart");
+                disabled={!artworkId || adding}
+                onClick={async () => {
+                  if (!artworkId) return;
+                  setAdding(true);
+                  try {
+                    const finishing = { welding: false, grommets: false, windSlits: false, polePockets: false, rope: false, webbing: false };
+                    const dimensions = { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 };
+                    const quote = await getApiClient().quote({
+                      productId: "RETRACTABLE",
+                      material: "RETRACTABLE",
+                      dimensions,
+                      finishing,
+                      quantity,
+                    });
+                    const line = quote.lines[0];
+                    if (!line) return;
+                    addLine({
+                      id: `cart_${Date.now()}`,
+                      product: "retractable",
+                      productId: "RETRACTABLE",
+                      material: "RETRACTABLE",
+                      dimensions,
+                      finishing,
+                      quantity,
+                      artworkId,
+                      quoteId: quote.quoteId,
+                      quoteValidUntil: quote.validUntil,
+                      currency: quote.currency,
+                      unitProduct: line.unitProduct,
+                      addons: line.addons,
+                      productSubtotal: line.productSubtotal,
+                      shipping: line.shipping,
+                      totalBeforeTax: line.totalBeforeTax,
+                      billableSqFt: line.billableSqFt,
+                      billableDims: line.billableDims,
+                      display: {
+                        requestedLabel: `${RETRACTABLE.widthIn}" × ${RETRACTABLE.heightIn}"`,
+                        billableLabel: "Fixed size",
+                      },
+                    });
+                    router.push("/cart");
+                  } finally {
+                    setAdding(false);
+                  }
                 }}
               >
                 <ShoppingCart className="mr-sm h-5 w-5" aria-hidden />
-                Add to cart
+                {adding ? "Adding…" : "Add to cart"}
               </Button>
+              {!artworkId && (
+                <p className="mt-sm text-sm text-danger text-center" role="alert">
+                  Select artwork before adding to cart.
+                </p>
+              )}
               <p className="mt-md text-body-sm text-ink-muted text-center">
                 Looking for a lower-priced stand?{" "}
                 <Link href="/order/econostand" className="text-link hover:underline">
@@ -141,6 +184,7 @@ export default function RetractableConfiguratorPage() {
           </div>
         </div>
       </div>
+      <ImagePickerOverlay />
     </div>
   );
 }

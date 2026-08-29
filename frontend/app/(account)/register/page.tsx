@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, AlertCircle } from "lucide-react";
+import { safeReturnUrl } from "@/lib/auth/return-url";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Name is required."),
@@ -25,17 +26,25 @@ export default function RegisterPage() {
   const router = useRouter();
   const setAuth = useAuth((s) => s.setAuth);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [returnUrl, setReturnUrl] = useState("/dashboard");
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setReturnUrl(safeReturnUrl(params.get("next")));
+    const email = params.get("email");
+    if (email) setValue("email", email);
+  }, [setValue]);
 
   async function onSubmit(values: RegisterInput) {
     setSubmitError(null);
     try {
       const res = await getApiClient().register(values);
       setAuth(res.user, res.token);
-      router.push("/dashboard");
+      router.push(returnUrl);
     } catch (err) {
       setSubmitError((err as Error).message);
     }
@@ -79,7 +88,7 @@ export default function RegisterPage() {
         </form>
         <p className="text-body-sm text-ink-muted mt-md text-center">
           Already have one?{" "}
-          <Link href="/login" className="text-link hover:underline">
+          <Link href={`/login?next=${encodeURIComponent(returnUrl)}`} className="text-link hover:underline">
             Log in <ChevronRight className="inline h-3 w-3" aria-hidden />
           </Link>
         </p>

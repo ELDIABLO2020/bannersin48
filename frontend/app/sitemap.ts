@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
+import { isInternalManualCommerce } from "@/lib/config/commerce-mode";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  if (isInternalManualCommerce) return [];
+
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const now = new Date();
   return [
@@ -17,6 +20,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/sizes`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/how-it-works`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/help`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${base}/reviews`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
   ];
 }

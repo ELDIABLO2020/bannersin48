@@ -36,9 +36,9 @@ test.describe("M4: brand design parity", () => {
     expect(parseFloat(btnRadius)).toBeGreaterThan(40);
   });
 
-  test("featured testimonial and carousel sections render", async ({ page }) => {
-    await expect(page.locator("#featured-testimonial-h")).toBeVisible();
-    await expect(page.getByRole("heading", { name: /hear from banners in 48 customers/i })).toBeVisible();
+  test("does not render unsupported customer testimonials", async ({ page }) => {
+    await expect(page.locator("#featured-testimonial-h")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /reviews|testimonials/i })).toHaveCount(0);
   });
 
   test("no blank CSS mock placeholder strings on homepage", async ({ page }) => {

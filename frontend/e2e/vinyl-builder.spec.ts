@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { seedDemoAuth } from "./helpers/auth";
 
 test.describe("Vinyl builder", () => {
   test.beforeEach(async ({ page }) => {
@@ -6,7 +7,11 @@ test.describe("Vinyl builder", () => {
       sessionStorage.removeItem("bi48.builder");
       localStorage.removeItem("bi48.cart");
     });
+    seedDemoAuth(page);
     await page.goto("/order/hd-banner");
+    // zustand persist hydrates from localStorage on this second navigation, so
+    // the seeded demo account is available to the account-gated artwork picker.
+    await page.reload();
     await expect(page.getByTestId("builder-shell")).toBeVisible({ timeout: 30_000 });
     await page.waitForFunction(
       () => (window as unknown as { __BI48_MOCKS_READY__?: boolean }).__BI48_MOCKS_READY__ === true,
@@ -169,14 +174,21 @@ test.describe("Vinyl builder", () => {
       buffer: Buffer.from("GIF89a"),
     });
     await expect(page.getByTestId("upload-reject")).toHaveText(
-      "Only these file types are allowed: jpg, jpeg, pdf, tiff, tif, eps, png.",
+      "Only JPEG, PNG, and PDF files are supported.",
     );
   });
 
   test("ADD SIGN then add to cart adds two lines", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop multi-sign");
+    // Artwork is required for every sign before add-to-cart.
+    await page.getByTestId("dock-images").click();
+    await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("library-item-art_sample_1").click();
     await page.getByTestId("add-sign").click();
     await expect(page.getByTestId("item-rail-select-1")).toBeVisible();
+    await page.getByTestId("dock-images").click();
+    await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("library-item-art_sample_2").click();
     await page.getByTestId("add-to-cart").click();
     await expect(page.getByRole("dialog", { name: /your cart/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("dialog", { name: /your cart/i })).toContainText(/2 items/i);
@@ -188,6 +200,10 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("stage-header").getByTestId("rate-matrix")).toBeHidden();
     await expect(page.getByTestId("show-options")).toBeVisible();
     await page.getByTestId("show-options").click();
+    await expect(page.getByTestId("dock-images")).toBeVisible();
+    await page.getByTestId("dock-images").click();
+    await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("library-item-art_sample_2").click();
     await expect(page.getByTestId("dock-size")).toBeVisible();
     await page.getByTestId("dock-size").click();
     await page.getByTestId("popular-size-4x8").click();

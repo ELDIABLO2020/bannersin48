@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run validate:commerce && npm run validate:content",
     "build": "next build",
+    "validate:commerce": "node scripts/validate-commerce-config.mjs",
+    "validate:content": "node scripts/validate-public-content.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

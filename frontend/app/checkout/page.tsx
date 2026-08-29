@@ -15,21 +15,18 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
-import { ChevronRight, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ChevronRight, AlertCircle } from "lucide-react";
 import { CountdownCard } from "@/components/home/CountdownCard";
 
 type Address = z.infer<typeof addressSchema>;
 
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"];
-const CA_PROVINCES = ["AB","BC","MB","NB","NL","NS","NT","NU","ON","PE","QC","SK","YT"];
-
 export default function CheckoutPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const auth = useAuth();
   const lines = useCart((s) => s.lines);
   const clearCart = useCart((s) => s.clear);
-  const [validated, setValidated] = useState<{ valid: boolean; message?: string } | null>(null);
   const [riskAck, setRiskAck] = useState(false);
   const [acknowledgements, setAcknowledgements] = useState({
     artworkCorrect: false,
@@ -49,20 +46,20 @@ export default function CheckoutPage() {
     },
   });
 
-  const watchCountry = watch("country");
-
-  // Validate address using the API (MSW) when fields change
+  // Validate the current US address through the authenticated API.
   const validate = useMutation({
     mutationFn: (a: Address) => getApiClient().validateAddress(a),
   });
 
   const watchAll = watch();
   useEffect(() => {
-    if (!watchAll.street1 || !watchAll.city || !watchAll.postalCode) return;
+    setRiskAck(false);
+    validate.reset();
+    if (!auth.user || !watchAll.street1 || !watchAll.city || !watchAll.region || !watchAll.postalCode) return;
     const t = setTimeout(() => validate.mutate(watchAll as Address), 600);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watchAll.street1, watchAll.street2, watchAll.city, watchAll.region, watchAll.postalCode, watchAll.country]);
+  }, [auth.user, watchAll.street1, watchAll.street2, watchAll.city, watchAll.region, watchAll.postalCode, watchAll.country]);
 
   const createOrder = useMutation({
     mutationFn: async (a: Address) => {
@@ -75,10 +72,11 @@ export default function CheckoutPage() {
           finishing: l.finishing,
           quantity: l.quantity,
           artworkId: l.artworkId,
+          quoteId: l.quoteId,
         })),
         shipTo: a,
-        shipToUnverified: validated?.valid === false,
-        paymentMethod: "stub_card",
+        addressValidationToken: validate.data?.validationToken ?? "",
+        addressRiskAcknowledged: riskAck,
         acknowledgements,
       });
       return order;
@@ -121,11 +119,15 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
           <form
             onSubmit={handleSubmit((a) => {
-              if (validated?.valid === false && !riskAck) {
+              if (!validate.data?.validationToken) {
+                setSubmitError("Wait for address normalization before continuing.");
+                return;
+              }
+              if (!riskAck) {
                 setSubmitError("Please acknowledge the unverified-address risk before continuing.");
                 return;
               }
-              createOrder.mutate(a);
+              createOrder.mutate(validate.data.normalized);
             })}
             className="lg:col-span-7 space-y-lg"
           >
@@ -137,10 +139,10 @@ export default function CheckoutPage() {
                   We require an account to checkout. Saved artwork, reorders, and FedEx tracking included.
                 </p>
                 <div className="flex gap-sm mt-md">
-                  <Link href="/login" className="flex-1">
+                  <Link href="/login?next=%2Fcheckout" className="flex-1">
                     <Button type="button" variant="cta" size="block" className="w-full">Log in</Button>
                   </Link>
-                  <Link href="/register" className="flex-1">
+                  <Link href="/register?next=%2Fcheckout" className="flex-1">
                     <Button type="button" variant="secondary" size="block" className="w-full">Create account</Button>
                   </Link>
                 </div>
@@ -166,30 +168,26 @@ export default function CheckoutPage() {
                 <Field label="City" error={errors.city?.message}>
                   <Input autoComplete="address-level2" {...register("city")} invalid={!!errors.city} />
                 </Field>
-                <Field label={watchCountry === "CA" ? "Province" : "State"} error={errors.region?.message}>
+                <Field label="State" error={errors.region?.message}>
                   <select
                     autoComplete="address-level1"
                     {...register("region")}
                     className="w-full h-10 rounded-pill border border-line-input px-md text-ink bg-surface focus:outline-none focus:border-link focus:shadow-focus"
                   >
                     <option value="">Select…</option>
-                    {(watchCountry === "CA" ? CA_PROVINCES : US_STATES).map((s) => (
+                    {US_STATES.map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
                 </Field>
-                <Field label="ZIP / Postal code" error={errors.postalCode?.message}>
+                <Field label="ZIP code" error={errors.postalCode?.message}>
                   <Input autoComplete="postal-code" {...register("postalCode")} invalid={!!errors.postalCode} />
                 </Field>
                 <Field label="Country">
-                  <select
-                    autoComplete="country"
-                    {...register("country")}
-                    className="w-full h-10 rounded-pill border border-line-input px-md text-ink bg-surface focus:outline-none focus:border-link focus:shadow-focus"
-                  >
-                    <option value="US">United States</option>
-                    <option value="CA">Canada</option>
-                  </select>
+                  <input type="hidden" {...register("country")} />
+                  <p className="h-10 flex items-center px-md rounded-pill border border-line-input bg-surface-tint text-ink">
+                    United States
+                  </p>
                 </Field>
                 <Field label="Phone (optional)">
                   <Input type="tel" autoComplete="tel" {...register("phone")} />
@@ -202,20 +200,12 @@ export default function CheckoutPage() {
                     validate.data.valid ? "bg-success-bg" : "bg-warning-bg"
                   }`}
                 >
-                  {validate.data.valid ? (
-                    <CheckCircle2 className="h-5 w-5 text-success-fg shrink-0 mt-0.5" aria-hidden />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-warning-fg shrink-0 mt-0.5" aria-hidden />
-                  )}
-                  <p className="text-sm text-ink">
-                    {validate.data.valid
-                      ? "Address verified."
-                      : validate.data.message ?? "Address could not be verified."}
-                  </p>
+                  <AlertCircle className="h-5 w-5 text-warning-fg shrink-0 mt-0.5" aria-hidden />
+                  <p className="text-sm text-ink">{validate.data.message}</p>
                 </div>
               )}
 
-              {validate.data?.valid === false && validate.data.requiresAcknowledgement && (
+              {validate.data?.requiresAcknowledgement && (
                 <label className="mt-md flex items-start gap-sm cursor-pointer">
                   <input
                     type="checkbox"
@@ -224,23 +214,18 @@ export default function CheckoutPage() {
                     onChange={(e) => setRiskAck(e.target.checked)}
                   />
                   <span className="text-sm text-ink">
-                    I understand that unverified-address orders ship at customer risk and may not qualify for the delivery guarantee.
+                    I reviewed the normalized address and accept the shipping risk because it has not been verified by an external provider.
                   </span>
                 </label>
               )}
             </Card>
 
-            {/* Payment stub */}
+            {/* Manual payment operating model */}
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Payment</h2>
+              <h2 className="font-bold text-heading-h4 text-ink mb-md">Manual payment</h2>
               <p className="text-body-sm text-ink-muted">
-                Stripe/PayPal/Apple Pay integrations are stubbed in this build. Clicking <strong>Place order</strong> will create a test order in the mock backend.
+                Submitting this order does not collect payment. Staff will provide manual-payment instructions and record confirmation on the order. Delivery timing begins only after both order submission and payment confirmation.
               </p>
-              <div className="mt-md flex flex-wrap gap-xs">
-                {["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "PayPal"].map((m) => (
-                  <span key={m} className="text-xs font-bold text-ink-muted border border-line rounded-sm px-sm py-xs">{m}</span>
-                ))}
-              </div>
             </Card>
 
             {/* Liability / proof acknowledgements — persisted in proof_* columns. */}
@@ -273,14 +258,14 @@ export default function CheckoutPage() {
               type="submit"
               variant="cta"
               size="lg"
-              disabled={isSubmitting || createOrder.isPending || !auth.user || (validated?.valid === false && !riskAck) || !Object.values(acknowledgements).every(Boolean)}
+              disabled={isSubmitting || createOrder.isPending || !auth.user || !validate.data?.validationToken || !riskAck || !Object.values(acknowledgements).every(Boolean)}
               className="w-full"
             >
-              {createOrder.isPending ? "Placing order…" : `Place order · ${formatUsd(totals.total)}`}
+              {createOrder.isPending ? "Submitting order…" : `Submit order · ${formatUsd(totals.total)} USD`}
             </Button>
             {!auth.user && (
               <p className="text-body-sm text-ink-muted text-center">
-                Sign in above to enable the place-order button.
+                Sign in above to enable order submission.
               </p>
             )}
           </form>
@@ -307,7 +292,7 @@ export default function CheckoutPage() {
                 <Row label="Subtotal" value={formatUsd(totals.subtotal)} />
                 <Row label="Shipping" value={formatUsd(totals.shipping)} />
                 <div className="border-t border-line my-sm" />
-                <Row label="Total before tax" value={formatUsd(totals.total)} bold />
+                <Row label="Internal test total" value={`${formatUsd(totals.total)} USD`} bold />
               </dl>
               <CountdownCard variant="inline" />
             </Card>

@@ -8,6 +8,7 @@ import { AnnouncementStrip } from "@/components/nav/AnnouncementStrip";
 import { Footer } from "@/components/home/Footer";
 import { CountdownFloatingIsland } from "@/components/nav/CountdownFloatingIsland";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { isInternalManualCommerce } from "@/lib/config/commerce-mode";
 import "./globals.css";
 
 const openSans = Open_Sans({
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     template: "%s | Banners In 48",
   },
   description:
-    "Order custom vinyl, mesh, poster, canvas, and banner stands online. $10 flat shipping. Delivered by noon in 48 business hours. Order by 9 PM ET.",
+    "Configure custom vinyl, mesh, poster, canvas, and banner stands for internal platform testing. USA-only orders use USD and manual payment.",
   keywords: [
     "custom banners",
     "vinyl banners",
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
     siteName: "Banners In 48",
     title: "Banners In 48 — Custom Banners Delivered in 48 Business Hours",
     description:
-      "Order custom vinyl, mesh, poster, canvas, and banner stands. $10 flat shipping. Delivered by noon in 48 business hours.",
+      "Configure custom vinyl, mesh, poster, canvas, and banner stands. Internal orders use manual payment.",
   },
   twitter: {
     card: "summary_large_image",
@@ -59,11 +60,13 @@ export const metadata: Metadata = {
     description: "Custom banners delivered in 48 business hours.",
   },
   robots: {
-    index: true,
-    follow: true,
+    index: !isInternalManualCommerce,
+    follow: !isInternalManualCommerce,
+    noarchive: isInternalManualCommerce,
     googleBot: {
-      index: true,
-      follow: true,
+      index: !isInternalManualCommerce,
+      follow: !isInternalManualCommerce,
+      noarchive: isInternalManualCommerce,
     },
   },
   manifest: "/manifest.webmanifest",

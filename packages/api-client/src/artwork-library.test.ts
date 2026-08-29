@@ -11,7 +11,12 @@ describe("artwork library + upload meta", () => {
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  const client = () => createApiClient({ baseUrl: "http://localhost:3001" });
+  // Artwork endpoints are account-only in V1; use the seeded demo account token.
+  const client = () =>
+    createApiClient({
+      baseUrl: "http://localhost:3001",
+      getToken: () => "mock-token-user_demo",
+    });
 
   it("lists Home folder", async () => {
     const folders = await client().listArtworkFolders();

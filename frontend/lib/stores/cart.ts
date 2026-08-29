@@ -2,7 +2,8 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { OrderLine, Order, ProductId } from "@bannersin48/shared";
+import type { OrderLine, ProductId } from "@bannersin48/shared";
+import type { ReorderResponse } from "@bannersin48/api-client";
 import { PRODUCTS, productBySlug, productIdForMaterial } from "@bannersin48/shared";
 
 export interface CartLine {
@@ -13,7 +14,10 @@ export interface CartLine {
   dimensions: OrderLine["dimensions"];
   finishing: OrderLine["finishing"];
   quantity: number;
-  artworkId?: string;
+  artworkId: string;
+  quoteId: string;
+  quoteValidUntil: string;
+  currency: "USD";
   unitProduct: number;
   addons: number;
   productSubtotal: number;
@@ -33,7 +37,7 @@ interface CartState {
   updateLine: (id: string, patch: Partial<CartLine>) => void;
   removeLine: (id: string) => void;
   clear: () => void;
-  loadFromOrder: (order: Order) => void;
+  loadFromReorder: (reorder: ReorderResponse) => void;
 }
 
 export function normalizeCartLine(line: CartLine): CartLine {
@@ -63,28 +67,32 @@ export const useCart = create<CartState>()(
       removeLine: (id) =>
         set((state) => ({ lines: state.lines.filter((l) => l.id !== id) })),
       clear: () => set({ lines: [] }),
-      loadFromOrder: (order) => {
-        const lines: CartLine[] = order.lines.map((l) => {
-          const productId = (l.productId as ProductId | undefined) ?? productIdForMaterial(l.material);
+      loadFromReorder: (reorder) => {
+        const lines: CartLine[] = reorder.lines.map((line) => {
+          const productId = line.productId as ProductId;
+          const priced = line.quote.lines[0]!;
           return normalizeCartLine({
-            id: `cart_${Date.now()}_${l.id}`,
+            id: `cart_${Date.now()}_${line.sourceOrderLineId}`,
             product: PRODUCTS[productId].slug,
             productId,
-            material: l.material,
-            dimensions: l.dimensions,
-            finishing: l.finishing,
-            quantity: l.quantity,
-            artworkId: l.artworkId,
-            unitProduct: l.unitProduct,
-            addons: l.addons,
-            productSubtotal: l.productSubtotal,
-            shipping: l.shipping,
-            totalBeforeTax: l.totalBeforeTax,
-            billableSqFt: l.billableSqFt,
-            billableDims: l.billableDims,
+            material: line.material,
+            dimensions: line.dimensions,
+            finishing: line.finishing,
+            quantity: line.quantity,
+            artworkId: line.artworkId,
+            quoteId: line.quote.quoteId,
+            quoteValidUntil: line.quote.validUntil,
+            currency: line.quote.currency,
+            unitProduct: priced.unitProduct,
+            addons: priced.addons,
+            productSubtotal: priced.productSubtotal,
+            shipping: priced.shipping,
+            totalBeforeTax: priced.totalBeforeTax,
+            billableSqFt: priced.billableSqFt,
+            billableDims: priced.billableDims,
             display: {
-              requestedLabel: `${l.dimensions.widthFt}' ${l.dimensions.widthIn}" × ${l.dimensions.heightFt}' ${l.dimensions.heightIn}"`,
-              billableLabel: `${l.billableDims.widthFt}' × ${l.billableDims.heightFt}'`,
+              requestedLabel: `${line.dimensions.widthFt}' ${line.dimensions.widthIn}" × ${line.dimensions.heightFt}' ${line.dimensions.heightIn}"`,
+              billableLabel: `${priced.billableDims.widthFt}' × ${priced.billableDims.heightFt}'`,
             },
           });
         });
@@ -93,12 +101,16 @@ export const useCart = create<CartState>()(
     }),
     {
       name: "bi48.cart",
-      version: 1,
+      version: 2,
       migrate: (persisted) => {
         const state = persisted as CartState;
         return {
           ...state,
-          lines: Array.isArray(state.lines) ? state.lines.map(normalizeCartLine) : [],
+          // Pre-quote-ID carts cannot be submitted safely. Discard them rather
+          // than pairing a stale price with a new order contract.
+          lines: Array.isArray(state.lines)
+            ? state.lines.filter((line) => Boolean(line.quoteId && line.artworkId)).map(normalizeCartLine)
+            : [],
         };
       },
     },

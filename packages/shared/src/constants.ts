@@ -63,14 +63,10 @@ export const ARTWORK_MIME_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
-  "image/tiff",
-  "application/postscript",
 ] as const;
 export const ARTWORK_MAX_BYTES_DEFAULT = 50 * 1024 * 1024; // 50 MB
 export const ARTWORK_DEFAULT_DPI = 150;
 
-// Cancellation window (in ms). Backend honors env override.
-export const CANCELLATION_WINDOW_MS_DEFAULT = 10 * 60 * 1000;
 
 /**
  * The 6 cutoff cycles from the plan §5.1.
@@ -201,7 +197,7 @@ export const MIN_SIZE_MSG = 'The minimum size is 12" × 12".';
 export function MAX_SHORT_SIDE_MSG(title: string, inches: number): string {
   return `The shorter side of a ${title} can be at most ${inches}".`;
 }
-export const UPLOAD_REJECT = "Only these file types are allowed: jpg, jpeg, pdf, tiff, tif, eps, png.";
+export const UPLOAD_REJECT = "Only JPEG, PNG, and PDF files are supported.";
 export const HUB_TITLE = "Order banners";
 export const HUB_SUBTITLE = "Pick a product to start building. Every banner ships on our 48-hour schedule.";
 

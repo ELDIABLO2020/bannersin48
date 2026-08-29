@@ -10,8 +10,6 @@ export const ALLOWED_MIME_TYPES = [
   "application/pdf",
   "image/jpeg",
   "image/png",
-  "image/tiff",
-  "application/postscript", // EPS
 ] as const;
 
 export type AllowedMimeType = (typeof ALLOWED_MIME_TYPES)[number];
@@ -43,18 +41,6 @@ export function sniffMime(buf: Buffer): AllowedMimeType | null {
   }
   // PDF: "%PDF-"
   if (buf.subarray(0, 5).toString("latin1") === "%PDF-") return "application/pdf";
-  // TIFF little-endian "II*\0" / big-endian "MM\0*"
-  if (
-    (buf[0] === 0x49 && buf[1] === 0x49 && buf[2] === 0x2a && buf[3] === 0x00) ||
-    (buf[0] === 0x4d && buf[1] === 0x4d && buf[2] === 0x00 && buf[3] === 0x2a)
-  ) {
-    return "image/tiff";
-  }
-  // EPS: ASCII "%!PS" or DOS binary EPS wrapper (C5 D0 D3 C6)
-  if (buf.subarray(0, 4).toString("latin1") === "%!PS") return "application/postscript";
-  if (buf[0] === 0xc5 && buf[1] === 0xd0 && buf[2] === 0xd3 && buf[3] === 0xc6) {
-    return "application/postscript";
-  }
   return null;
 }
 
@@ -242,10 +228,6 @@ export function inspectDimensions(mime: AllowedMimeType, buf: Buffer): DimsResul
       return parsePng(buf);
     case "image/jpeg":
       return parseJpeg(buf);
-    case "image/tiff":
-      return parseTiff(buf);
-    case "application/postscript":
-      return parseEps(buf);
     case "application/pdf":
       return parsePdf(buf);
   }

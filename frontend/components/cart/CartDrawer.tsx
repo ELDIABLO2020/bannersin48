@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ShoppingBag, X } from "lucide-react";
 import { useCart, cartTotals } from "@/lib/stores/cart";
@@ -28,7 +28,9 @@ export function CartDrawer() {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const previousOverflow = useRef<string>("");
   const titleId = useId();
+  const pathname = usePathname();
 
   // SSR-safe portal mount
   useEffect(() => {
@@ -49,12 +51,20 @@ export function CartDrawer() {
     if (isOpen) {
       setRender(true);
       previouslyFocused.current = document.activeElement as HTMLElement | null;
+      previousOverflow.current = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       // Focus close button after paint
       const t = setTimeout(() => closeBtnRef.current?.focus(), 0);
       return () => clearTimeout(t);
     }
-    // Closing — give the panel time to slide out unless reduced motion
+
+    // Closing — restore the previous body overflow and focus on every path
+    // (close button, backdrop, Escape, View Cart, Checkout, route change).
+    document.body.style.overflow = previousOverflow.current;
+    previouslyFocused.current?.focus?.();
+    previouslyFocused.current = null;
+
+    // Give the panel time to slide out unless reduced motion
     if (!reducedMotion) {
       const t = setTimeout(() => setRender(false), ANIMATION_MS);
       return () => clearTimeout(t);
@@ -62,10 +72,15 @@ export function CartDrawer() {
     setRender(false);
   }, [isOpen, reducedMotion]);
 
+  // Close (and therefore restore scroll/focus) if the route changes while open.
+  useEffect(() => {
+    close();
+  }, [pathname, close]);
+
   // Cleanup body scroll lock on unmount
   useEffect(() => {
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow.current;
       previouslyFocused.current?.focus?.();
     };
   }, []);
@@ -114,6 +129,7 @@ export function CartDrawer() {
     <div aria-hidden={!isOpen}>
       {/* Backdrop */}
       <div
+        data-testid="cart-drawer-backdrop"
         className={`fixed inset-0 bg-black/40 ${reducedMotion ? "" : "transition-opacity duration-300"}`}
         style={{ zIndex: "var(--z-modal-backdrop)", opacity: isOpen ? 1 : 0 }}
         onClick={close}

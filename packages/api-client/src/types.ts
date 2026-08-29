@@ -13,6 +13,7 @@ import type {
   Material,
   Order,
   OrderStatus,
+  PaymentStatus,
   PricingInput,
   PricingLine,
   RegisterInput,
@@ -32,9 +33,13 @@ export interface ApiClientConfig {
 }
 
 export interface QuoteResponse {
+  quoteId: string;
+  validUntil: string;
+  currency: "USD";
   lines: PricingLine[];
   subtotal: number;
   shipping: number;
+  tax: number;
   total: number;
   eligible: boolean;
   guaranteedDeliveryDate: string;
@@ -72,9 +77,11 @@ export interface OrderListItem {
   id: string;
   orderNumber: string;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
   total: number;
   totalLabel: string;
   createdAt: string;
+  placedAt: string | null;
   firstLineLabel: string;
   firstLineQty: number;
   guaranteedDeliveryDate: string;
@@ -88,22 +95,36 @@ export interface CreateOrderInput {
     dimensions: PricingInput["dimensions"];
     finishing: Finishing;
     quantity: number;
-    artworkId?: string;
+    artworkId: string;
+    quoteId: string;
   }>;
-  shipTo?: Address;
-  shipToUnverified?: boolean;
-  paymentMethod: "stub_card" | "stub_paypal" | "stub_apple_pay";
-  acknowledgements: ApproveProofInput["acknowledgements"];
+  shipTo: Address;
+  addressValidationToken: string;
+  addressRiskAcknowledged: boolean;
+  acknowledgements: OrderAcknowledgements;
 }
 
-export interface ApproveProofInput {
-  acknowledgements: {
-    artworkCorrect: boolean;
-    spellingColorsLayoutAccepted: boolean;
-    printsAsUploaded: boolean;
-    cancellationWindowUnderstood: boolean;
-    deliveryDateAndAddressConfirmed: boolean;
-  };
+export interface ReorderResponse {
+  sourceOrderId: string;
+  lines: Array<{
+    sourceOrderLineId: string;
+    productId: string;
+    material: Material;
+    dimensions: PricingInput["dimensions"];
+    finishing: Finishing;
+    quantity: number;
+    artworkId: string;
+    quote: QuoteResponse;
+  }>;
+  warnings: string[];
+}
+
+export interface OrderAcknowledgements {
+  artworkCorrect: boolean;
+  spellingColorsLayoutAccepted: boolean;
+  printsAsUploaded: boolean;
+  cancellationWindowUnderstood: boolean;
+  deliveryDateAndAddressConfirmed: boolean;
 }
 
 export interface ApiError {
@@ -119,6 +140,7 @@ export type {
   Material,
   Order,
   OrderStatus,
+  PaymentStatus,
   User,
   RegisterInput,
   LoginInput,

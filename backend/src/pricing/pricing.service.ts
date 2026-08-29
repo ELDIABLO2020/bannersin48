@@ -12,9 +12,12 @@ const QUOTE_VALIDITY_DAYS = 14;
 
 export interface QuoteResponse {
   quoteId: string;
+  validUntil: string;
+  currency: "USD";
   lines: unknown[];
   subtotal: number;
   shipping: number;
+  tax: number;
   total: number;
   eligible: boolean;
   guaranteedDeliveryDate: string;
@@ -86,9 +89,12 @@ export class PricingService {
 
     return {
       quoteId: quote.id,
+      validUntil: quote.validUntil!.toISOString(),
+      currency: "USD",
       lines: result.lines,
       subtotal: result.subtotal,
       shipping: result.shipping,
+      tax: 0,
       total: result.total,
       eligible: result.lines.every((l) => l.eligible),
       guaranteedDeliveryDate: estimate.guaranteedDeliveryDate,

@@ -19,16 +19,9 @@ const STATUS_TONE: Record<OrderStatus, "info" | "success" | "warning" | "error" 
   IN_PROCESSING: "info",
   ACCEPTED: "info",
   ON_HOLD: "warning",
-  AWAITING_PROOF_APPROVAL: "info",
-  CANCELLATION_WINDOW: "warning",
-  READY_FOR_TRANSFER: "info",
-  TRANSFERRED_TO_PRODUCTION: "info",
-  IN_PRODUCTION: "info",
   SHIPPED: "info",
   DELIVERED: "success",
-  EXCEPTION: "error",
   CANCELLED: "error",
-  REFUNDED: "error",
 };
 
 const QUICK_ACTIONS = [
@@ -42,7 +35,7 @@ export default function DashboardPage() {
   const auth = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const loadFromOrder = useCart((s) => s.loadFromOrder);
+  const loadFromReorder = useCart((s) => s.loadFromReorder);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders"],
@@ -53,7 +46,7 @@ export default function DashboardPage() {
   const reorder = useMutation({
     mutationFn: (id: string) => getApiClient().reorder(id),
     onSuccess: (res) => {
-      loadFromOrder(res.order);
+      loadFromReorder(res);
       router.push("/cart");
     },
   });
@@ -186,13 +179,11 @@ export default function DashboardPage() {
           </ul>
         )}
 
-        {/* Saved designs shell */}
         <div className="mt-2xl">
-          <h2 className="font-bold text-heading-h4 text-ink mb-md">Saved artwork &amp; designs</h2>
+          <h2 className="font-bold text-heading-h4 text-ink mb-md">Artwork</h2>
           <Card className="bg-surface text-center p-2xl">
-            <Badge variant="warning" className="mb-sm">Coming soon</Badge>
             <p className="text-body-sm text-ink-muted">
-              Your uploaded artwork and saved designs will appear here once artwork storage ships (Phase 1.5).
+              Artwork is selected during product configuration and remains tied to the ordering account.
             </p>
           </Card>
         </div>

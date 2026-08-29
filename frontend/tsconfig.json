@@ -27,6 +27,7 @@
     "components/**/*.tsx",
     "lib/**/*.ts",
     "lib/**/*.tsx",
+    "middleware.ts",
     "e2e/**/*.ts",
     ".next/types/**/*.ts"
   ],

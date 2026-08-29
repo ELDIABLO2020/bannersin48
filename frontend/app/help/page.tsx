@@ -128,7 +128,7 @@ export default function HelpPage() {
         </ul>
 
         <div className="text-center mt-2xl">
-          <Link href="/orders/lookup" className="text-link text-body-sm hover:underline">
+          <Link href="/orders" className="text-link text-body-sm hover:underline">
             Track an order <ChevronRight className="inline h-3 w-3" aria-hidden />
           </Link>
         </div>

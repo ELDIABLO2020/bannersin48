@@ -17,6 +17,11 @@ The palette is sampled from the client brand board (magenta `#CB1079`, green `#3
 black `#000000`). The Housecall Pro palette that preceded it is archived below and is no
 longer authoritative.
 
+## Current UX work
+
+- [Comprehensive front-end UX audit (2026-08-23)](frontend-ux-audit.md)
+- [Front-end UX remediation plan (2026-08-23)](frontend-ux-remediation-plan.md)
+
 ## Archive
 
 - [Phase 1 build & test plan](archive/phase1-build-test-plan.md)

@@ -112,7 +112,7 @@ export function TopNav() {
 
         <div className="hidden lg:flex items-center gap-sm ml-auto">
           <Link
-            href="/orders/lookup"
+            href="/orders"
             className="text-link text-body px-md py-sm hover:underline font-medium font-body"
           >
             Track Order
@@ -198,7 +198,7 @@ export function TopNav() {
               )}
             </button>
             <Link
-              href="/orders/lookup"
+              href="/orders"
               className="px-md py-sm text-link font-body"
               onClick={() => setMobileOpen(false)}
             >

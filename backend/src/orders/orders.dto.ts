@@ -2,7 +2,6 @@ import { Type } from "class-transformer";
 import { Equals } from "class-validator";
 import {
   ArrayMinSize,
-  IsBoolean,
   IsDefined,
   IsEmail,
   IsIn,
@@ -33,8 +32,11 @@ export class OrderLineDto {
   @IsInt() @Min(1) @Max(10, { message: "Quantity must be between 1 and 10." })
   quantity!: number;
 
-  @IsOptional() @IsString()
-  artworkId?: string;
+  @IsString() @MinLength(1)
+  artworkId!: string;
+
+  @IsString() @MinLength(1)
+  quoteId!: string;
 }
 
 /** Liability checkbox — every acknowledgement must be true; writes proof_* columns. */
@@ -78,8 +80,8 @@ export class ShipToDto {
   @IsString() @MinLength(3) @MaxLength(12)
   postalCode!: string;
 
-  @IsIn(["US", "CA"])
-  country!: string;
+  @IsIn(["US"])
+  country!: "US";
 
   @IsOptional() @IsString() @MaxLength(32)
   phone?: string;
@@ -97,15 +99,14 @@ export class CreateOrderDto {
   @Type(() => OrderLineDto)
   lines!: OrderLineDto[];
 
-  @IsOptional() @ValidateNested() @Type(() => ShipToDto)
-  shipTo?: ShipToDto;
+  @IsDefined() @ValidateNested() @Type(() => ShipToDto)
+  shipTo!: ShipToDto;
 
-  @IsOptional() @IsBoolean()
-  shipToUnverified?: boolean;
+  @IsString() @MinLength(1)
+  addressValidationToken!: string;
 
-  /** Payment is deferred (§0); kept for payload compatibility with the frontend. */
-  @IsOptional() @IsString()
-  paymentMethod?: string;
+  @Equals(true, { message: "Unverified-address risk acknowledgement is required." })
+  addressRiskAcknowledged!: boolean;
 
   @IsDefined({ message: "Acknowledgements are required." })
   @ValidateNested()
