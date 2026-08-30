@@ -1,8 +1,10 @@
 # Front-end UX remediation status
 
-**Last updated:** 2026-08-29  
+**Last updated:** 2026-08-29 (all waves complete)  
 **Product mode:** `internal_manual` (mandatory account, manual payment, USA/USD only)  
 **Public release:** Blocked until approved policy URLs and live payment/tax requirements exist.
+
+**Status:** Waves 0-11 are implemented. All P0 findings are closed except P0-12 (legal policies, external release blocker). All runnable gates pass (typecheck, lint, test:ws, mock build, MSW e2e 92/62, audit:ci 13, e2e:real 5).
 
 Status values are limited to **Open**, **In Progress**, **Closed**, and **External Release Blocker**.
 
@@ -10,17 +12,17 @@ Status values are limited to **Open**, **In Progress**, **Closed**, and **Extern
 
 | Finding | Status | Notes / dependency |
 |---|---|---|
-| P0-01 Cart quantity pricing | In Progress | Quote contract + cart v2 fields landed; re-quote orchestration on quantity/config change remains (Wave 3). |
+| P0-01 Cart quantity pricing | Closed | Cart re-quote state machine re-quotes on quantity/config change; server rejects changed/expired quotes. |
 | P0-02 Cart drawer scroll lock | Closed | Scroll/focus restored on every close path + route change; Playwright regression added. |
-| P0-03 Actual uploaded-file review | In Progress | Fake post-order proof removed (redirects); checkout uploaded-file/configuration review remains (Wave 4). |
+| P0-03 Actual uploaded-file review | Closed | Checkout shows the uploaded file + full configuration; fake proof removed. |
 | P0-04 Artwork required | Closed | `artworkId` required in backend DTO/MSW/UI; add-to-cart gated; retractable requires artwork. |
 | P0-05 Payment stub / order creation | Closed | Internal mode now truthfully submits a pending manual-payment order; payment brands and online-payment claims removed; `public_live` is build-gated. |
 | P0-06 Unverified address bypass | Closed | Real `POST /address/validate` normalizes US syntax as `unverified` with a signed token; order creation re-validates and requires risk acknowledgement. |
 | P0-07 Fake tracking lookup | Closed | Fake form removed; `/orders/lookup` redirects and nav points to authenticated `/orders`. |
 | P0-08 Broken reorder | Closed | Authenticated current-price reorder implemented end-to-end (backend, MSW, client, UI). |
 | P0-09 Fake verified testimonials | Closed | Placeholder data/component/media and navigation removed; `/reviews` is neutral and noindex. |
-| P0-10 Dimension orientation | Open | Canonical width/height migration not started. |
-| P0-11 Currency/tax/final total | In Progress | Checkout and footer identify USD/internal mode; authoritative quote/tax model still pending. |
+| P0-10 Dimension orientation | Closed | width=horizontal/height=vertical; "8′ W × 4′ H" + landscape defaults; legacy redirect + persisted-state migration. |
+| P0-11 Currency/tax/final total | Closed | Explicit USD product/shipping/tax breakdown; tax=0 shown truthfully in internal mode. |
 | P0-12 Legal policies | External Release Blocker | No approved policies exist. Internal mode is noindex/access-gated; `public_live` requires approved HTTPS policy URLs. |
 
 ## P1 findings
@@ -158,3 +160,29 @@ Status values are limited to **Open**, **In Progress**, **Closed**, and **Extern
 **Exact next batch**
 
 - Wave 2 (P0-10 dimension orientation: height × width, landscape defaults, persisted-state migration).
+
+### Waves 2-11 — completed (parallel deepseek-v4-pro workers)
+
+**Status:** Closed
+
+**Waves implemented**
+
+- Wave 2 (dimensions) — P0-10.
+- Waves 3-5 (cart re-quote, uploaded-file review, checkout idempotency + delivery commitment) — P0-01, P0-03, P0-11, P1-18/19.
+- Wave 6 (password recovery) — P1-17.
+- Waves 7-9 (trust/content, accessibility, IA/perf) — P1-05/06/07/08/09/10/11/13/16/20/21/23/25.
+- Wave 10 (admin isolation) — P1-26.
+- Wave 11 (release gates: axe, audit:ci, e2e:real) — release definition of done.
+
+**Validation**
+
+- `npm run typecheck` / `npm run lint` — green.
+- `npm run test:ws` — backend 51 tests; all workspaces pass.
+- `NEXT_PUBLIC_ENABLE_MOCKS=1 npm run build` — green.
+- `npm run e2e` — 92 passed, 62 skipped, 0 failed.
+- `npm run audit:ci` — 13 passed (content scan + link/image crawl + metadata + console/network).
+- `npm run e2e:real` — 5 passed against real Nest + Postgres/Redis.
+
+**External blocker**
+
+- None remaining for internal V1. `e2e:real` requires Docker Desktop (Postgres/Redis); it was started and passed during verification.
