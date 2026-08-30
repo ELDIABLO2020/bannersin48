@@ -15,7 +15,7 @@ test.describe("BANNER order hub", () => {
     await page.goto("/order");
     await waitForHub(page);
     const cards = page.locator("[data-testid^='hub-card-']");
-    await expect(cards).toHaveCount(7);
+    await expect(cards).toHaveCount(8);
     await expect(page.getByTestId("hub-card-hd-banner")).toBeVisible();
     await expect(page.getByTestId("hub-card-hdpe")).toBeVisible();
     await expect(page.getByTestId("hub-card-canvas")).toBeVisible();
@@ -23,8 +23,21 @@ test.describe("BANNER order hub", () => {
     await expect(page.getByTestId("hub-card-poster")).toBeVisible();
     await expect(page.getByTestId("hub-card-no-curl")).toBeVisible();
     await expect(page.getByTestId("hub-card-econostand")).toBeVisible();
-    await expect(page.getByTestId("hub-card-retractable")).toHaveCount(0);
+    await expect(page.getByTestId("hub-card-retractable")).toBeVisible();
+    await expect(page.getByTestId("hub-card-hd-banner").getByRole("heading", { name: "HD Banner" })).toBeVisible();
+    await expect(page.getByTestId("hub-card-hd-banner").locator("img")).toBeVisible();
     await expect(page.getByRole("link", { name: /order a retractable banner/i })).toBeVisible();
+  });
+
+  test("stand filter shows both stand tiles", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
+    await page.goto("/order");
+    await waitForHub(page);
+    await page.getByTestId("hub-filter-stand").click();
+    await expect(page).toHaveURL(/need=stand/);
+    await expect(page.getByTestId("hub-card-econostand")).toBeVisible();
+    await expect(page.getByTestId("hub-card-retractable")).toBeVisible();
+    await expect(page.getByTestId("hub-card-poster")).toHaveCount(0);
   });
 
   test("mesh more info opens modal with webbing", async ({ page }, testInfo) => {
@@ -63,6 +76,15 @@ test.describe("BANNER order hub", () => {
     await expect(page).toHaveURL(/need=windy/);
     await expect(page.getByTestId("hub-card-mesh")).toBeVisible();
     await expect(page.getByTestId("hub-card-poster")).toHaveCount(0);
+  });
+
+  test("retractable tile opens the retractable configurator", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
+    await page.goto("/order");
+    await waitForHub(page);
+    await page.getByTestId("hub-order-retractable").click();
+    await expect(page).toHaveURL(/\/order\/retractable/);
+    await expect(page.getByRole("heading", { name: /retractable banner/i })).toBeVisible();
   });
 
   test("poster order opens builder", async ({ page }, testInfo) => {

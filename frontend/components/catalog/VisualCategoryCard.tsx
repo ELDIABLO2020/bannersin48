@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
+import { cn } from "@/lib/utils/cn";
 import type { PlaceholderAsset } from "@/content/placeholders";
 
 export function VisualCategoryCard({
@@ -17,6 +18,7 @@ export function VisualCategoryCard({
   linkTestId,
   ariaLabel,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
+  mediaClassName,
 }: {
   href?: string;
   title: string;
@@ -30,6 +32,7 @@ export function VisualCategoryCard({
   linkTestId?: string;
   ariaLabel?: string;
   sizes?: string;
+  mediaClassName?: string;
 }) {
   const Heading = headingLevel;
   const label = ariaLabel ?? (href ? `${cta} ${title}` : undefined);
@@ -47,7 +50,7 @@ export function VisualCategoryCard({
           aria-label={label}
         />
       )}
-      <div className="relative aspect-video overflow-hidden">
+      <div className={cn("relative aspect-video overflow-hidden", mediaClassName)}>
         <PlaceholderImage
           src={image.src}
           alt=""
@@ -60,15 +63,17 @@ export function VisualCategoryCard({
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-darkest/85 via-darkest/35 to-transparent transition-colors duration-500 group-hover:from-darkest/95"
           aria-hidden
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 p-lg">
-          <Heading className="font-display tracking-tight text-[clamp(22px,2.5vw,34px)] leading-[1.05] text-white uppercase drop-shadow-sm">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end p-md lg:p-lg">
+          <Heading className="font-display tracking-tight text-[clamp(20px,2.2vw,32px)] leading-[1.05] text-white uppercase drop-shadow-sm">
             {title}
           </Heading>
           {subtitle && (
-            <p className="mt-xs text-sm text-white/85 font-body leading-relaxed">{subtitle}</p>
+            <p className="mt-xs line-clamp-2 text-sm text-white/85 font-body leading-relaxed">
+              {subtitle}
+            </p>
           )}
           {href && (
-            <span className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-strong-accent font-body">
+            <span className="mt-sm inline-flex items-center gap-xs text-sm font-semibold text-strong-accent font-body">
               {cta}
               <ArrowRight
                 className="h-4 w-4 transition-transform duration-300 motion-safe:group-hover:translate-x-1"

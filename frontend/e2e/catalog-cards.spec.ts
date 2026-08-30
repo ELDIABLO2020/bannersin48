@@ -27,6 +27,18 @@ test.describe("Category card surfaces", () => {
     await expect(page).toHaveURL(/\/order\/mesh/);
   });
 
+  test("order hub cards are visual tiles with names and photos", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
+    await page.goto("/order");
+    const grid = page.getByTestId("hub-product-grid");
+    await expect(grid.getByRole("heading", { name: "HD Banner" })).toBeVisible({ timeout: 15_000 });
+    await expect(grid.locator("img").first()).toBeVisible();
+    await expect(grid.getByRole("heading", { name: "Mesh Banner" })).toBeVisible();
+    await expect(grid.getByRole("heading", { name: "Retractable Banner" })).toBeVisible();
+    await grid.getByRole("link", { name: /order poster/i }).click();
+    await expect(page).toHaveURL(/\/order\/poster/);
+  });
+
   test("sizes other products and stands keep price and photos", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
     await page.goto("/sizes");

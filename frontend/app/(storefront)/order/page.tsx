@@ -2,27 +2,22 @@
 
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, ChevronRight } from "lucide-react";
-import { getApiClient } from "@/lib/api/client";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CategoryCard } from "@/components/order/CategoryCard";
-import { ScrollReveal } from "@/components/animations/ScrollReveal";
-import { formatUsd } from "@/lib/utils/format";
 import {
   HUB_TITLE,
   HUB_SUBTITLE,
   PRODUCTS,
   CATALOG_NEEDS,
+  CATALOG_NAV_PRODUCTS,
   CATALOG_COMPARISONS,
-  SHIPPING_FLAT_PER_UNIT_USD,
   catalogFilterHref,
   catalogFilterLabel,
   catalogFilterProductIds,
+  productBySlug,
   productOrderHref,
-  type ProductId,
 } from "@bannersin48/shared";
 
 export default function OrderHubPage() {
@@ -33,107 +28,33 @@ export default function OrderHubPage() {
   );
 }
 
-function HubCardSkeletonGrid() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
-      {Array.from({ length: 7 }, (_, i) => (
-        <div key={i} className="aspect-video rounded-card bg-line animate-pulse-slow" />
-      ))}
-    </div>
-  );
-}
-
 function HubSkeleton() {
   return (
     <div className="bg-surface-tint min-h-[60vh]">
       <div className="mx-auto max-w-content px-md lg:px-xl py-xl">
         <div className="h-10 w-64 bg-line rounded animate-pulse-slow mb-md" />
-        <HubCardSkeletonGrid />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="aspect-video rounded-card bg-line animate-pulse-slow" />
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-interface DecisionFacts {
-  fromPrice: number;
-  bestUse: string;
-  environment: string;
-  maxSize: string;
-}
-
-/**
- * Authoritative, server-derivable decision facts for a product card. Values
- * come from the shared product catalog (the same source the quote/catalog API
- * serves), not from a client-only guess.
- */
-function productDecisionFacts(id: ProductId): DecisionFacts {
-  const p = PRODUCTS[id];
-  const shipping = SHIPPING_FLAT_PER_UNIT_USD;
-
-  let fromPrice: number;
-  if (p.sizeMode === "fixed") {
-    fromPrice = (p.flatPriceUsd ?? 0) + shipping;
-  } else {
-    const minRate = Math.min(...p.materials.map((m) => p.ratePerSqFt(m)));
-    // Minimum orderable size is 12" × 12" = 1 billable square foot.
-    fromPrice = minRate * 1 + shipping;
-  }
-
-  const maxSize =
-    p.sizeMode === "fixed"
-      ? `Fixed ${p.fixedSizeIn?.widthIn ?? 33.5}" × ${p.fixedSizeIn?.heightIn ?? 80}"`
-      : p.limits.maxShortSideIn
-        ? `Shorter side ≤ ${p.limits.maxShortSideIn}"`
-        : `Up to ${p.limits.maxBillableFt}' × ${p.limits.maxBillableFt}'`;
-
-  return {
-    fromPrice,
-    bestUse: p.hubCopy.commonUses[0] ?? p.subtitle,
-    environment: p.hubCopy.environment[0] ?? "Indoor and outdoor",
-    maxSize,
-  };
-}
-
-function FactsList({ facts }: { facts: DecisionFacts }) {
-  const items: ReadonlyArray<{ label: string; value: string }> = [
-    { label: "From", value: `${formatUsd(facts.fromPrice)} USD` },
-    { label: "Best for", value: facts.bestUse },
-    { label: "Use", value: facts.environment },
-    { label: "Max size", value: facts.maxSize },
-  ];
-  return (
-    <dl className="grid grid-cols-2 gap-x-md gap-y-sm">
-      {items.map((item) => (
-        <div key={item.label}>
-          <dt className="text-xs font-bold uppercase tracking-wide text-ink-muted">
-            {item.label}
-          </dt>
-          <dd className="mt-xs text-body-sm text-ink">{item.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
 function OrderHub() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const need = searchParams.get("need");
-  const { data: cards = [], isLoading } = useQuery({
-    queryKey: ["banner-catalog"],
-    queryFn: () => getApiClient().getBannerCatalog(),
-    retry: 8,
-    retryDelay: 250,
-  });
   const [infoSlug, setInfoSlug] = useState<string | null>(null);
 
   const allowedIds = catalogFilterProductIds(need);
   const filterLabel = catalogFilterLabel(need);
 
-  const hubCards = useMemo(() => {
-    if (!allowedIds) return cards;
-    return cards.filter((c) => allowedIds.includes(c.id as ProductId));
-  }, [cards, allowedIds]);
+  const hubIds = useMemo(() => {
+    if (!allowedIds) return [...CATALOG_NAV_PRODUCTS];
+    return CATALOG_NAV_PRODUCTS.filter((id) => allowedIds.includes(id));
+  }, [allowedIds]);
 
   return (
     <div className="bg-surface-tint min-h-[60vh]">
@@ -151,7 +72,7 @@ function OrderHub() {
         <div className="flex flex-wrap gap-sm mb-lg" role="group" aria-label="Filter by need">
           <Chip
             active={!need}
-            onClick={() => router.push("/order")}
+            href="/order"
             testId="hub-filter-all"
           >
             All
@@ -160,7 +81,7 @@ function OrderHub() {
             <Chip
               key={chip.id}
               active={need === chip.id}
-              onClick={() => router.push(catalogFilterHref(chip.id))}
+              href={catalogFilterHref(chip.id)}
               testId={`hub-filter-${chip.id}`}
             >
               {chip.label}
@@ -171,31 +92,24 @@ function OrderHub() {
         {filterLabel && (
           <p className="text-body-sm text-ink-muted mb-lg" data-testid="hub-filter-label">
             Showing products for <span className="font-semibold text-ink">{filterLabel}</span>.{" "}
-            <button type="button" className="text-link hover:underline" onClick={() => router.push("/order")}>
+            <Link href="/order" scroll={false} className="text-link hover:underline">
               Clear filter
-            </button>
+            </Link>
           </p>
         )}
 
-        {isLoading && <HubCardSkeletonGrid />}
-
-        {hubCards.length > 0 && (
-          <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
-            {hubCards.map((card) => {
-              const facts = productDecisionFacts(card.id as ProductId);
-              return (
-                <div key={card.slug} className="flex flex-col gap-sm">
-                  <CategoryCard card={card} onMoreInfo={setInfoSlug} />
-                  <div className="rounded-card border border-line bg-surface p-md">
-                    <FactsList facts={facts} />
-                  </div>
-                </div>
-              );
-            })}
-          </ScrollReveal>
+        {hubIds.length > 0 && (
+          <div
+            data-testid="hub-product-grid"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md"
+          >
+            {hubIds.map((id) => (
+              <CategoryCard key={id} productId={id} onMoreInfo={setInfoSlug} />
+            ))}
+          </div>
         )}
 
-        {!isLoading && hubCards.length === 0 && (
+        {hubIds.length === 0 && (
           <p className="text-body text-ink-muted">No products match this filter.</p>
         )}
 
@@ -220,29 +134,29 @@ function OrderHub() {
 
 function Chip({
   active,
-  onClick,
+  href,
   children,
   testId,
 }: {
   active: boolean;
-  onClick: () => void;
+  href: string;
   children: React.ReactNode;
   testId: string;
 }) {
   return (
-    <button
-      type="button"
+    <Link
+      href={href}
+      scroll={false}
       data-testid={testId}
-      aria-pressed={active}
-      onClick={onClick}
-      className={`inline-flex min-h-11 items-center rounded-pill border px-md py-xs text-sm font-semibold font-body transition-colors ${
+      aria-current={active ? "true" : undefined}
+      className={`inline-flex min-h-11 items-center rounded-pill border px-md py-xs text-sm font-semibold font-body no-underline transition-colors ${
         active
-          ? "border-strong-accent bg-strong-accent text-strong-accent-text"
+          ? "border-strong-accent bg-strong-accent text-strong-accent-text hover:text-strong-accent-text"
           : "border-line bg-surface text-ink hover:border-link hover:text-link"
       }`}
     >
       {children}
-    </button>
+    </Link>
   );
 }
 
@@ -275,31 +189,28 @@ function ComparisonStrip() {
 }
 
 function MoreInfoModal({ slug, onClose }: { slug: string; onClose: () => void }) {
-  const { data, isFetching } = useQuery({
-    queryKey: ["banner-catalog-info", slug],
-    queryFn: () => getApiClient().getBannerCatalogInfo(slug),
-  });
+  const product = productBySlug(slug);
 
   return (
     <Dialog open={Boolean(slug)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         data-testid="hub-info-modal"
-        title={data?.title ?? "More information"}
+        title={product?.title ?? "More information"}
         className="p-md sm:p-lg"
       >
-        {isFetching && <p className="text-sm text-ink-muted">Loading…</p>}
-        {data && (
+        {product && (
           <>
-            <p className="mt-sm text-body text-ink-muted">{data.subtitle}</p>
+            <p className="mt-sm text-body text-ink-muted">{product.subtitle}</p>
             <div className="mt-md space-y-md">
-              <Section heading="Common uses" items={data.commonUses} />
-              <Section heading="Environment" items={data.environment} />
-              <Section heading="Options" items={data.options} />
+              <Section heading="Common uses" items={product.hubCopy.commonUses} />
+              <Section heading="Environment" items={product.hubCopy.environment} />
+              <Section heading="Options" items={product.hubCopy.options} />
             </div>
-            <Link href={`/order/${data.slug}`} onClick={onClose} className="no-underline">
-              <Button variant="cta" size="md" className="mt-lg">
-                Order
-              </Button>
+            <Link
+              href={productOrderHref(product.id)}
+              className="mt-lg inline-flex h-11 items-center justify-center rounded-btn bg-strong-accent px-md text-body font-bold text-strong-accent-text no-underline hover:bg-strong-accent-hover hover:text-strong-accent-text"
+            >
+              Order
             </Link>
           </>
         )}
