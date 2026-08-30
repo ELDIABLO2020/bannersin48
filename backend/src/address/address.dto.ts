@@ -1,4 +1,7 @@
-import { IsEmail, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength, ValidateIf } from "class-validator";
+
+/** Skip validation when the field is absent or an empty string (the frontend schema sends ""). */
+const NotEmpty = (o: object, v: unknown) => v !== undefined && v !== null && v !== "";
 
 export class ValidateAddressDto {
   @IsString() @MinLength(2) @MaxLength(120)
@@ -25,9 +28,9 @@ export class ValidateAddressDto {
   @IsIn(["US"])
   country!: "US";
 
-  @IsOptional() @IsString() @MaxLength(32)
+  @ValidateIf(NotEmpty) @IsString() @MaxLength(32)
   phone?: string;
 
-  @IsOptional() @IsEmail()
+  @ValidateIf(NotEmpty) @IsEmail()
   email?: string;
 }

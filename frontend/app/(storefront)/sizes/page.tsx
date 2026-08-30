@@ -304,7 +304,7 @@ function PricingMatrix() {
                     className="text-left font-bold text-ink px-lg py-md whitespace-nowrap"
                   >
                     <Link
-                      href={`/order/hd-banner?w=${s.widthFt}&h=${s.heightFt}`}
+                      href={`/order/hd-banner?width=${s.widthFt}&height=${s.heightFt}`}
                       className="text-link no-underline hover:underline"
                     >
                       {s.label}
@@ -350,7 +350,7 @@ function AllSizesGrid() {
         {POPULAR_SIZES.map((s) => (
           <Link
             key={s.id}
-            href={`/order/hd-banner?w=${s.widthFt}&h=${s.heightFt}`}
+            href={`/order/hd-banner?width=${s.widthFt}&height=${s.heightFt}`}
             className="ps-card group block no-underline"
           >
             <article

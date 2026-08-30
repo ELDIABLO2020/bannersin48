@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState, type InputHTMLAttributes } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/stores/auth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { ChevronRight, AlertCircle, Eye, EyeOff, Check } from "lucide-react";
 import { safeReturnUrl } from "@/lib/auth/return-url";
 
 const registerSchema = z.object({
@@ -22,15 +22,43 @@ const registerSchema = z.object({
 
 type RegisterInput = z.infer<typeof registerSchema>;
 
+const PasswordField = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(
+  function PasswordField(props, ref) {
+    const [visible, setVisible] = useState(false);
+    return (
+      <div className="relative">
+        <Input
+          ref={ref}
+          type={visible ? "text" : "password"}
+          autoComplete="new-password"
+          className="pr-11"
+          {...props}
+        />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? "Hide password" : "Show password"}
+        aria-pressed={visible}
+        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent rounded-r-btn"
+      >
+        {visible ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+      </button>
+    </div>
+    );
+  },
+);
+
 export default function RegisterPage() {
   const router = useRouter();
   const setAuth = useAuth((s) => s.setAuth);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [returnUrl, setReturnUrl] = useState("/dashboard");
 
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
   });
+
+  const password = watch("password") ?? "";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -49,6 +77,11 @@ export default function RegisterPage() {
       setSubmitError((err as Error).message);
     }
   }
+
+  const requirements = [
+    { met: password.length >= 8, label: "At least 8 characters" },
+    { met: password.length <= 128, label: "128 characters or fewer" },
+  ];
 
   return (
     <div
@@ -71,11 +104,27 @@ export default function RegisterPage() {
             <Input type="email" autoComplete="email" {...register("email")} invalid={!!errors.email} />
             {errors.email && <p className="text-body-sm text-danger mt-xs">{errors.email.message}</p>}
           </label>
-          <label className="block">
-            <span className="text-body-sm text-ink-muted block mb-xs">Password</span>
-            <Input type="password" autoComplete="new-password" {...register("password")} invalid={!!errors.password} />
+          <div>
+            <label htmlFor="register-password" className="text-body-sm text-ink-muted block mb-xs">
+              Password
+            </label>
+            <PasswordField id="register-password" invalid={!!errors.password} {...register("password")} />
+            <ul className="mt-xs space-y-xs" aria-label="Password requirements">
+              {requirements.map((req) => (
+                <li
+                  key={req.label}
+                  className="flex items-center gap-xs text-body-sm text-ink-muted"
+                >
+                  <Check
+                    className={`h-4 w-4 shrink-0 ${req.met ? "text-success" : "text-line-input"}`}
+                    aria-hidden
+                  />
+                  <span>{req.label}</span>
+                </li>
+              ))}
+            </ul>
             {errors.password && <p className="text-body-sm text-danger mt-xs">{errors.password.message}</p>}
-          </label>
+          </div>
           {submitError && (
             <div role="alert" className="flex items-start gap-sm p-md rounded-feature bg-badge-error-bg">
               <AlertCircle className="h-5 w-5 text-danger shrink-0 mt-0.5" aria-hidden />

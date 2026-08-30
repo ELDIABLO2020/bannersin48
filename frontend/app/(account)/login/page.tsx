@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState, type InputHTMLAttributes } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/stores/auth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { ChevronRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { safeReturnUrl } from "@/lib/auth/return-url";
 
 const loginSchema = z.object({
@@ -20,6 +20,32 @@ const loginSchema = z.object({
 });
 
 type LoginInput = z.infer<typeof loginSchema>;
+
+const PasswordField = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(
+  function PasswordField(props, ref) {
+    const [visible, setVisible] = useState(false);
+    return (
+      <div className="relative">
+        <Input
+          ref={ref}
+          type={visible ? "text" : "password"}
+          autoComplete="current-password"
+          className="pr-11"
+          {...props}
+        />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? "Hide password" : "Show password"}
+        aria-pressed={visible}
+        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent rounded-r-btn"
+      >
+        {visible ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+      </button>
+    </div>
+    );
+  },
+);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -63,11 +89,21 @@ export default function LoginPage() {
             <Input type="email" autoComplete="email" {...register("email")} invalid={!!errors.email} />
             {errors.email && <p className="text-body-sm text-danger mt-xs">{errors.email.message}</p>}
           </label>
-          <label className="block">
-            <span className="text-body-sm text-ink-muted block mb-xs">Password</span>
-            <Input type="password" autoComplete="current-password" {...register("password")} invalid={!!errors.password} />
+          <div>
+            <div className="flex items-center justify-between mb-xs">
+              <label htmlFor="login-password" className="text-body-sm text-ink-muted">
+                Password
+              </label>
+              <Link
+                href={`/forgot-password${returnUrl !== "/dashboard" ? `?next=${encodeURIComponent(returnUrl)}` : ""}`}
+                className="text-body-sm text-link hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <PasswordField id="login-password" invalid={!!errors.password} {...register("password")} />
             {errors.password && <p className="text-body-sm text-danger mt-xs">{errors.password.message}</p>}
-          </label>
+          </div>
           {submitError && (
             <div role="alert" className="flex items-start gap-sm p-md rounded-feature bg-badge-error-bg">
               <AlertCircle className="h-5 w-5 text-danger shrink-0 mt-0.5" aria-hidden />

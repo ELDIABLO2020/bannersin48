@@ -32,6 +32,7 @@ static-server.err.log
 frontend/playwright-report/
 frontend/test-results/
 frontend/lhci-reports/
+frontend/audit/
 
 # OS
 .DS_Store

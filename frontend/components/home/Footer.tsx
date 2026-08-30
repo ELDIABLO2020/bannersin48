@@ -5,6 +5,7 @@ import { SITE_NAVIGATION_GROUPS } from "@/components/nav/siteNavigation";
 export function Footer() {
   return (
     <footer className="bg-darkest text-white">
+      <h2 className="sr-only">Site footer</h2>
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
           <div className="sm:col-span-2 lg:col-span-1">
@@ -15,7 +16,7 @@ export function Footer() {
             <p className="text-sm text-white/70">
               <span className="text-white font-semibold">Get in touch:</span>
               <br />
-              <a href="mailto:support@bannersin48.com" className="text-strong-accent-on-dark hover:underline no-underline">
+              <a href="mailto:support@bannersin48.com" className="text-strong-accent-on-dark">
                 support@bannersin48.com
               </a>
             </p>
@@ -28,7 +29,7 @@ export function Footer() {
                   <li key={item.href + item.label}>
                     <Link
                       href={item.href}
-                      className="text-sm text-white/70 hover:text-white hover:underline inline-flex items-center gap-xs no-underline"
+                      className="text-sm text-white/70 hover:text-white hover:underline inline-flex min-h-6 items-center gap-xs no-underline"
                     >
                       {item.label}
                     </Link>

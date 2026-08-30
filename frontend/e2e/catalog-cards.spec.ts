@@ -10,13 +10,12 @@ test.describe("Category card surfaces", () => {
     await expect(page).toHaveURL(/\/order\/hd-banner/);
   });
 
-  test("homepage industry cards link to catalog filters", async ({ page }, testInfo) => {
+  test("homepage help-me-choose chips link to catalog filters", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
     await page.goto("/");
-    const industries = page.getByRole("region", { name: /customized banners for every use case/i });
-    await expect(industries.locator("img").first()).toBeVisible();
-    await industries.getByRole("link", { name: /shop contractor/i }).click();
-    await expect(page).toHaveURL(/need=contractor/);
+    const chooser = page.getByRole("list", { name: "Choose by need" });
+    await chooser.getByRole("link", { name: "Windy" }).click();
+    await expect(page).toHaveURL(/need=windy/);
   });
 
   test("help which-banner cards keep destinations and show photos", async ({ page }, testInfo) => {

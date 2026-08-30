@@ -13,7 +13,13 @@ import { Clock, ShoppingCart } from "lucide-react";
 import { materialLabel } from "./builderRules";
 import { RateMatrix } from "./RateMatrix";
 import { useBuilderQuote } from "./useBuilderQuote";
-import { PRODUCTS, SHIPPING_FLAT_PER_UNIT_USD } from "@bannersin48/shared";
+import {
+  PRODUCTS,
+  SHIPPING_FLAT_PER_UNIT_USD,
+  formatDimensionsWH,
+  formatBillableWH,
+  formatInchesWH,
+} from "@bannersin48/shared";
 
 export function PriceHero() {
   const signs = useConfigurator((s) => s.signs);
@@ -78,10 +84,13 @@ export function PriceHero() {
           billableDims: line.billableDims,
           display: {
             requestedLabel:
+              signConfig.sizeMode === "fixed" && signConfig.fixedSizeIn
+                ? formatInchesWH(signConfig.fixedSizeIn.widthIn, signConfig.fixedSizeIn.heightIn)
+                : formatDimensionsWH(sign.size),
+            billableLabel:
               signConfig.sizeMode === "fixed"
-                ? '33.5" × 80"'
-                : `${sign.size.widthFt}' ${sign.size.widthIn}" × ${sign.size.heightFt}' ${sign.size.heightIn}"`,
-            billableLabel: signConfig.sizeMode === "fixed" ? "Fixed size" : `${line.billableDims.widthFt}' × ${line.billableDims.heightFt}'`,
+                ? "Fixed size"
+                : formatBillableWH(line.billableDims),
           },
         });
       }

@@ -36,6 +36,23 @@ export class OrdersService {
   // --- Creation -------------------------------------------------------------
 
   async create(userId: string, dto: CreateOrderDto, ip?: string): Promise<OrderDetail> {
+    // Idempotency (Wave 5.7): replaying the same submission key returns the
+    // existing order instead of creating a duplicate.
+    if (dto.idempotencyKey) {
+      const existingOrder = await this.prisma.order.findUnique({
+        where: { idempotencyKey: dto.idempotencyKey },
+      });
+      if (existingOrder) {
+        if (existingOrder.userId !== userId) {
+          throw new ConflictException({
+            code: "IDEMPOTENCY_KEY_REUSED",
+            message: "This submission key was already used by a different account.",
+          });
+        }
+        return this.getMineDetail(userId, existingOrder.id);
+      }
+    }
+
     const products = await this.loadProducts(dto.lines);
 
     // Validate every line against DB-driven catalog rules and ownership of artwork.
@@ -108,6 +125,7 @@ export class OrdersService {
         data: {
           number,
           userId,
+          idempotencyKey: dto.idempotencyKey ?? null,
           status: "RECEIVED",
           paymentStatus: "PENDING_PAYMENT",
           subtotal: dec(priced.subtotal),
@@ -395,12 +413,26 @@ export class OrdersService {
     if (!order) throw new NotFoundException({ code: "NOT_FOUND", message: "Order not found." });
     assertTransition(order.status, to);
 
+    // Persist the committed delivery date when the manual payment is confirmed
+    // (D6: the effective SLA start is paymentConfirmedAt). The first transition
+    // into IN_PROCESSING marks that moment; the date is never recomputed later.
+    const now = new Date();
+    const commitDelivery = to === "IN_PROCESSING" && !order.paymentConfirmedAt;
+    const commitment = commitDelivery ? this.delivery.estimate(now) : null;
+
     await this.prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id: orderId },
         data: {
           status: to,
           ...(to === "CANCELLED" ? { cancelledAt: new Date(), cancelReason: opts.cancelledReason ?? opts.note ?? null } : {}),
+          ...(commitment
+            ? {
+                paymentConfirmedAt: now,
+                committedDeliveryDate: commitment.guaranteedDeliveryDate,
+                committedDeliveryDow: commitment.guaranteedDeliveryDow,
+              }
+            : {}),
         },
       });
       await tx.orderEvent.create({
@@ -440,7 +472,10 @@ export class OrdersService {
 
   toListSummary(o: Order & { items: OrderItem[] }): OrderListItem {
     const first = o.items[0];
+    // Render the persisted commitment when payment has been confirmed; before
+    // that the value is only an estimate (the same one the quote carried).
     const estimate = this.delivery.estimate(o.placedAt ?? o.createdAt);
+    const guaranteedDeliveryDate = o.committedDeliveryDate ?? estimate.guaranteedDeliveryDate;
     const widthFt = first ? Math.floor(Number(first.widthIn) / 12) : 0;
     const heightFt = first ? Math.floor(Number(first.heightIn) / 12) : 0;
     return {
@@ -452,14 +487,16 @@ export class OrdersService {
       totalLabel: `$${Number(o.total).toFixed(2)}`,
       createdAt: o.createdAt.toISOString(),
       placedAt: o.placedAt?.toISOString() ?? null,
-      firstLineLabel: first ? `${widthFt}' × ${heightFt}'` : "—",
+      firstLineLabel: first ? `${widthFt}′ × ${heightFt}′` : "—",
       firstLineQty: first?.qty ?? 0,
-      guaranteedDeliveryDate: estimate.guaranteedDeliveryDate,
+      guaranteedDeliveryDate,
     };
   }
 
   assembleDetail(o: Order, items: OrderItem[], events: OrderEvent[]): OrderDetail {
     const estimate = this.delivery.estimate(o.placedAt ?? o.createdAt);
+    const guaranteedDeliveryDate = o.committedDeliveryDate ?? estimate.guaranteedDeliveryDate;
+    const guaranteedDeliveryDow = o.committedDeliveryDow ?? estimate.guaranteedDeliveryDow;
     return {
       id: o.id,
       orderNumber: o.number,
@@ -473,8 +510,9 @@ export class OrdersService {
       currency: o.currency,
       shipTo: o.shipAddress as Record<string, unknown>,
       artworkIds: items.map((i) => i.artworkFileId).filter((x): x is string => Boolean(x)),
-      guaranteedDeliveryDate: estimate.guaranteedDeliveryDate,
-      guaranteedDeliveryDow: estimate.guaranteedDeliveryDow,
+      guaranteedDeliveryDate,
+      guaranteedDeliveryDow,
+      paymentConfirmedAt: o.paymentConfirmedAt?.toISOString() ?? null,
       proofConfirmedAt: o.proofConfirmedAt?.toISOString() ?? null,
       placedAt: o.placedAt?.toISOString() ?? null,
       createdAt: o.createdAt.toISOString(),
@@ -570,6 +608,7 @@ export interface OrderDetail {
   artworkIds: string[];
   guaranteedDeliveryDate: string;
   guaranteedDeliveryDow: string;
+  paymentConfirmedAt: string | null;
   proofConfirmedAt: string | null;
   placedAt: string | null;
   createdAt: string;

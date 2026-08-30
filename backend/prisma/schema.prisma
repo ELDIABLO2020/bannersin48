@@ -479,6 +479,10 @@ model Order {
   placedAt                DateTime?
   cancelledAt             DateTime?
   cancelReason            String?
+  paymentConfirmedAt      DateTime? // effective SLA start (D6)
+  committedDeliveryDate   String?   // YYYY-MM-DD, persisted once payment confirmed
+  committedDeliveryDow    String?   // e.g. "Wednesday"
+  idempotencyKey          String?   @unique // client-generated submission key
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 

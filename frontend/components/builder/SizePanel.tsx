@@ -6,6 +6,8 @@ import {
   POPULAR_SIZES,
   PRODUCTS,
   validateProductSize,
+  orientationOf,
+  orientationLabel,
   type PopularSize,
   type ProductId,
 } from "@bannersin48/shared";
@@ -91,20 +93,22 @@ export function SizePanel() {
 
       <div className="grid grid-cols-2 gap-sm">
         <Axis
-          label="Width"
+          label="Width (left to right)"
           ft={size.widthFt}
           inches={size.widthIn}
           onChange={(ft, inches) => updateAxis("width", ft, inches)}
           testId="size-width"
         />
         <Axis
-          label="Height"
+          label="Height (top to bottom)"
           ft={size.heightFt}
           inches={size.heightIn}
           onChange={(ft, inches) => updateAxis("height", ft, inches)}
           testId="size-height"
         />
       </div>
+
+      <OrientationDiagram size={size} />
 
       {!sizeError.ok && (
         <p role="alert" data-testid="size-error" className="text-sm text-danger">
@@ -188,5 +192,46 @@ function Axis({
         </label>
       </div>
     </fieldset>
+  );
+}
+
+function OrientationDiagram({ size }: { size: { widthFt: number; widthIn: number; heightFt: number; heightIn: number } }) {
+  const widthIn = size.widthFt * 12 + size.widthIn;
+  const heightIn = size.heightFt * 12 + size.heightIn;
+  const orientation = orientationOf({ widthFt: size.widthFt, widthIn: size.widthIn, heightFt: size.heightFt, heightIn: size.heightIn });
+
+  // Bound the diagram so extreme ratios stay inside the panel.
+  const MAX_PX = 150;
+  const scale = MAX_PX / Math.max(widthIn, heightIn);
+  const boxW = Math.max(20, Math.round(widthIn * scale));
+  const boxH = Math.max(20, Math.round(heightIn * scale));
+
+  return (
+    <div
+      data-testid="orientation-diagram"
+      className="rounded-card border border-line bg-surface-tint px-sm py-sm"
+    >
+      <div className="flex items-center justify-between gap-sm">
+        <p className="text-xs font-bold uppercase tracking-wide text-ink-muted">Orientation</p>
+        <span className="rounded-pill bg-soft-accent px-sm py-micro text-[11px] font-bold uppercase text-ink">
+          {orientationLabel(orientation)}
+        </span>
+      </div>
+      <div className="mt-sm flex min-h-[80px] items-center justify-center">
+        <div className="relative">
+          <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase text-ink-muted">
+            W
+          </span>
+          <span className="absolute -left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase text-ink-muted">
+            H
+          </span>
+          <div
+            className="rounded-sm border-2 border-ink bg-surface"
+            style={{ width: boxW, height: boxH }}
+            aria-label={`${widthIn} inches wide by ${heightIn} inches high`}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

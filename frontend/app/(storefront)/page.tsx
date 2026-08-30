@@ -1,24 +1,26 @@
+import type { Metadata } from "next";
 import { Hero } from "@/components/home/Hero";
+import { HelpMeChoose } from "@/components/home/HelpMeChoose";
 import { ProductStrip } from "@/components/home/ProductStrip";
-import { UseCaseMarquee } from "@/components/home/UseCaseMarquee";
-import { PopularSizes } from "@/components/home/PopularSizes";
 import { HowItWorks } from "@/components/home/HowItWorks";
-import { MaterialsBand } from "@/components/home/MaterialsBand";
-import { IndustriesGrid } from "@/components/home/IndustriesGrid";
 import { GuaranteePanel } from "@/components/home/GuaranteePanel";
 import { FAQ } from "@/components/home/FAQ";
 import { EmailCapture } from "@/components/home/EmailCapture";
+
+export const metadata: Metadata = {
+  title: "Banners In 48 — Custom Banners Delivered in 48 Business Hours",
+  description:
+    "Configure custom vinyl, mesh, poster, canvas, and banner stands. USA-only orders use USD and manual payment.",
+  alternates: { canonical: "/" },
+};
 
 export default function HomePage() {
   return (
     <>
       <Hero />
+      <HelpMeChoose />
       <ProductStrip />
-      <UseCaseMarquee />
-      <PopularSizes />
       <HowItWorks />
-      <MaterialsBand />
-      <IndustriesGrid />
       <GuaranteePanel />
       <FAQ />
       <EmailCapture />

@@ -2,12 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Open_Sans } from "next/font/google";
 import { colors } from "@bannersin48/design-tokens";
 import { Providers } from "./providers";
-import { TopNav } from "@/components/nav/TopNav";
-import { BottomTabBar } from "@/components/nav/BottomTabBar";
-import { AnnouncementStrip } from "@/components/nav/AnnouncementStrip";
-import { Footer } from "@/components/home/Footer";
-import { CountdownFloatingIsland } from "@/components/nav/CountdownFloatingIsland";
-import { CartDrawer } from "@/components/cart/CartDrawer";
 import { isInternalManualCommerce } from "@/lib/config/commerce-mode";
 import "./globals.css";
 
@@ -86,19 +80,17 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+/**
+ * Root layout is intentionally limited to the document shell + providers so
+ * that every surface (storefront, admin, account) controls its own chrome.
+ * Storefront chrome lives in `(storefront)/layout.tsx`; admin in
+ * `admin/layout.tsx`.
+ */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${openSans.variable} ${bebasNeue.variable}`}>
       <body className="min-h-screen flex flex-col font-body">
-        <Providers>
-          <AnnouncementStrip />
-          <TopNav />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <BottomTabBar />
-          <CountdownFloatingIsland />
-          <CartDrawer />
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

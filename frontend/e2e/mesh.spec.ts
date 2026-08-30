@@ -17,7 +17,7 @@ test.describe("Mesh module", () => {
     });
   });
 
-  test("3×6 default $140.50; webbing $152.50; no wind slits", async ({ page }, testInfo) => {
+  test("3×6 default $140.50; webbing $164.50; no wind slits", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
     await page.goto("/order/mesh");
     await waitForBuilder(page);
@@ -36,7 +36,7 @@ test.describe("Mesh module", () => {
     await expect(page.getByTestId("dock-panel-webbing")).toContainText(
       "Webbing reinforces the top and bottom welds. Recommended for mesh banners wider than 8 ft.",
     );
-    await expect(page.getByTestId("price-hero").getByTestId("price-total")).toContainText("$152.50");
+    await expect(page.getByTestId("price-hero").getByTestId("price-total")).toContainText("$164.50");
   });
 
   test("rope still clears grommets", async ({ page }, testInfo) => {

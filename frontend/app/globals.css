@@ -38,11 +38,12 @@
     --color-text-dark: #212121;
     --color-text-charcoal: #13181A;
     --color-text-light: #FFFFFF;
-    --color-text-medium: #979797;
+    --color-text-medium: #616161;
     --color-text-on-accent: #FFFFFF;
+    --color-text-disabled: #9E9E9E;
     --color-dark: #212121;
     --color-dark-muted: #979797;
-    --color-muted: #979797;
+    --color-muted: #616161;
     --color-border: #BDBDBD;
     --color-border-subtle: #E0E0E0;
     --color-border-input: #E0E0E0;
@@ -119,12 +120,25 @@
 
   a {
     color: var(--color-link);
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.18em;
+  }
+
+  a:visited {
+    color: var(--color-link-active);
   }
 
   a:hover {
-    text-decoration: underline;
+    color: var(--color-link-hover);
   }
+
+  a:active {
+    color: var(--color-link-active);
+  }
+
+  /* Links inside the primary skip-to-content control and other non-prose
+     chrome opt back out via the Tailwind `no-underline` utility. */
 
   button {
     font-family: inherit;
@@ -136,11 +150,40 @@
     outline-offset: 2px;
   }
 
+  /* Stable skip-link target — don't paint a focus ring around <main>. */
+  #main-content:focus,
+  #main-content:focus-visible {
+    outline: none;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-bebas-neue, "Bebas Neue"), Impact, sans-serif;
     letter-spacing: 0.02em;
     font-weight: 400;
   }
+}
+
+/* Skip-to-main-content control: visually hidden until focused. */
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 9999;
+  transform: translateY(-200%);
+  background: var(--color-bg-strong-accent);
+  color: var(--color-strong-accent-text);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-button);
+  font-weight: 700;
+  font-family: var(--font-open-sans, "Open Sans"), system-ui, sans-serif;
+  text-decoration: none;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--color-bg-lightest);
+  outline-offset: 2px;
 }
 
 .tabular-nums {

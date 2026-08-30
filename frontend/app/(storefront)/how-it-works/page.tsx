@@ -1,18 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { StepIllustration } from "@/components/how-it-works/StepIllustration";
 import { ChevronRight } from "lucide-react";
 
-export const metadata = {
-  title: "How it works — Banners In 48",
-  description: "Pick a banner product, upload artwork, approve the proof, and get 48-hour delivery.",
+export const metadata: Metadata = {
+  title: "How it works",
+  description: "Pick a banner product, upload your artwork, review it at checkout, and get 48-business-hour delivery within the United States.",
+  alternates: { canonical: "/how-it-works" },
 };
 
 const STEPS = [
   { n: 1, kind: "size" as const, title: "Pick your product", body: "Choose HD Banner, mesh, poster, canvas, no-curl, or a stand. Custom products take size next; stands are a fixed 33.5\" × 80\"." },
-  { n: 2, kind: "upload" as const, title: "Upload your artwork", body: "PDF, JPEG, PNG, TIFF, or EPS. We'll show an instant proof — what you upload is what we print." },
-  { n: 3, kind: "proof" as const, title: "Approve your instant proof", body: "Five quick acknowledgements. A 10-minute cancellation window starts after approval." },
-  { n: 4, kind: "delivery" as const, title: "Delivered by noon, guaranteed", body: "FedEx only, anywhere in the US & Canada. If we miss, the $10 shipping fee is refunded." },
+  { n: 2, kind: "upload" as const, title: "Upload your artwork", body: "JPEG, PNG, or PDF. You review the exact file you uploaded before submitting — we print your file as configured." },
+  { n: 3, kind: "proof" as const, title: "Review at checkout", body: "Confirm your uploaded file and configuration when you submit. Delivery timing starts after order submission and manual payment confirmation." },
+  { n: 4, kind: "delivery" as const, title: "Delivered by noon", body: "FedEx delivery within the United States on our 48-business-hour schedule." },
 ] as const;
 
 export default function HowItWorksPage() {
@@ -23,7 +25,7 @@ export default function HowItWorksPage() {
           How it works
         </h1>
         <p className="text-body text-ink-muted text-center mb-2xl max-w-2xl mx-auto">
-          From cart to door in 48 business hours. FedEx only, US &amp; Canada.
+          From order to door in 48 business hours. FedEx only, within the United States.
         </p>
         <ol className="relative mx-auto max-w-4xl space-y-lg before:absolute before:bottom-10 before:left-[55px] before:top-10 before:hidden before:border-l-2 before:border-dashed before:border-line md:before:block">
           {STEPS.map((s) => (

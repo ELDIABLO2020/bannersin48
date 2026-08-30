@@ -7,7 +7,7 @@ import { useCart } from "@/lib/stores/cart";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
-import { RETRACTABLE, MAX_QUANTITY_PER_LINE } from "@bannersin48/shared";
+import { RETRACTABLE, MAX_QUANTITY_PER_LINE, formatInchesWH } from "@bannersin48/shared";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -58,7 +58,7 @@ export default function RetractableConfiguratorPage() {
             <Card className="bg-surface">
               <h2 className="font-bold text-heading-h4 text-ink mb-sm">Specifications</h2>
               <dl className="text-body-sm space-y-xs">
-                <Row label="Size" value={`${RETRACTABLE.widthIn}" × ${RETRACTABLE.heightIn}"`} />
+                <Row label="Size" value={formatInchesWH(RETRACTABLE.widthIn, RETRACTABLE.heightIn)} />
                 <Row label="Hardware" value="Retractable stand + carrying case (included)" />
                 <Row label="Artwork" value="JPEG, PNG, or PDF" />
                 <Row label="Delivery" value="By 12:00 PM, 48 business hours" />
@@ -151,7 +151,7 @@ export default function RetractableConfiguratorPage() {
                       billableSqFt: line.billableSqFt,
                       billableDims: line.billableDims,
                       display: {
-                        requestedLabel: `${RETRACTABLE.widthIn}" × ${RETRACTABLE.heightIn}"`,
+                        requestedLabel: formatInchesWH(RETRACTABLE.widthIn, RETRACTABLE.heightIn),
                         billableLabel: "Fixed size",
                       },
                     });

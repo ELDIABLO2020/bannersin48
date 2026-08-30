@@ -1,16 +1,17 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { useConfigurator } from "./configurator";
+import { useConfigurator, hydrateBuilderSession } from "./configurator";
+import { DEFAULT_FINISHING } from "@bannersin48/shared";
 
 describe("useConfigurator — multi-sign + finishing", () => {
   beforeEach(() => {
     useConfigurator.getState().reset();
   });
 
-  it("starts in vinyl mode, 13 oz, 4x8, qty 1, one sign", () => {
+  it("starts in vinyl mode, 13 oz, 4×8 landscape, qty 1, one sign", () => {
     const s = useConfigurator.getState();
     expect(s.productId).toBe("HD_BANNER");
     expect(s.material).toBe("VINYL_13OZ_SINGLE");
-    expect(s.size).toEqual({ widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 });
+    expect(s.size).toEqual({ widthFt: 8, widthIn: 0, heightFt: 4, heightIn: 0 });
     expect(s.quantity).toBe(1);
     expect(s.finishing.welding).toBe(true);
     expect(s.finishing.grommets).toBe(true);
@@ -68,13 +69,13 @@ describe("useConfigurator — multi-sign + finishing", () => {
     expect(s.size.widthFt).toBe(0);
   });
 
-  it("restores a valid default size when returning to vinyl", () => {
+  it("restores a valid landscape default size when returning to vinyl", () => {
     useConfigurator.getState().setProduct("RETRACTABLE");
     useConfigurator.getState().setProduct("HD_BANNER");
     expect(useConfigurator.getState().size).toEqual({
-      widthFt: 4,
+      widthFt: 8,
       widthIn: 0,
-      heightFt: 8,
+      heightFt: 4,
       heightIn: 0,
     });
   });
@@ -141,5 +142,51 @@ describe("useConfigurator — multi-sign + finishing", () => {
     expect(f.grommetPreset).toBe("CUSTOM");
     expect(f.grommetPoints).toHaveLength(2);
     expect(f.grommets).toBe(true);
+  });
+});
+
+describe("hydrateBuilderSession — dimension-semantics migration", () => {
+  const legacySign = {
+    id: "sign_legacy",
+    productId: "HD_BANNER",
+    size: { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 },
+    material: "VINYL_13OZ_SINGLE",
+    finishing: DEFAULT_FINISHING,
+    quantity: 1,
+    artworkId: null,
+    artworkFileName: null,
+    artworkPreviewUrl: null,
+    fitMode: "fit",
+    aspectLocked: true,
+  };
+
+  it("discards legacy unversioned drafts (portrait-axis convention)", () => {
+    const raw = JSON.stringify({ signs: [legacySign], activeSignId: "sign_legacy" });
+    expect(hydrateBuilderSession(raw)).toBeNull();
+  });
+
+  it("discards v1 drafts below the dimension-semantics version", () => {
+    const raw = JSON.stringify({
+      version: 1,
+      signs: [legacySign],
+      activeSignId: "sign_legacy",
+    });
+    expect(hydrateBuilderSession(raw)).toBeNull();
+  });
+
+  it("accepts v2 drafts and normalizes missing fields", () => {
+    const raw = JSON.stringify({
+      version: 2,
+      signs: [{ ...legacySign, id: "sign_v2", size: { widthFt: 8, widthIn: 0, heightFt: 4, heightIn: 0 } }],
+      activeSignId: "sign_v2",
+    });
+    const session = hydrateBuilderSession(raw);
+    expect(session).not.toBeNull();
+    expect(session!.signs[0]!.size).toEqual({ widthFt: 8, widthIn: 0, heightFt: 4, heightIn: 0 });
+    expect(session!.signs[0]!.finishing.webbing).toBe(false);
+  });
+
+  it("returns null for malformed JSON", () => {
+    expect(hydrateBuilderSession("{not json")).toBeNull();
   });
 });

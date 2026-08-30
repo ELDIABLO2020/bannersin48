@@ -4,7 +4,7 @@ import { Suspense, useEffect } from "react";
 import { useParams, useSearchParams, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { productBySlug } from "@bannersin48/shared";
+import { productBySlug, resolveSizeParams } from "@bannersin48/shared";
 import { useConfigurator } from "@/lib/stores/configurator";
 import { BuilderShell } from "@/components/builder/BuilderShell";
 import { ItemRail } from "@/components/builder/ItemRail";
@@ -48,13 +48,14 @@ function ProductBuilder() {
   useEffect(() => {
     setProduct(config.id);
     if (config.sizeMode === "custom") {
-      const w = search.get("w");
-      const h = search.get("h");
-      if (w && h) {
-        const wf = parseInt(w, 10);
-        const hf = parseInt(h, 10);
-        if (!Number.isNaN(wf) && !Number.isNaN(hf)) applySize(wf, hf);
-      }
+      // Canonical `width`/`height` params; legacy `w`/`h` are migrated (axes swapped).
+      const resolved = resolveSizeParams({
+        width: search.get("width"),
+        height: search.get("height"),
+        w: search.get("w"),
+        h: search.get("h"),
+      });
+      if (resolved) applySize(resolved.widthFt, resolved.heightFt);
     }
     if (search.get("picker") === "1") {
       setPickerOpen(true);

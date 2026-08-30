@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCart, cartTotals } from "@/lib/stores/cart";
+import { useCart, cartTotals, canCheckout, configOf } from "@/lib/stores/cart";
+import { requoteLine, retryLine, revertLine, revalidateQuotes } from "@/lib/cart/requote";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
@@ -12,10 +14,15 @@ import { CartLineRow } from "@/components/cart/CartLineRow";
 export default function CartPage() {
   const lines = useCart((s) => s.lines);
   const removeLine = useCart((s) => s.removeLine);
-  const updateLine = useCart((s) => s.updateLine);
   const router = useRouter();
 
+  // Revalidate expired quotes when the cart page loads (P0-01 / Wave 3).
+  useEffect(() => {
+    void revalidateQuotes();
+  }, []);
+
   const totals = cartTotals(lines);
+  const checkoutReady = canCheckout(lines);
 
   if (lines.length === 0) {
     return (
@@ -46,7 +53,8 @@ export default function CartPage() {
           Your cart
         </h1>
         <p className="text-body text-ink-muted mb-2xl">
-          Review your configuration. We&rsquo;ll save it while you sign in at checkout.
+          Review your configuration. Prices are quoted by the server and refresh
+          automatically if a quote expires. We&rsquo;ll save it while you sign in at checkout.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
@@ -56,7 +64,12 @@ export default function CartPage() {
                 key={l.id}
                 line={l}
                 onRemove={removeLine}
-                onUpdateQty={(id, quantity) => updateLine(id, { quantity })}
+                onUpdateQty={(id, quantity) => {
+                  const line = lines.find((ln) => ln.id === id);
+                  if (line) void requoteLine(id, { ...configOf(line), quantity });
+                }}
+                onRetry={(id) => void retryLine(id)}
+                onRevert={(id) => revertLine(id)}
               />
             ))}
           </div>
@@ -67,16 +80,23 @@ export default function CartPage() {
               <dl className="text-sm space-y-xs">
                 <Row label="Subtotal" value={formatUsd(totals.subtotal)} />
                 <Row label="Shipping" value={formatUsd(totals.shipping)} />
+                <Row label="Tax" value={formatUsd(totals.tax)} />
                 <div className="border-t border-line my-sm" />
-                <Row label="Total before tax" value={formatUsd(totals.total)} bold />
+                <Row label="Total" value={`${formatUsd(totals.total)} USD`} bold />
               </dl>
+              {!checkoutReady && (
+                <p className="text-body-sm text-ink-muted mt-sm" role="status">
+                  Updating prices — checkout unlocks once every line has a confirmed quote.
+                </p>
+              )}
               <Button
                 variant="cta"
                 size="block"
                 className="w-full mt-lg"
+                disabled={!checkoutReady}
                 onClick={() => router.push("/checkout")}
               >
-                Proceed to checkout
+                {checkoutReady ? "Proceed to checkout" : "Updating price…"}
               </Button>
               <Link
                 href="/order"

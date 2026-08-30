@@ -31,5 +31,31 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
         working-directory: frontend
 
-      - name: CI gate
+      - name: CI gate (typecheck, lint, test, build, MSW e2e + axe)
         run: npm run ci
+
+  # Wave 11 content/perf gate: production unsafe-content scan, broken
+  # link/image crawl, metadata snapshot, console/network error assertions.
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: "true"
+      AUDIT_PORT: "3100"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+
+      - name: Audit gate (content scan, link/image crawl, metadata, console/network)
+        run: npm run audit:ci

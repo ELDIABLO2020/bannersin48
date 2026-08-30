@@ -5,17 +5,21 @@ import { formatUsd } from "@/lib/utils/format";
 import { materialLabel } from "./builderRules";
 import { RateMatrix } from "./RateMatrix";
 import { useBuilderQuote } from "./useBuilderQuote";
-import { PRODUCTS, SHIPPING_FLAT_PER_UNIT_USD } from "@bannersin48/shared";
+import {
+  PRODUCTS,
+  SHIPPING_FLAT_PER_UNIT_USD,
+  formatDimensionsHW,
+  formatInchesWH,
+} from "@bannersin48/shared";
 
+/** Industry-facing "height × width" label, e.g. "4′ H × 8′ W". */
 function formatSizeLabel(size: {
   widthFt: number;
   widthIn: number;
   heightFt: number;
   heightIn: number;
 }): string {
-  const w = size.widthIn > 0 ? `${size.widthFt}′${size.widthIn}″` : `${size.widthFt}′`;
-  const h = size.heightIn > 0 ? `${size.heightFt}′${size.heightIn}″` : `${size.heightFt}′`;
-  return `${w} × ${h}`;
+  return formatDimensionsHW(size);
 }
 
 function specsSubtitle(materialLabelText: string, sizeLabel: string): string {
@@ -37,8 +41,8 @@ export function StageHeader() {
   const subtitle =
     productId === "HD_BANNER"
       ? specsSubtitle(materialLabel(material), sizeLabel)
-      : config.sizeMode === "fixed"
-        ? `${config.title}, 33.5" × 80"`
+      : config.sizeMode === "fixed" && config.fixedSizeIn
+        ? `${config.title}, ${formatInchesWH(config.fixedSizeIn.widthIn, config.fixedSizeIn.heightIn)}`
         : `${materialLabel(material)}, ${sizeLabel}`;
 
   return (

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,15 +8,16 @@ import { placeholders, type PlaceholderAsset } from "@/content/placeholders";
 import { ChevronRight, Mail } from "lucide-react";
 import { catalogFilterHref, productOrderHref, PRODUCTS, UPLOAD_REJECT } from "@bannersin48/shared";
 
-export const metadata = {
-  title: "Help center — Banners In 48",
-  description: "Get help choosing a banner product and placing your order. We support via email — no inbound phone calls.",
+export const metadata: Metadata = {
+  title: "Help center",
+  description: "Get help choosing a banner product and placing your order. Email support is available.",
+  alternates: { canonical: "/help" },
 };
 
 const FAQS = [
   {
     q: "Which banner do I need?",
-    a: `Windy fences and construction → Mesh. Everyday hanging banners → HD Banner. Indoor short-term POP → Poster. Must lay flat → No-Curl. Stretch and frame → Canvas. Need hardware → Econostand or Retractable.`,
+    a: "Windy fences and construction → Mesh. Everyday hanging banners → HD Banner. Indoor short-term POP → Poster. Must lay flat → No-Curl. Stretch and frame → Canvas. Need hardware → Econostand or Retractable.",
   },
   {
     q: "What file types do you accept?",
@@ -29,9 +31,15 @@ const FAQS = [
     q: "Are there size limits besides 10' × 10'?",
     a: "Yes. Canvas shorter side max 49\". HDPE and Poster 52\". No-Curl 35\" and a 12\" minimum. Stands are a fixed 33.5\" × 80\".",
   },
-  { q: "Can I cancel my order?", a: "Yes — for 10 minutes after proof approval. After that, production starts." },
-  { q: "What if my banner arrives late?", a: "We refund the $10 shipping fee for any banner that misses the 48-hour promise for reasons on our side." },
-  { q: "Do you ship outside the US &amp; Canada?", a: "Not yet. Expansion is on the roadmap." },
+  {
+    q: "Can I cancel my order?",
+    a: "You can cancel before your order is marked as paid and production begins. Email support if you need to cancel.",
+  },
+  {
+    q: "What if my banner arrives late?",
+    a: "Delivery timing begins after order submission and manual payment confirmation. If your banner misses that estimate, email support and we'll review your order.",
+  },
+  { q: "Do you ship outside the United States?", a: "No — V1 ships within the United States only." },
 ];
 
 const HELP_NEEDS: ReadonlyArray<{
@@ -86,7 +94,7 @@ export default function HelpPage() {
           Help center
         </h1>
         <p className="text-body text-ink-muted text-center mb-2xl max-w-2xl mx-auto">
-          We support via email. No inbound phone calls.
+          We support by email — reach us at support@bannersin48.com.
         </p>
 
         <section className="mb-2xl" aria-labelledby="which-banner-h">
@@ -122,7 +130,7 @@ export default function HelpPage() {
           {FAQS.map((f) => (
             <li key={f.q} className="bg-surface rounded-feature p-md border border-line">
               <p className="font-bold text-ink">{f.q}</p>
-              <p className="text-body-sm text-ink-muted mt-xs" dangerouslySetInnerHTML={{ __html: f.a }} />
+              <p className="text-body-sm text-ink-muted mt-xs">{f.a}</p>
             </li>
           ))}
         </ul>

@@ -76,12 +76,14 @@ export const tailwindPreset: Partial<Config> = {
           charcoal: colors.textCharcoal,
           muted: colors.textMedium,
           light: colors.textLight,
+          disabled: colors.disabledText,
         },
         dark: {
           DEFAULT: colors.dark,
           muted: colors.darkMuted,
         },
         muted: colors.muted,
+        disabled: colors.disabledText,
 
         // Lines & dividers
         line: {

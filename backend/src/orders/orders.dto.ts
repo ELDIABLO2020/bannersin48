@@ -12,6 +12,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from "class-validator";
 import { DimensionsDto, FinishingDto } from "../pricing/quote-request.dto";
@@ -83,16 +84,20 @@ export class ShipToDto {
   @IsIn(["US"])
   country!: "US";
 
-  @IsOptional() @IsString() @MaxLength(32)
+  @ValidateIf((_o: object, v: unknown) => v !== undefined && v !== null && v !== "") @IsString() @MaxLength(32)
   phone?: string;
 
-  @IsOptional() @IsEmail()
+  @ValidateIf((_o: object, v: unknown) => v !== undefined && v !== null && v !== "") @IsEmail()
   email?: string;
 }
 
 export class CreateOrderDto {
   @IsEmail()
   email!: string;
+
+  /** Client-generated submission key; replaying the same key returns the existing order. */
+  @IsOptional() @IsString() @MinLength(8) @MaxLength(128)
+  idempotencyKey?: string;
 
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

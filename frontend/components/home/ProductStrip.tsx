@@ -3,9 +3,15 @@ import { ArrowRight } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
 import { catalogImage } from "@/content/catalogImages";
-import { PRODUCTS, CATALOG_NAV_PRODUCTS, productOrderHref } from "@bannersin48/shared";
+import { PRODUCTS, CATALOG_NAV_PRODUCTS, productOrderHref, type ProductId } from "@bannersin48/shared";
+
+/** Four featured products on the homepage; the full catalog lives on /order. */
+const FEATURED: ReadonlyArray<ProductId> = ["HD_BANNER", "MESH", "POSTER", "RETRACTABLE"];
 
 export function ProductStrip() {
+  const featured = CATALOG_NAV_PRODUCTS.filter((id) =>
+    (FEATURED as readonly string[]).includes(id),
+  );
   return (
     <section id="products" className="bg-surface border-b border-line" aria-labelledby="products-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
@@ -26,12 +32,12 @@ export function ProductStrip() {
             href="/order"
             className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
           >
-            Compare all products
+            View all products
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </ScrollReveal>
         <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
-          {CATALOG_NAV_PRODUCTS.map((id) => {
+          {featured.map((id) => {
             const product = PRODUCTS[id];
             return (
               <VisualCategoryCard

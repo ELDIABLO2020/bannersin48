@@ -82,7 +82,8 @@ const DOCK_NONE: ProductDockFlags = {
   windSlits: false,
 };
 
-const SIZE_4X8 = { widthFt: 4, widthIn: 0, heightFt: 8, heightIn: 0 };
+// Locked D2: "4′ H × 8′ W" = width (horizontal) 8, height (vertical) 4.
+const SIZE_4X8 = { widthFt: 8, widthIn: 0, heightFt: 4, heightIn: 0 };
 const SIZE_FIXED = { widthFt: 0, widthIn: 0, heightFt: 0, heightIn: 0 };
 const FIXED_33_5_X_80 = { widthIn: 33.5, heightIn: 80 };
 
@@ -237,7 +238,8 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     printSides: "singleOnly",
     dock: { ...DOCK_NONE },
     defaultFinishing: { ...NONE_FINISHING },
-    defaultSize: { widthFt: 2, widthIn: 0, heightFt: 6, heightIn: 0 },
+    // Locked D2: "2′ H × 6′ W" = width 6, height 2.
+    defaultSize: { widthFt: 6, widthIn: 0, heightFt: 2, heightIn: 0 },
     limits: { minAxisIn: 12, maxShortSideIn: 35, maxBillableFt: 10 },
     hubCopy: {
       commonUses: ["Trade shows", "Retail promotion", "Posters that must lay flat"],

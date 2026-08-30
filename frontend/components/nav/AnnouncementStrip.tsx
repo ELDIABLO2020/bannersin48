@@ -35,7 +35,7 @@ export function AnnouncementStrip() {
     now === null ? { padded: "-- : -- : --" } : formatCountdown(remainingMs);
 
   return (
-    <div className="bg-darkest text-white text-sm">
+    <div className="bg-darkest text-white text-sm" role="region" aria-label="Announcement">
       {isInternalManualCommerce && (
         <div
           role="status"

@@ -43,23 +43,19 @@ const FAQS: ReadonlyArray<{ q: string; a: ReactNode }> = [
   },
   {
     q: "When will my banner arrive?",
-    a: "By 12:00 PM noon on the guaranteed delivery date — that's 48 business hours after your order and proof approval, anywhere in the US or Canada. FedEx only; we pick the service that meets the guarantee.",
+    a: "By 12:00 PM noon on the estimated delivery date — 48 business hours after your order is submitted and manual payment is confirmed, anywhere in the United States. FedEx only; we pick the service that meets the estimate.",
   },
   {
-    q: "What if I miss the 9 PM cutoff?",
-    a: "Your order rolls into the next cutoff cycle automatically. The countdown on the homepage and configurator always shows the current window so you see the new delivery date in real time.",
+    q: "When does delivery timing start?",
+    a: "After you submit your order and we confirm manual payment. The countdown shows the current cutoff window, and delivery timing follows business hours.",
   },
   {
     q: "What file types can I upload?",
-    a: "PDF, JPEG, PNG, TIFF, and EPS. We print exactly what you upload after proof approval — no manual re-proofing.",
+    a: "JPEG, PNG, and PDF. We print exactly the file you upload, as configured — review it at checkout before you submit.",
   },
   {
     q: "What if my artwork has a problem?",
-    a: "Upload is rejected client-side for unsupported types and oversize files. If we spot a quality issue in the proof stage, the proof step pauses the SLA until the file is fixed. Otherwise the timer doesn't start until you approve.",
-  },
-  {
-    q: "What does the guarantee cover?",
-    a: "If we miss the 48-business-hour delivery for reasons on our side, the $10 shipping charge for that banner is refunded automatically. The order total is not affected — just the shipping fee.",
+    a: "Uploads are checked for supported types and file size. You review your artwork and configuration at checkout before submitting, so any issue is caught before production.",
   },
 ];
 

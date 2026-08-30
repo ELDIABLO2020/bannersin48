@@ -18,25 +18,19 @@ const STEPS = [
     n: 2,
     icon: FileUp,
     title: "Upload artwork",
-    body: "Submit a PDF, JPEG, PNG, TIFF, or EPS file and review the proof before production starts.",
+    body: "Submit a JPEG, PNG, or PDF file and review it at checkout before production starts.",
   },
   {
     n: 3,
     icon: Printer,
-    title: "We print and finish",
-    body: "Your banner is printed, checked, packed, and prepared for fast FedEx delivery.",
-  },
-  {
-    n: 4,
-    icon: Truck,
-    title: "Delivered fast",
-    body: "The delivery promise and cutoff window stay visible before you place the order.",
+    title: "We print and ship",
+    body: "Your banner is printed, checked, packed, and shipped FedEx — the delivery estimate stays visible before you order.",
   },
 ] as const;
 
 const PATH_PILLS = [
   { icon: Clock, label: "Order by cutoff" },
-  { icon: FileCheck2, label: "Approve proof" },
+  { icon: FileCheck2, label: "Review artwork" },
   { icon: Truck, label: "Ships in 48 hrs" },
 ] as const;
 
@@ -58,8 +52,8 @@ export function HowItWorks() {
               How it works
             </h2>
             <p className="mt-sm text-ink-muted max-w-lg font-body">
-              Order by 9 PM ET, approve your proof, and count on FedEx delivery in 48 business
-              hours across the US and Canada.
+              Submit your order, confirm manual payment, and count on FedEx delivery in 48
+              business hours within the United States.
             </p>
 
             <ul className="mt-xl flex flex-wrap gap-md">
@@ -98,7 +92,7 @@ export function HowItWorks() {
               />
             </div>
             <div className="mt-md flex justify-between text-xs text-white/70 font-body px-sm">
-              <span>Proof approved</span>
+              <span>Artwork reviewed</span>
               <span className="text-strong-accent-on-dark font-semibold">In production</span>
             </div>
           </div>
@@ -106,11 +100,11 @@ export function HowItWorks() {
 
         <ScrollReveal
           as="ol"
-          className="relative mt-2xl grid grid-cols-1 gap-lg md:grid-cols-4"
+          className="relative mt-2xl grid grid-cols-1 gap-lg md:grid-cols-3"
           selector=".hw-step"
         >
           <span
-            className="absolute left-[12.5%] right-[12.5%] top-10 hidden border-t border-dashed border-line md:block"
+            className="absolute left-[16.5%] right-[16.5%] top-10 hidden border-t border-dashed border-line md:block"
             aria-hidden
           />
           {STEPS.map((step) => {
@@ -142,12 +136,12 @@ export function HowItWorks() {
               <p className="text-sm font-semibold text-strong-accent">Production promise</p>
               <p className="mt-xs max-w-2xl text-ink-muted">
                 The workflow is intentionally narrow: pick a product, set size, upload artwork,
-                approve the proof, then we produce and ship.
+                review it at checkout, then we produce and ship.
               </p>
             </div>
             <div className="flex items-center gap-sm text-sm font-bold text-ink">
               <CheckCircle2 className="h-5 w-5 text-ink-muted" aria-hidden />
-              Proof approval starts the clock
+              Submission and payment confirmation start the clock
             </div>
           </div>
         </ScrollReveal>

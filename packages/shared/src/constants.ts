@@ -204,6 +204,10 @@ export const HUB_SUBTITLE = "Pick a product to start building. Every banner ship
 /**
  * Standard quick-pick sizes (13 oz, single-sided, qty 1, no add-ons, +$10 shipping).
  * Source: bannersin48-final-website-structured-plan.md §7.3
+ *
+ * Locked D2 convention: labels are industry-facing "height × width" and the
+ * stored `widthFt`/`heightFt` follow the canonical semantics (width = horizontal,
+ * height = vertical). So "4′ H × 8′ W" is stored as widthFt 8 / heightFt 4.
  */
 export interface PopularSize {
   id: string;
@@ -217,14 +221,14 @@ export interface PopularSize {
 }
 
 export const POPULAR_SIZES: ReadonlyArray<PopularSize> = [
-  { id: "2x4", widthFt: 2, heightFt: 4, label: "2' × 4'", sqFt: 8, bannerPrice: 32, shipping: 10, total: 42 },
-  { id: "2x6", widthFt: 2, heightFt: 6, label: "2' × 6'", sqFt: 12, bannerPrice: 48, shipping: 10, total: 58 },
-  { id: "2x8", widthFt: 2, heightFt: 8, label: "2' × 8'", sqFt: 16, bannerPrice: 64, shipping: 10, total: 74 },
-  { id: "3x6", widthFt: 3, heightFt: 6, label: "3' × 6'", sqFt: 18, bannerPrice: 72, shipping: 10, total: 82 },
-  { id: "3x8", widthFt: 3, heightFt: 8, label: "3' × 8'", sqFt: 24, bannerPrice: 96, shipping: 10, total: 106 },
-  { id: "4x6", widthFt: 4, heightFt: 6, label: "4' × 6'", sqFt: 24, bannerPrice: 96, shipping: 10, total: 106 },
-  { id: "4x8", widthFt: 4, heightFt: 8, label: "4' × 8'", sqFt: 32, bannerPrice: 128, shipping: 10, total: 138 },
-  { id: "5x8", widthFt: 5, heightFt: 8, label: "5' × 8'", sqFt: 40, bannerPrice: 160, shipping: 10, total: 170 },
-  { id: "5x10", widthFt: 5, heightFt: 10, label: "5' × 10'", sqFt: 50, bannerPrice: 200, shipping: 10, total: 210 },
-  { id: "10x10", widthFt: 10, heightFt: 10, label: "10' × 10'", sqFt: 100, bannerPrice: 400, shipping: 10, total: 410 },
+  { id: "2x4", widthFt: 4, heightFt: 2, label: "2′ H × 4′ W", sqFt: 8, bannerPrice: 32, shipping: 10, total: 42 },
+  { id: "2x6", widthFt: 6, heightFt: 2, label: "2′ H × 6′ W", sqFt: 12, bannerPrice: 48, shipping: 10, total: 58 },
+  { id: "2x8", widthFt: 8, heightFt: 2, label: "2′ H × 8′ W", sqFt: 16, bannerPrice: 64, shipping: 10, total: 74 },
+  { id: "3x6", widthFt: 6, heightFt: 3, label: "3′ H × 6′ W", sqFt: 18, bannerPrice: 72, shipping: 10, total: 82 },
+  { id: "3x8", widthFt: 8, heightFt: 3, label: "3′ H × 8′ W", sqFt: 24, bannerPrice: 96, shipping: 10, total: 106 },
+  { id: "4x6", widthFt: 6, heightFt: 4, label: "4′ H × 6′ W", sqFt: 24, bannerPrice: 96, shipping: 10, total: 106 },
+  { id: "4x8", widthFt: 8, heightFt: 4, label: "4′ H × 8′ W", sqFt: 32, bannerPrice: 128, shipping: 10, total: 138 },
+  { id: "5x8", widthFt: 8, heightFt: 5, label: "5′ H × 8′ W", sqFt: 40, bannerPrice: 160, shipping: 10, total: 170 },
+  { id: "5x10", widthFt: 10, heightFt: 5, label: "5′ H × 10′ W", sqFt: 50, bannerPrice: 200, shipping: 10, total: 210 },
+  { id: "10x10", widthFt: 10, heightFt: 10, label: "10′ × 10′", sqFt: 100, bannerPrice: 400, shipping: 10, total: 410 },
 ];

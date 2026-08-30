@@ -53,16 +53,21 @@ export const colors = {
 
   // ── Dark text & footer backgrounds ─────────────────────────────────────
   dark: "#212121",
+  // Muted neutral for dark surfaces only (passes AA against #212121 / #100F0D).
   darkMuted: "#979797",
   darkest: "#000000",
 
   textDark: "#212121",
   textCharcoal: "#13181A",
   textLight: "#FFFFFF",
-  textMedium: "#979797",
+  // AA-safe readable secondary text (~6.2:1 on white, ~5.7:1 on #F5F5F5).
+  textMedium: "#616161",
   textOnDark: "#FFFFFF",
   textOnAccent: "#FFFFFF",
-  muted: "#979797",
+  muted: "#616161",
+  // Decorative/disabled-only neutral. Fails AA on white by design — reserve it
+  // for disabled/placeholder states, never for readable text or form labels.
+  disabledText: "#9E9E9E",
 
   // ── Dark surfaces ──────────────────────────────────────────────────────
   inkBlack: "#000000",

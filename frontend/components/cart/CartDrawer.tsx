@@ -5,7 +5,8 @@ import { createPortal } from "react-dom";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ShoppingBag, X } from "lucide-react";
-import { useCart, cartTotals } from "@/lib/stores/cart";
+import { useCart, cartTotals, canCheckout, configOf } from "@/lib/stores/cart";
+import { requoteLine, retryLine, revertLine } from "@/lib/cart/requote";
 import { useCartDrawer } from "@/lib/stores/cart-drawer";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
@@ -18,7 +19,6 @@ export function CartDrawer() {
   const close = useCartDrawer((s) => s.close);
   const lines = useCart((s) => s.lines);
   const removeLine = useCart((s) => s.removeLine);
-  const updateLine = useCart((s) => s.updateLine);
   const router = useRouter();
 
   const [mounted, setMounted] = useState(false); // portal target ready
@@ -118,6 +118,10 @@ export function CartDrawer() {
 
   const totals = cartTotals(lines);
   const count = lines.reduce((acc, l) => acc + l.quantity, 0);
+  const checkoutReady = canCheckout(lines);
+  const hasRefreshIssue = lines.some(
+    (l) => l.quoteState === "refreshing" || l.quoteState === "stale" || l.quoteState === "error",
+  );
   const transitionClass = reducedMotion ? "" : "transition-transform duration-300 ease-out";
 
   function goToCheckout() {
@@ -191,7 +195,12 @@ export function CartDrawer() {
                   line={l}
                   bare
                   onRemove={removeLine}
-                  onUpdateQty={(id, quantity) => updateLine(id, { quantity })}
+                  onUpdateQty={(id, quantity) => {
+                    const line = lines.find((ln) => ln.id === id);
+                    if (line) void requoteLine(id, { ...configOf(line), quantity });
+                  }}
+                  onRetry={(id) => void retryLine(id)}
+                  onRevert={(id) => revertLine(id)}
                 />
               </div>
             ))}
@@ -217,20 +226,30 @@ export function CartDrawer() {
                 <dt>Shipping</dt>
                 <dd className="tabular-nums">{formatUsd(totals.shipping)}</dd>
               </div>
+              <div className="flex justify-between text-ink-muted">
+                <dt>Tax</dt>
+                <dd className="tabular-nums">{formatUsd(totals.tax)}</dd>
+              </div>
               <div className="border-t border-line my-sm" />
               <div className="flex justify-between font-bold text-ink">
-                <dt>Total before tax</dt>
-                <dd className="tabular-nums">{formatUsd(totals.total)}</dd>
+                <dt>Total</dt>
+                <dd className="tabular-nums">{formatUsd(totals.total)} USD</dd>
               </div>
             </dl>
+            {hasRefreshIssue && (
+              <p className="text-body-sm text-ink-muted mt-sm" role="status">
+                Updating prices — checkout unlocks when every line is confirmed.
+              </p>
+            )}
             <Button
               type="button"
               variant="cta"
               size="block"
               className="w-full mt-md"
+              disabled={!checkoutReady}
               onClick={goToCheckout}
             >
-              Checkout · {formatUsd(totals.total)}
+              {checkoutReady ? `Checkout · ${formatUsd(totals.total)}` : "Updating price…"}
             </Button>
           </div>
         )}

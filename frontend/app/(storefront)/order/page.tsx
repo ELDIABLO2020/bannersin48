@@ -4,17 +4,20 @@ import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ChevronRight, X } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { getApiClient } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CategoryCard } from "@/components/order/CategoryCard";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { formatUsd } from "@/lib/utils/format";
 import {
   HUB_TITLE,
   HUB_SUBTITLE,
   PRODUCTS,
   CATALOG_NEEDS,
   CATALOG_COMPARISONS,
+  SHIPPING_FLAT_PER_UNIT_USD,
   catalogFilterHref,
   catalogFilterLabel,
   catalogFilterProductIds,
@@ -48,6 +51,67 @@ function HubSkeleton() {
         <HubCardSkeletonGrid />
       </div>
     </div>
+  );
+}
+
+interface DecisionFacts {
+  fromPrice: number;
+  bestUse: string;
+  environment: string;
+  maxSize: string;
+}
+
+/**
+ * Authoritative, server-derivable decision facts for a product card. Values
+ * come from the shared product catalog (the same source the quote/catalog API
+ * serves), not from a client-only guess.
+ */
+function productDecisionFacts(id: ProductId): DecisionFacts {
+  const p = PRODUCTS[id];
+  const shipping = SHIPPING_FLAT_PER_UNIT_USD;
+
+  let fromPrice: number;
+  if (p.sizeMode === "fixed") {
+    fromPrice = (p.flatPriceUsd ?? 0) + shipping;
+  } else {
+    const minRate = Math.min(...p.materials.map((m) => p.ratePerSqFt(m)));
+    // Minimum orderable size is 12" × 12" = 1 billable square foot.
+    fromPrice = minRate * 1 + shipping;
+  }
+
+  const maxSize =
+    p.sizeMode === "fixed"
+      ? `Fixed ${p.fixedSizeIn?.widthIn ?? 33.5}" × ${p.fixedSizeIn?.heightIn ?? 80}"`
+      : p.limits.maxShortSideIn
+        ? `Shorter side ≤ ${p.limits.maxShortSideIn}"`
+        : `Up to ${p.limits.maxBillableFt}' × ${p.limits.maxBillableFt}'`;
+
+  return {
+    fromPrice,
+    bestUse: p.hubCopy.commonUses[0] ?? p.subtitle,
+    environment: p.hubCopy.environment[0] ?? "Indoor and outdoor",
+    maxSize,
+  };
+}
+
+function FactsList({ facts }: { facts: DecisionFacts }) {
+  const items: ReadonlyArray<{ label: string; value: string }> = [
+    { label: "From", value: `${formatUsd(facts.fromPrice)} USD` },
+    { label: "Best for", value: facts.bestUse },
+    { label: "Use", value: facts.environment },
+    { label: "Max size", value: facts.maxSize },
+  ];
+  return (
+    <dl className="grid grid-cols-2 gap-x-md gap-y-sm">
+      {items.map((item) => (
+        <div key={item.label}>
+          <dt className="text-xs font-bold uppercase tracking-wide text-ink-muted">
+            {item.label}
+          </dt>
+          <dd className="mt-xs text-body-sm text-ink">{item.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -117,9 +181,17 @@ function OrderHub() {
 
         {hubCards.length > 0 && (
           <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
-            {hubCards.map((card) => (
-              <CategoryCard key={card.slug} card={card} onMoreInfo={setInfoSlug} />
-            ))}
+            {hubCards.map((card) => {
+              const facts = productDecisionFacts(card.id as ProductId);
+              return (
+                <div key={card.slug} className="flex flex-col gap-sm">
+                  <CategoryCard card={card} onMoreInfo={setInfoSlug} />
+                  <div className="rounded-card border border-line bg-surface p-md">
+                    <FactsList facts={facts} />
+                  </div>
+                </div>
+              );
+            })}
           </ScrollReveal>
         )}
 
@@ -161,8 +233,9 @@ function Chip({
     <button
       type="button"
       data-testid={testId}
+      aria-pressed={active}
       onClick={onClick}
-      className={`rounded-pill border px-md py-xs text-sm font-semibold font-body transition-colors ${
+      className={`inline-flex min-h-11 items-center rounded-pill border px-md py-xs text-sm font-semibold font-body transition-colors ${
         active
           ? "border-strong-accent bg-strong-accent text-strong-accent-text"
           : "border-line bg-surface text-ink hover:border-link hover:text-link"
@@ -186,7 +259,7 @@ function ComparisonStrip() {
             <ul className="space-y-xs text-body-sm text-ink-muted">
               {row.items.map((item) => (
                 <li key={item.productId}>
-                  <Link href={productOrderHref(item.productId)} className="text-link no-underline hover:underline">
+                  <Link href={productOrderHref(item.productId)} className="text-link hover:underline">
                     {PRODUCTS[item.productId].title}
                   </Link>
                   {" — "}
@@ -208,40 +281,30 @@ function MoreInfoModal({ slug, onClose }: { slug: string; onClose: () => void })
   });
 
   return (
-    <div
-      data-testid="hub-info-modal"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink/50 p-md"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="hub-info-title"
-    >
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-feature border border-line bg-surface shadow-lg">
-        <div className="flex items-center justify-between border-b border-line px-md py-sm">
-          <h2 id="hub-info-title" className="font-display text-heading-h4 text-ink">
-            {data?.title ?? "More information"}
-          </h2>
-          <button type="button" aria-label="Close" onClick={onClose} className="p-1 text-ink-muted hover:text-ink">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="p-md space-y-md">
-          {isFetching && <p className="text-sm text-ink-muted">Loading…</p>}
-          {data && (
-            <>
-              <p className="text-body text-ink-muted">{data.subtitle}</p>
+    <Dialog open={Boolean(slug)} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        data-testid="hub-info-modal"
+        title={data?.title ?? "More information"}
+        className="p-md sm:p-lg"
+      >
+        {isFetching && <p className="text-sm text-ink-muted">Loading…</p>}
+        {data && (
+          <>
+            <p className="mt-sm text-body text-ink-muted">{data.subtitle}</p>
+            <div className="mt-md space-y-md">
               <Section heading="Common uses" items={data.commonUses} />
               <Section heading="Environment" items={data.environment} />
               <Section heading="Options" items={data.options} />
-              <Link href={`/order/${data.slug}`} onClick={onClose}>
-                <Button variant="cta" size="md">
-                  Order
-                </Button>
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+            </div>
+            <Link href={`/order/${data.slug}`} onClick={onClose} className="no-underline">
+              <Button variant="cta" size="md" className="mt-lg">
+                Order
+              </Button>
+            </Link>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

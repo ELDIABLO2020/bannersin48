@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useConfigurator } from "@/lib/stores/configurator";
-import { dimensionsToInches, generateGrommetPoints, PRODUCTS } from "@bannersin48/shared";
+import {
+  dimensionsToInches,
+  generateGrommetPoints,
+  PRODUCTS,
+  formatDimensionsWH,
+  orientationOf,
+  orientationLabel,
+} from "@bannersin48/shared";
 import { ImageIcon } from "lucide-react";
 import { StageHeader } from "./StageHeader";
 
@@ -108,12 +115,13 @@ export function BuilderStage() {
       >
         {/* Corner */}
         <div className="pointer-events-none flex items-center justify-center border-b border-r border-line bg-surface text-[9px] font-bold uppercase tracking-wide text-ink-muted">
-          ft
+          W/H ft
         </div>
 
-        {/* Horizontal ruler */}
+        {/* Horizontal ruler (width, left-to-right) */}
         <div
           data-testid="stage-ruler-h"
+          aria-label="Width ruler in feet"
           className="pointer-events-none relative overflow-hidden border-b border-line bg-surface"
         >
           {hTicks.map((inch) => {
@@ -134,9 +142,10 @@ export function BuilderStage() {
           })}
         </div>
 
-        {/* Vertical ruler */}
+        {/* Vertical ruler (height, top-to-bottom) */}
         <div
           data-testid="stage-ruler-v"
+          aria-label="Height ruler in feet"
           className="pointer-events-none relative overflow-hidden border-r border-line bg-surface"
         >
           {vTicks.map((inch) => {
@@ -217,10 +226,9 @@ export function BuilderStage() {
                 {PRODUCTS[productId].sizeMode === "fixed" ? (
                   <span data-testid="fixed-size-label">33.5″ × 80″ · Front side</span>
                 ) : (
-                  <>
-                    {size.widthFt}&prime;{size.widthIn > 0 ? `${size.widthIn}&Prime;` : ""} × {size.heightFt}
-                    &prime;{size.heightIn > 0 ? `${size.heightIn}&Prime;` : ""}
-                  </>
+                  <span data-testid="stage-dimension-label">
+                    {formatDimensionsWH(size)} · {orientationLabel(orientationOf(size))}
+                  </span>
                 )}
               </div>
 

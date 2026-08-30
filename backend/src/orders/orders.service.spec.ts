@@ -337,3 +337,49 @@ describe("status machine", () => {
     expect(() => assertTransition("CANCELLED", "RECEIVED")).toThrow(BadRequestException);
   });
 });
+
+describe("delivery commitment persistence (D6)", () => {
+  it("persists the committed delivery date the first time an order enters IN_PROCESSING", async () => {
+    const { service, prisma } = await makeService();
+    prisma.order.findUnique.mockResolvedValueOnce({
+      id: "ord_test1",
+      status: "RECEIVED",
+      paymentStatus: "MARKED_PAID",
+      paymentConfirmedAt: null,
+    });
+
+    await service.transition("ord_test1", "IN_PROCESSING", { actorId: "staff_1", note: "paid" });
+
+    expect(prisma.order.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "IN_PROCESSING",
+          paymentConfirmedAt: expect.any(Date),
+          committedDeliveryDate: "2026-01-07",
+          committedDeliveryDow: "Wednesday",
+        }),
+      }),
+    );
+  });
+
+  it("does not recompute the commitment on later transitions", async () => {
+    const { service, prisma } = await makeService();
+    prisma.order.findUnique.mockResolvedValueOnce({
+      id: "ord_test1",
+      status: "IN_PROCESSING",
+      paymentStatus: "MARKED_PAID",
+      paymentConfirmedAt: new Date("2026-01-05T12:00:00Z"),
+    });
+
+    await service.transition("ord_test1", "ACCEPTED", { actorId: "staff_1" });
+
+    expect(prisma.order.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({
+          paymentConfirmedAt: expect.anything(),
+          committedDeliveryDate: expect.anything(),
+        }),
+      }),
+    );
+  });
+});

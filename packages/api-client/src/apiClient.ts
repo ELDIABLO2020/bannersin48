@@ -18,7 +18,7 @@ import type {
   BannerCatalogCard,
   BannerCatalogInfo,
 } from "./types";
-import type { DeliveryResponse, PopularSize, RegisterInput, LoginInput, User, Address, AddressValidationResult } from "@bannersin48/shared";
+import type { DeliveryResponse, PopularSize, RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, User, Address, AddressValidationResult } from "@bannersin48/shared";
 import { POPULAR_SIZES } from "@bannersin48/shared";
 
 export class ApiClientError extends Error {
@@ -136,6 +136,22 @@ export class ApiClient {
   }
   me(): Promise<User | null> {
     return this.request<User | null>("GET", "/auth/me");
+  }
+
+  /**
+   * Requests a password reset token. Always resolves (the backend never
+   * reveals whether an account exists for the submitted email).
+   */
+  forgotPassword(input: ForgotPasswordInput): Promise<{ ok: true }> {
+    return this.request<{ ok: true }>("POST", "/auth/forgot-password", input);
+  }
+
+  /**
+   * Completes a password reset using the emailed token. Invalid/expired
+   * tokens surface as a 400 `ApiClientError`.
+   */
+  resetPassword(input: ResetPasswordInput): Promise<{ ok: true }> {
+    return this.request<{ ok: true }>("POST", "/auth/reset-password", input);
   }
 
   // --- Artwork ---

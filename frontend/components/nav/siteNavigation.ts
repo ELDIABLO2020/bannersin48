@@ -17,7 +17,7 @@ const PRODUCT_ITEMS: ReadonlyArray<SiteNavigationItem> = [
     label: PRODUCTS[id].title,
   })),
   { href: "/sizes", label: "All Sizes & Pricing" },
-  { href: "/order", label: "Upload Artwork" },
+  { href: "/order", label: "Order a banner" },
   { href: "/help", label: "Artwork Guidelines" },
 ];
 

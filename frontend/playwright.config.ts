@@ -5,6 +5,9 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // The console/network error assertions are part of `npm run audit:ci` (they
+  // target a production server, not the mock-backed e2e web server).
+  testIgnore: /console-errors\.spec\.ts/,
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,

@@ -1,0 +1,44 @@
+name: Release gate
+
+# Wave 11 release definition of done. Runs the canonical customer scenarios
+# against the REAL Nest + Postgres/Redis backend (no mocks) in addition to the
+# MSW-backed suite and the content/performance audit. Trigger manually before
+# a release, or automatically on version tags.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+        working-directory: frontend
+
+      - name: Fast gate (typecheck, lint, test, build, MSW e2e + axe)
+        run: npm run ci
+
+      - name: Content/performance audit
+        run: npm run audit:ci
+
+      - name: Real-backend release E2E (docker Postgres + Redis)
+        run: npm run e2e:real

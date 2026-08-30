@@ -304,7 +304,7 @@ export const handlers = [
         totalLabel: `$${order.total.toFixed(2)}`,
         createdAt: order.createdAt,
         placedAt: order.placedAt,
-        firstLineLabel: order.lines[0] ? `${order.lines[0].billableDims.widthFt}' × ${order.lines[0].billableDims.heightFt}'` : "—",
+        firstLineLabel: order.lines[0] ? `${order.lines[0].billableDims.widthFt}′ × ${order.lines[0].billableDims.heightFt}′` : "—",
         firstLineQty: order.lines[0]?.quantity ?? 0,
         guaranteedDeliveryDate: order.guaranteedDeliveryDate,
       }));

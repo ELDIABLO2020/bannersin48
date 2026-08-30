@@ -162,31 +162,64 @@ function updateActive(
   return { signs, ...mirrorFromSign(active), ...extras };
 }
 
+const BUILDER_STORAGE_KEY = "bi48.builder";
+/** v2 marks the locked D2 dimension semantics (width = horizontal, height = vertical). */
+const BUILDER_SCHEMA_VERSION = 2;
+
 function persistSession(signs: SignDraft[], activeSignId: string) {
   if (typeof sessionStorage === "undefined") return;
   try {
-    sessionStorage.setItem("bi48.builder", JSON.stringify({ signs, activeSignId }));
+    sessionStorage.setItem(
+      BUILDER_STORAGE_KEY,
+      JSON.stringify({ version: BUILDER_SCHEMA_VERSION, signs, activeSignId }),
+    );
   } catch {
     // ignore quota / private mode
   }
 }
 
-function loadSession(): { signs: SignDraft[]; activeSignId: string } | null {
-  if (typeof sessionStorage === "undefined") return null;
+/**
+ * Parse a persisted builder session. Pure and exported so migration behavior is
+ * unit-testable without reloading the module.
+ *
+ * Pre-v2 drafts stored axes under the legacy portrait-default convention. A
+ * silently migrated axis swap could produce the wrong physical banner, so
+ * incompatible drafts are discarded (returns null) and the store boots from the
+ * corrected defaults.
+ */
+export function hydrateBuilderSession(
+  raw: string,
+): { signs: SignDraft[]; activeSignId: string } | null {
   try {
-    const raw = sessionStorage.getItem("bi48.builder");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { signs: SignDraft[]; activeSignId: string };
+    const parsed = JSON.parse(raw) as {
+      version?: unknown;
+      signs?: unknown;
+      activeSignId?: unknown;
+    };
+    if (typeof parsed.version !== "number" || parsed.version < BUILDER_SCHEMA_VERSION) {
+      return null;
+    }
     if (!Array.isArray(parsed.signs) || parsed.signs.length === 0) return null;
-    parsed.signs = parsed.signs.map((s) => ({
+    const signs = (parsed.signs as SignDraft[]).map((s) => ({
       ...s,
       productId: s.productId ?? "HD_BANNER",
       finishing: { ...s.finishing, webbing: s.finishing?.webbing ?? false },
     }));
-    return parsed;
+    const activeSignId =
+      typeof parsed.activeSignId === "string" && signs.some((s) => s.id === parsed.activeSignId)
+        ? (parsed.activeSignId as string)
+        : signs[0]!.id;
+    return { signs, activeSignId };
   } catch {
     return null;
   }
+}
+
+function loadSession(): { signs: SignDraft[]; activeSignId: string } | null {
+  if (typeof sessionStorage === "undefined") return null;
+  const raw = sessionStorage.getItem(BUILDER_STORAGE_KEY);
+  if (!raw) return null;
+  return hydrateBuilderSession(raw);
 }
 
 const initialSign = createDefaultSign({ id: "sign_initial" });

@@ -14,7 +14,7 @@ import { placeholders } from "@/content/placeholders";
 const PROOF_POINTS = [
   { icon: CheckCircle2, label: "Vinyl, mesh, paper, canvas, and stands" },
   { icon: ShieldCheck, label: "Weather-ready finishing where it counts" },
-  { icon: Truck, label: "FedEx delivery across US & Canada" },
+  { icon: Truck, label: "FedEx delivery across the US" },
 ] as const;
 
 export function Hero() {
@@ -65,8 +65,8 @@ export function Hero() {
             </h1>
             <p className="hero-subhead text-lg sm:text-xl text-ink-muted mt-lg max-w-xl leading-relaxed font-body">
               Custom banners printed, finished, shipped, and delivered in 48 business hours.
-              Pick the product, choose your size, upload artwork, approve proof, and keep your
-              event moving.
+              Pick the product, choose your size, upload artwork, and review it at checkout to
+              keep your event moving.
             </p>
             <div className="hero-actions mt-xl flex flex-col sm:flex-row gap-sm">
               <Link href="/order">
@@ -132,7 +132,7 @@ export function Hero() {
                   </li>
                   <li className="flex items-center gap-sm">
                     <CheckCircle2 className="h-4 w-4 text-ink-muted" aria-hidden />
-                    Approve proof
+                    Review at checkout
                   </li>
                   <li className="flex items-center gap-sm">
                     <Truck className="h-4 w-4 text-ink-muted" aria-hidden />

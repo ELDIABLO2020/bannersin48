@@ -72,9 +72,10 @@ test.describe("Vinyl builder", () => {
     expect(stageBox!.width).toBeGreaterThan(slotBox!.width - 2);
     expect(stageBox!.height).toBeGreaterThanOrEqual(280);
     expect(Math.abs(stageBox!.height - slotBox!.height)).toBeLessThan(2);
-    // Default 4×8 creative keeps ~0.5 aspect and is larger than the old capped stage
-    expect(creativeBox!.width / creativeBox!.height).toBeCloseTo(0.5, 1);
-    expect(creativeBox!.height).toBeGreaterThan(200);
+    // Default 4×8 creative is landscape (width 8 / height 4 = 2:1) under the
+    // locked D2 dimension semantics, and is larger than the old capped stage.
+    expect(creativeBox!.width / creativeBox!.height).toBeCloseTo(2, 1);
+    expect(creativeBox!.height).toBeGreaterThan(150);
     expect(dockBox!.y).toBeLessThan(viewport!.height);
   });
 

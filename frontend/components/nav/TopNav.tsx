@@ -113,7 +113,7 @@ export function TopNav() {
         <div className="hidden lg:flex items-center gap-sm ml-auto">
           <Link
             href="/orders"
-            className="text-link text-body px-md py-sm hover:underline font-medium font-body"
+            className="text-link text-body px-md py-sm hover:underline no-underline font-medium font-body"
           >
             Track Order
           </Link>
@@ -172,7 +172,7 @@ export function TopNav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="flex items-center justify-between px-md py-sm text-body text-ink hover:bg-soft-accent rounded-btn font-body"
+                className="flex items-center justify-between px-md py-sm text-body text-ink hover:bg-soft-accent rounded-btn no-underline font-body"
                 onClick={() => setMobileOpen(false)}
               >
                 {l.label}
@@ -199,7 +199,7 @@ export function TopNav() {
             </button>
             <Link
               href="/orders"
-              className="px-md py-sm text-link font-body"
+              className="px-md py-sm text-link no-underline font-body"
               onClick={() => setMobileOpen(false)}
             >
               Track Order

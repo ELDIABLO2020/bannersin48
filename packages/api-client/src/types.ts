@@ -10,6 +10,7 @@ import type {
   ArtworkUploadMeta,
   DeliveryResponse,
   Finishing,
+  ForgotPasswordInput,
   Material,
   Order,
   OrderStatus,
@@ -18,6 +19,7 @@ import type {
   PricingLine,
   RegisterInput,
   LoginInput,
+  ResetPasswordInput,
   User,
 } from "@bannersin48/shared";
 
@@ -137,11 +139,13 @@ export type {
   Address,
   AddressValidationResult,
   DeliveryResponse,
+  ForgotPasswordInput,
   Material,
   Order,
   OrderStatus,
   PaymentStatus,
-  User,
   RegisterInput,
   LoginInput,
+  ResetPasswordInput,
+  User,
 };

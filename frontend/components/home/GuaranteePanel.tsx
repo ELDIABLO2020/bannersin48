@@ -6,9 +6,9 @@ import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 const METRICS = [
   { icon: Clock3, value: "9 PM ET", label: "daily order cutoff" },
-  { icon: Truck, value: "48 hr", label: "business-hour delivery promise" },
-  { icon: MapPinned, value: "US + CA", label: "FedEx delivery region" },
-  { icon: FileCheck2, value: "5 types", label: "PDF, JPEG, PNG, TIFF, EPS" },
+  { icon: Truck, value: "48 hr", label: "business-hour delivery estimate" },
+  { icon: MapPinned, value: "USA", label: "FedEx delivery region" },
+  { icon: FileCheck2, value: "3 types", label: "JPEG, PNG, PDF" },
 ] as const;
 
 export function GuaranteePanel() {
@@ -37,26 +37,26 @@ export function GuaranteePanel() {
             })}
           </div>
 
-          <aside className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,var(--color-bg-accent-tint),var(--color-bg-lightest))] p-xl shadow-elev-2">
+          <div className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,var(--color-bg-accent-tint),var(--color-bg-lightest))] p-xl shadow-elev-2">
             <BadgeCheck className="h-12 w-12 text-strong-accent" aria-hidden />
             <h2
               id="guarantee-h"
               className="mt-md font-display tracking-tight text-[34px] leading-tight text-ink uppercase"
             >
-              Our 48-hour guarantee
+              Our 48-hour promise
             </h2>
             <p className="mt-md text-body text-ink-muted">
-              If we miss the 48-business-hour delivery for reasons on our side, the $10
-              shipping charge for that banner is refunded automatically.
+              Delivery timing begins after order submission and manual payment confirmation.
+              FedEx delivery within the United States on our 48-business-hour schedule.
             </p>
             <Link
               href="/help"
-              className="mt-lg inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline"
+              className="mt-lg inline-flex items-center gap-xs text-sm font-semibold text-link hover:underline"
             >
-              Learn about the guarantee
+              Learn how delivery works
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-          </aside>
+          </div>
         </ScrollReveal>
       </div>
     </section>
