@@ -43,11 +43,11 @@ This project deploys to Vercel via GitHub integration. Vercel must be configured
 
 The [`frontend/vercel.json`](frontend/vercel.json) file runs install and build from the monorepo root so workspace packages are available.
 
-Recommended environment variables:
+Production domain: `https://bannersin48.com` (project `bannersin48-frontend`).
 
 | Variable | Example |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | `https://bannersin48.vercel.app` |
+| `NEXT_PUBLIC_SITE_URL` | `https://bannersin48.com` |
 | `NEXT_PUBLIC_API_BASE_URL` | Backend URL when deployed |
 
 Design tokens (navy foundations, gold CTAs, blue links) live in [`packages/design-tokens/src/tokens.ts`](packages/design-tokens/src/tokens.ts).

@@ -17,9 +17,7 @@ export type CommerceEnvironment = Partial<Record<
   | "NEXT_PUBLIC_PRIVACY_POLICY_URL"
   | "NEXT_PUBLIC_TERMS_POLICY_URL"
   | "NEXT_PUBLIC_SHIPPING_POLICY_URL"
-  | "NEXT_PUBLIC_CANCELLATION_POLICY_URL"
-  | "INTERNAL_ACCESS_USERNAME"
-  | "INTERNAL_ACCESS_PASSWORD",
+  | "NEXT_PUBLIC_CANCELLATION_POLICY_URL",
   string | undefined
 >>;
 
@@ -62,8 +60,6 @@ export function validateCommerceEnvironment(env: CommerceEnvironment): string[] 
   const mode = parseCommerceMode(env.NEXT_PUBLIC_COMMERCE_MODE);
   const errors: string[] = [];
   const isProductionBuild = env.NODE_ENV === "production";
-  const isProductionDeployment =
-    env.VERCEL_ENV === "production" || env.DEPLOYMENT_ENV === "production";
 
   if (mode === "public_live" && isProductionBuild) {
     for (const key of PUBLIC_LIVE_REQUIREMENTS) {
@@ -91,17 +87,6 @@ export function validateCommerceEnvironment(env: CommerceEnvironment): string[] 
       if (env[key] && !isAbsoluteHttpsUrl(env[key])) {
         errors.push(`${key} must be an absolute HTTPS URL for public_live.`);
       }
-    }
-  }
-
-  if (mode === "internal_manual" && isProductionDeployment) {
-    if (!env.INTERNAL_ACCESS_USERNAME) {
-      errors.push("INTERNAL_ACCESS_USERNAME is required for an internal production deployment.");
-    }
-    if (!env.INTERNAL_ACCESS_PASSWORD || env.INTERNAL_ACCESS_PASSWORD.length < 16) {
-      errors.push(
-        "INTERNAL_ACCESS_PASSWORD must contain at least 16 characters for an internal production deployment.",
-      );
     }
   }
 

@@ -7,8 +7,6 @@ if (!validModes.has(mode)) {
 }
 
 const productionBuild = process.env.NODE_ENV === "production";
-const productionDeployment =
-  process.env.VERCEL_ENV === "production" || process.env.DEPLOYMENT_ENV === "production";
 
 if (mode === "public_live" && productionBuild) {
   const enabledKeys = [
@@ -39,15 +37,6 @@ if (mode === "public_live" && productionBuild) {
     } catch {
       errors.push(`${key} must be an absolute HTTPS URL for public_live.`);
     }
-  }
-}
-
-if (mode === "internal_manual" && productionDeployment) {
-  if (!process.env.INTERNAL_ACCESS_USERNAME) {
-    errors.push("INTERNAL_ACCESS_USERNAME is required for an internal production deployment.");
-  }
-  if (!process.env.INTERNAL_ACCESS_PASSWORD || process.env.INTERNAL_ACCESS_PASSWORD.length < 16) {
-    errors.push("INTERNAL_ACCESS_PASSWORD must contain at least 16 characters.");
   }
 }
 

@@ -42,13 +42,13 @@ describe("commerce mode configuration", () => {
     expect(errors).toEqual([]);
   });
 
-  it("requires access credentials for an internal production deployment", () => {
+  it("allows an internal production deployment without HTTP Basic credentials", () => {
     const errors = validateCommerceEnvironment({
       NODE_ENV: "production",
       VERCEL_ENV: "production",
       NEXT_PUBLIC_COMMERCE_MODE: "internal_manual",
     });
 
-    expect(errors).toHaveLength(2);
+    expect(errors).toEqual([]);
   });
 });
