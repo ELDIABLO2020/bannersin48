@@ -1,12 +1,10 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import * as path from "node:path";
+import { ARTWORK_MAX_BYTES_DEFAULT } from "@bannersin48/shared";
 import { PrismaService } from "../prisma/prisma.service";
 import { StorageService } from "../storage/storage.service";
 import { ALLOWED_MIME_TYPES, inspectDimensions, sniffMime } from "./artwork-inspect";
-import type { AllowedMimeType } from "./artwork-inspect";
-
-const MAX_BYTES = 50 * 1024 * 1024; // keep in sync with shared ARTWORK_MAX_BYTES_DEFAULT
 
 /** Shape the frontend library grid consumes (matches the MSW handler). */
 export interface ArtworkLibraryItem {
@@ -36,7 +34,7 @@ export class ArtworkService {
     if (!file || file.size === 0) {
       throw new BadRequestException({ code: "NO_FILE", message: "No file provided." });
     }
-    if (file.size > MAX_BYTES) {
+    if (file.size > ARTWORK_MAX_BYTES_DEFAULT) {
       throw new BadRequestException({
         code: "FILE_TOO_LARGE",
         message: "Files can be at most 50 MB.",

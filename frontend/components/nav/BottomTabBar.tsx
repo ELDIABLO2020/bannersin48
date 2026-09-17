@@ -74,7 +74,7 @@ export function BottomTabBar() {
               aria-label="Order now"
               className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 flex-col items-center justify-center rounded-full bg-strong-accent text-strong-accent-text no-underline shadow-elev-3 ring-4 ring-darkest transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent-on-dark"
             >
-              <span className="font-display text-lg font-bold uppercase leading-none">Order</span>
+              <span className="font-display text-lg uppercase leading-none">Order</span>
             </Link>
           </li>
 

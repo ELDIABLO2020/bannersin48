@@ -1,5 +1,7 @@
 "use client";
 
+import { PagePrompt } from "@/components/ui/page-prompt";
+import { PageHeader } from "@/components/ui/page-header";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -17,7 +19,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { CountdownCard } from "@/components/home/CountdownCard";
 import { ArtworkReview } from "@/components/cart/ArtworkReview";
 
@@ -133,14 +135,11 @@ export default function CheckoutPage() {
 
   if (lines.length === 0) {
     return (
-      <div className="bg-surface-tint min-h-[60vh] flex items-center justify-center p-md">
-        <div className="bg-surface rounded-card p-3xl text-center max-w-md">
-          <h1 className="font-display text-section-h2 text-ink">Your cart is empty</h1>
-          <Link href="/order" className="inline-block mt-md bg-cta text-cta-fg rounded-btn px-2xl py-sm font-bold no-underline hover:bg-cta-hover">
-            Start an order
-          </Link>
-        </div>
-      </div>
+      <PagePrompt title="Your cart is empty" detail="Build a banner and it will show up here, with its price and delivery date.">
+        <Link href="/order">
+          <Button variant="cta" size="lg">Start your order</Button>
+        </Link>
+      </PagePrompt>
     );
   }
 
@@ -198,14 +197,7 @@ export default function CheckoutPage() {
   return (
     <div className="bg-surface-tint min-h-[60vh]">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-xl">
-        <nav className="text-body-sm text-ink-muted mb-md" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-link no-underline">Home</Link>
-          <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
-          <Link href="/cart" className="hover:text-link no-underline">Cart</Link>
-          <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
-          <span aria-current="page">Checkout</span>
-        </nav>
-        <h1 className="font-display text-section-h2 text-ink leading-section-h2 mb-md">Checkout</h1>
+        <PageHeader trail={[{ href: "/cart", label: "Cart" }]} title="Checkout" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
           <form
@@ -236,7 +228,7 @@ export default function CheckoutPage() {
             {/* Auth gate */}
             {!auth.user && (
               <Card className="bg-info-tint">
-                <h2 className="font-bold text-heading-h4 text-ink mb-sm">Sign in to place your order</h2>
+                <h2 className="text-heading-h4 text-ink mb-sm">Sign in to place your order</h2>
                 <p className="text-body-sm text-ink-muted">
                   We require an account to checkout. Saved artwork, reorders, and FedEx tracking included.
                 </p>
@@ -264,7 +256,7 @@ export default function CheckoutPage() {
               </Card>
             ) : (
               <Card className="bg-info-tint">
-                <h2 className="font-bold text-heading-h4 text-ink mb-sm">Review uploaded artwork</h2>
+                <h2 className="text-heading-h4 text-ink mb-sm">Review uploaded artwork</h2>
                 <p className="text-body-sm text-ink-muted">
                   Sign in to review the exact files we will print.
                 </p>
@@ -273,7 +265,7 @@ export default function CheckoutPage() {
 
             {/* Address */}
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Shipping address</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Shipping address</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
                 <Field label="Full name" error={errors.fullName?.message} errorId="fullName-error">
                   <Input autoComplete="name" {...register("fullName")} invalid={!!errors.fullName} aria-describedby={errors.fullName ? "fullName-error" : undefined} />
@@ -346,7 +338,7 @@ export default function CheckoutPage() {
 
             {/* Manual payment operating model */}
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Manual payment</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Manual payment</h2>
               <p className="text-body-sm text-ink-muted">
                 Submitting this order does not collect payment. Staff will provide manual-payment instructions and record confirmation on the order.
               </p>
@@ -400,7 +392,7 @@ export default function CheckoutPage() {
 
           <aside className="lg:col-span-5 space-y-md">
             <Card className="bg-surface sticky top-20">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Order summary</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Order summary</h2>
               <ul className="text-sm space-y-sm mb-md">
                 {lines.map((l) => {
                   const productId: ProductId =

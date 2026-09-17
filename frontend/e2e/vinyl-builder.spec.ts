@@ -27,23 +27,21 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByTestId("price-hero")).toBeVisible();
     await expect(page.getByTestId("item-rail")).toBeVisible();
 
-    // Stage header: product title, live specs, green price, 48-hour production
+    // Stage header: product title and live specs
     await expect(page.getByTestId("stage-header")).toBeVisible();
     await expect(page.getByTestId("stage-header")).toContainText(/HD Banner \(Vinyl\)/i);
     await expect(page.getByTestId("stage-header-specs")).toContainText(/Vinyl 13 oz Single Sided/i);
     await expect(page.getByTestId("stage-header-specs")).toContainText("4′");
     await expect(page.getByTestId("stage-header-specs")).not.toContainText('0" x 0"');
-    await expect(page.getByTestId("stage-header")).toContainText(/48-hour production/i);
-    // Default 4×8 13oz → $138 (header + PriceHero)
-    await expect(page.getByTestId("stage-header-price")).toContainText("$138", { timeout: 10_000 });
-    await expect(page.getByTestId("price-hero").getByTestId("price-total")).toContainText("$138");
+    // Default 4×8 13oz → $138, shown once, in the price panel
+    await expect(page.getByTestId("price-hero").getByTestId("price-total")).toContainText("$138", { timeout: 10_000 });
 
-    // Real rates (not competitor figures) in both matrices
-    const matrices = page.getByTestId("rate-matrix");
-    await expect(matrices).toHaveCount(2);
-    await expect(matrices.first()).toContainText("$4.00");
-    await expect(matrices.first()).toContainText("$7.50");
-    await expect(matrices.first()).not.toContainText("$1.25");
+    // Real rates (not competitor figures), shown once, beside the stage
+    const matrix = page.getByTestId("stage-header").getByTestId("rate-matrix");
+    await expect(matrix).toHaveCount(1);
+    await expect(matrix).toContainText("$4.00");
+    await expect(matrix).toContainText("$7.50");
+    await expect(matrix).not.toContainText("$1.25");
 
     // Empty artwork CTA
     await expect(page.getByTestId("stage-empty-upload")).toBeVisible();
@@ -197,7 +195,6 @@ test.describe("Vinyl builder", () => {
 
   test("mobile: show options dock and add to cart", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile-webkit", "Mobile only");
-    await expect(page.getByTestId("price-hero").getByTestId("rate-matrix")).toBeHidden();
     await expect(page.getByTestId("stage-header").getByTestId("rate-matrix")).toBeHidden();
     await expect(page.getByTestId("show-options")).toBeVisible();
     await page.getByTestId("show-options").click();

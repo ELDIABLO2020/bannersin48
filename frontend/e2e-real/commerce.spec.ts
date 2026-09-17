@@ -2,7 +2,7 @@ import { test, expect, type APIRequestContext, type Page } from "@playwright/tes
 
 /**
  * Wave 11 release suite — canonical customer scenarios against the real
- * Nest + Postgres/Redis backend.
+ * Nest + Postgres backend.
  *
  * The first test drives the full storefront journey through the browser UI.
  * The remaining tests exercise server-enforced invariants (quote change

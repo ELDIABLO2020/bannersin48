@@ -1,9 +1,10 @@
 "use client";
 
+import { PageHeader } from "@/components/ui/page-header";
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CategoryCard } from "@/components/order/CategoryCard";
 import {
@@ -58,16 +59,13 @@ function OrderHub() {
 
   return (
     <div className="bg-surface-tint min-h-[60vh]">
-      <div className="mx-auto max-w-content px-md lg:px-xl py-xl">
-        <nav className="text-body-sm text-ink-muted mb-sm" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-link no-underline">
-            Home
-          </Link>
-          <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
-          <span aria-current="page">Order</span>
-        </nav>
-        <h1 className="font-display text-section-h2 text-ink leading-section-h2">{HUB_TITLE}</h1>
-        <p className="text-body text-ink-muted mt-sm mb-lg max-w-2xl">{HUB_SUBTITLE}</p>
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl">
+        <PageHeader
+          trail={[{ href: "/", label: "Home" }]}
+          title={HUB_TITLE}
+          intro={HUB_SUBTITLE}
+          className="mb-lg"
+        />
 
         <div className="flex flex-wrap gap-sm mb-lg" role="group" aria-label="Filter by need">
           <Chip
@@ -169,7 +167,7 @@ function ComparisonStrip() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
         {CATALOG_COMPARISONS.map((row) => (
           <article key={row.title} className="rounded-card border border-line bg-surface p-lg">
-            <h3 className="font-bold text-ink mb-sm">{row.title}</h3>
+            <h3 className="text-ink mb-sm">{row.title}</h3>
             <ul className="space-y-xs text-body-sm text-ink-muted">
               {row.items.map((item) => (
                 <li key={item.productId}>
@@ -223,7 +221,7 @@ function Section({ heading, items }: { heading: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <h3 className="text-xs font-bold uppercase tracking-wide text-ink-muted">{heading}</h3>
+      <h3 className="text-xs uppercase tracking-wide text-ink-muted">{heading}</h3>
       <ul className="mt-xs list-disc pl-md text-body-sm text-ink">
         {items.map((item) => (
           <li key={item}>{item}</li>

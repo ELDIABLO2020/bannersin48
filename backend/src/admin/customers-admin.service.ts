@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
 import { EmailService } from "../notifications/email.service";
-import { serializeUser } from "../common/user.serializer";
+import { serializeAddress, serializeUser } from "../common/user.serializer";
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
 
@@ -82,16 +82,7 @@ export class AdminCustomersService {
 
     return {
       user: serializeUser(user, []),
-      addresses: user.addresses.map((a) => ({
-        id: a.id,
-        label: a.label,
-        line1: a.line1,
-        line2: a.line2,
-        city: a.city,
-        state: a.state,
-        zip: a.zip,
-        country: a.country,
-      })),
+      addresses: user.addresses.map(serializeAddress),
       orders: orders.map((o) => ({
         id: o.id,
         orderNumber: o.number,

@@ -84,7 +84,7 @@ test.describe("BANNER order hub", () => {
     await waitForHub(page);
     await page.getByTestId("hub-order-retractable").click();
     await expect(page).toHaveURL(/\/order\/retractable/);
-    await expect(page.getByRole("heading", { name: /retractable banner/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: /retractable banner/i })).toBeVisible();
   });
 
   test("poster order opens builder", async ({ page }, testInfo) => {

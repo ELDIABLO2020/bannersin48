@@ -4,7 +4,6 @@ import { PricingEngineService } from "./pricing-engine.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CatalogService } from "../catalog/catalog.service";
 import { DeliveryService } from "../delivery/delivery.service";
-import type { FinishingDto } from "./quote-request.dto";
 import type { QuoteRequestDto } from "./quote-request.dto";
 import { assertMaterialOffered, assertSizeAllowed, normalizeFinishing } from "./catalog-rules";
 

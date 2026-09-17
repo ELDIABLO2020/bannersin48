@@ -121,6 +121,8 @@ export const tailwindPreset: Partial<Config> = {
       fontSize: {
         "hero-h1": [`${typography.fontSize.heroH1}px`, { lineHeight: `${typography.lineHeight.heroH1}px`, letterSpacing: typography.letterSpacing.tighter }],
         "section-h2": [`${typography.fontSize.sectionH2}px`, { lineHeight: `${typography.lineHeight.sectionH2}px`, letterSpacing: typography.letterSpacing.tight }],
+        "heading-h2": [`${typography.fontSize.headingH2}px`, { lineHeight: `${typography.lineHeight.headingH2}px` }],
+        "heading-h3": [`${typography.fontSize.headingH3}px`, { lineHeight: `${typography.lineHeight.headingH3}px` }],
         "heading-h4": [`${typography.fontSize.headingH4}px`, { lineHeight: `${typography.lineHeight.headingH4}px` }],
         "heading-h5": [`${typography.fontSize.headingH5}px`, { lineHeight: `${typography.lineHeight.headingH5}px` }],
         body: [`${typography.fontSize.body}px`, { lineHeight: `${typography.lineHeight.body}px` }],
@@ -176,16 +178,6 @@ export const tailwindPreset: Partial<Config> = {
       maxWidth: {
         content: "1200px",
         hero: "1440px",
-      },
-      gridTemplateColumns: {
-        desktop: "repeat(12, minmax(0, 1fr))",
-        tablet: "repeat(8, minmax(0, 1fr))",
-        mobile: "repeat(4, minmax(0, 1fr))",
-      },
-      gridGap: {
-        desktop: "40px",
-        tablet: "24px",
-        mobile: "16px",
       },
       zIndex: {
         "tab-bar": "var(--z-tab-bar)",

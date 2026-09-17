@@ -156,7 +156,6 @@ describe("hydrateBuilderSession — dimension-semantics migration", () => {
     artworkId: null,
     artworkFileName: null,
     artworkPreviewUrl: null,
-    fitMode: "fit",
     aspectLocked: true,
   };
 

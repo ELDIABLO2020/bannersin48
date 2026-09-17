@@ -4,7 +4,7 @@ import { SITE_NAVIGATION_GROUPS } from "@/components/nav/siteNavigation";
 
 export function Footer() {
   return (
-    <footer className="bg-darkest text-white">
+    <footer className="bg-darkest text-white border-t border-white/15">
       <h2 className="sr-only">Site footer</h2>
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
@@ -23,7 +23,7 @@ export function Footer() {
           </div>
           {SITE_NAVIGATION_GROUPS.map((col) => (
             <div key={col.title}>
-              <h3 className="font-bold text-body mb-md text-white">{col.title}</h3>
+              <h3 className="font-display text-heading-h4 mb-md text-white">{col.title}</h3>
               <ul className="space-y-xs">
                 {col.items.map((item) => (
                   <li key={item.href + item.label}>
@@ -42,10 +42,10 @@ export function Footer() {
 
         <div className="mt-3xl pt-xl border-t border-white/15 flex flex-col lg:flex-row lg:items-center gap-md">
           <p className="text-sm text-white/60">
-            &copy; 2026 Banners In 48 &middot; BannersIn48.com
+            &copy; 2026 Banners In 48
           </p>
           <p className="text-sm text-white/60 lg:ml-auto">
-            Internal platform test · USD · Manual payment
+            Prices in USD. Orders are paid manually after submission.
           </p>
         </div>
       </div>

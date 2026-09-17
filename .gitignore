@@ -31,7 +31,6 @@ static-server.err.log
 # Test artifacts
 frontend/playwright-report/
 frontend/test-results/
-frontend/lhci-reports/
 frontend/audit/
 
 # OS
@@ -48,3 +47,6 @@ frontend/audit/
 
 # Local artwork storage (dev driver)
 backend/storage/
+
+# Local design-audit screenshots
+frontend/e2e/artifacts/

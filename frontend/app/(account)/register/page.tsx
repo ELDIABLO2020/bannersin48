@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useState, type InputHTMLAttributes } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -10,8 +10,9 @@ import { getApiClient } from "@/lib/api/client";
 import { useAuth } from "@/lib/stores/auth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordField } from "@/components/ui/password-field";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, AlertCircle, Eye, EyeOff, Check } from "lucide-react";
+import { ChevronRight, AlertCircle, Check } from "lucide-react";
 import { safeReturnUrl } from "@/lib/auth/return-url";
 
 const registerSchema = z.object({
@@ -21,32 +22,6 @@ const registerSchema = z.object({
 });
 
 type RegisterInput = z.infer<typeof registerSchema>;
-
-const PasswordField = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(
-  function PasswordField(props, ref) {
-    const [visible, setVisible] = useState(false);
-    return (
-      <div className="relative">
-        <Input
-          ref={ref}
-          type={visible ? "text" : "password"}
-          autoComplete="new-password"
-          className="pr-11"
-          {...props}
-        />
-      <button
-        type="button"
-        onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? "Hide password" : "Show password"}
-        aria-pressed={visible}
-        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent rounded-r-btn"
-      >
-        {visible ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
-      </button>
-    </div>
-    );
-  },
-);
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -85,10 +60,9 @@ export default function RegisterPage() {
 
   return (
     <div
-      className="min-h-[80vh] flex items-center justify-center px-md py-3xl"
-      style={{ backgroundColor: "var(--color-bg-soft-accent)" }}
+      className="flex items-start justify-center px-md py-3xl"
     >
-      <Card variant="default" className="bg-surface w-full max-w-md">
+      <Card className="bg-surface w-full max-w-md">
         <h1 className="font-display text-section-h2 text-ink leading-tight">Create an account</h1>
         <p className="text-body-sm text-ink-muted mt-xs">
           We require an account to place an order. Saved artwork &amp; reorders included.
@@ -108,7 +82,7 @@ export default function RegisterPage() {
             <label htmlFor="register-password" className="text-body-sm text-ink-muted block mb-xs">
               Password
             </label>
-            <PasswordField id="register-password" invalid={!!errors.password} {...register("password")} />
+            <PasswordField autoComplete="new-password" id="register-password" invalid={!!errors.password} {...register("password")} />
             <ul className="mt-xs space-y-xs" aria-label="Password requirements">
               {requirements.map((req) => (
                 <li

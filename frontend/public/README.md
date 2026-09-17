@@ -6,7 +6,6 @@
 |---|---|
 | `images/logo.png` | Horizontal lockup for light backgrounds (top nav) |
 | `images/logo-dark.png` | Horizontal lockup for dark backgrounds (footer) |
-| `images/logo-mobile-header.png` | Light-background lockup for the mobile header strip |
 | `icons/icon-192.png`, `icons/icon-512.png` | PWA icons, mark centred on brand black |
 | `icons/icon-maskable-512.png` | Maskable PWA icon, extra padding for the safe zone |
 

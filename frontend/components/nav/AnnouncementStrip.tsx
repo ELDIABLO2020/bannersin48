@@ -1,38 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { Truck } from "lucide-react";
-import { getApiClient } from "@/lib/api/client";
-import { formatCountdown } from "@/lib/utils/time";
-import { getNextCutoffFallback } from "@/lib/utils/countdown-fallback";
+import { useCutoffCountdown } from "@/lib/hooks/useCutoffCountdown";
 import { isInternalManualCommerce } from "@/lib/config/commerce-mode";
+import { SiteContentStrip } from "@/components/nav/SiteContentStrip";
 
 export function AnnouncementStrip() {
-  const { data: apiData } = useQuery({
-    queryKey: ["next-cutoff"],
-    queryFn: () => getApiClient().getNextCutoff(),
-    refetchInterval: 60_000,
-    retry: 1,
-  });
-
-  const [now, setNow] = useState<number | null>(null);
-  useEffect(() => {
-    setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const remainingMs = useMemo(() => {
-    if (now === null) return 0;
-    if (apiData) return apiData.cutoffInMs;
-    return getNextCutoffFallback(new Date(now)).remainingMs;
-  }, [apiData, now]);
-
-  const { padded: countdownPadded } =
-    now === null ? { padded: "-- : -- : --" } : formatCountdown(remainingMs);
+  const { padded } = useCutoffCountdown();
 
   return (
     <div className="bg-darkest text-white text-sm" role="region" aria-label="Announcement">
@@ -51,7 +27,7 @@ export function AnnouncementStrip() {
           aria-label="Banners In 48 home"
         >
           <Image
-            src="/images/logo-mobile-header.png"
+            src="/images/logo.png"
             alt="Banners In 48"
             width={502}
             height={116}
@@ -72,9 +48,10 @@ export function AnnouncementStrip() {
           aria-live="polite"
           className="hidden md:inline-flex items-center gap-1 px-sm py-xs rounded-pill bg-strong-accent text-strong-accent-text tabular-nums text-xs font-bold"
         >
-          {countdownPadded}
+          {padded ?? "-- : -- : --"}
         </span>
       </div>
+      <SiteContentStrip />
     </div>
   );
 }

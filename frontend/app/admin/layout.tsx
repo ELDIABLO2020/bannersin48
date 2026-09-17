@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -84,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="bg-surface-tint min-h-[70vh] flex items-center justify-center p-md">
         <Card className="bg-surface p-3xl w-full max-w-sm">
-          <h1 className="font-display text-section-h2 text-ink mb-xs">Banners In 48 · Ops</h1>
+          <h1 className="font-display text-section-h2 text-ink mb-xs">Staff sign-in</h1>
           <p className="text-body-sm text-ink-muted mb-lg">Sign in with your staff account.</p>
           <form onSubmit={submit} className="space-y-md">
             <label className="block" htmlFor="admin-email">
@@ -157,8 +158,9 @@ function AdminShell({ role, email, children }: { role: string; email: string; ch
       <header className="bg-surface-dark text-ink-light sticky top-0 z-sticky">
         <div className="mx-auto max-w-content px-md lg:px-2xl">
           <div className="h-14 flex items-center gap-lg">
-            <Link href="/admin" className="font-display font-bold no-underline text-ink-light shrink-0">
-              BI48 Ops
+            <Link href="/admin" className="flex items-center gap-sm no-underline text-ink-light shrink-0" aria-label="Banners In 48 staff home">
+              <Image src="/images/logo-dark.png" alt="" width={502} height={116} className="h-7 w-auto" priority />
+              <span className="text-body-sm font-semibold text-ink-light/70">Staff</span>
             </Link>
 
             {/* Desktop navigation */}

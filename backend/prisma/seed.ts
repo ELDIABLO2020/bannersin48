@@ -226,7 +226,7 @@ async function seedSiteContent(): Promise<void> {
     {
       key: "promo_strip",
       blockType: "PROMO_STRIP" as const,
-      payload: { text: "Free shipping on every banner — always $10/flat per unit.", linkHref: "/order/hd-banner" },
+      payload: { text: "Flat $10 shipping per banner.", linkHref: "/order/hd-banner" },
     },
     {
       key: "announcement",

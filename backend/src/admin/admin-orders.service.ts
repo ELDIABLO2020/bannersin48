@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import type { Order, OrderStatus } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { OrdersService } from "../orders/orders.service";
-import { ArtworkService } from "../artwork/artwork.service";
 import { StorageService } from "../storage/storage.service";
 import { EmailService } from "../notifications/email.service";
 import { AuditService } from "../audit/audit.service";
@@ -39,7 +38,6 @@ export class AdminOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly orders: OrdersService,
-    private readonly artwork: ArtworkService,
     private readonly storage: StorageService,
     private readonly email: EmailService,
     private readonly audit: AuditService,
@@ -55,9 +53,6 @@ export class AdminOrdersService {
     const counts = new Map<string, number>(KANBAN_STATUSES.map((s) => [s, 0]));
     const breached = new Map<string, number>();
     const now = new Date();
-    for (const status of KANBAN_STATUSES) {
-      if (!counts.has(status)) counts.set(status, 0);
-    }
     const grouped = await this.prisma.order.groupBy({ by: ["status"], _count: { _all: true } });
     for (const g of grouped) {
       counts.set(g.status, g._count._all);
@@ -350,7 +345,7 @@ export class AdminOrdersService {
     if (to === "DELIVERED") {
       await this.prisma.shipment.upsert({
         where: { orderId },
-        update: { deliveredAt: new Date(), ...(reason ? {} : {}) },
+        update: { deliveredAt: new Date() },
         create: { orderId, deliveredAt: new Date() },
       });
       note = reason ?? "FedEx reports delivered.";

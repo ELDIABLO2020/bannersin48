@@ -1,5 +1,3 @@
-import type { ArtworkUploadMeta } from "@bannersin48/shared";
-
 /**
  * Artwork file inspection — magic-byte MIME detection (never trusts the
  * client-supplied Content-Type) plus best-effort pixel dimensions & DPI.
@@ -13,10 +11,6 @@ export const ALLOWED_MIME_TYPES = [
 ] as const;
 
 export type AllowedMimeType = (typeof ALLOWED_MIME_TYPES)[number];
-
-export interface SniffResult {
-  mime: AllowedMimeType | null;
-}
 
 export interface DimsResult {
   widthPx?: number;
@@ -127,83 +121,6 @@ function parseJpeg(buf: Buffer): DimsResult {
   return { widthPx, heightPx, dpi, report };
 }
 
-const TIFF_TYPE_SIZES: Record<number, number> = { 1: 1, 2: 1, 3: 2, 4: 4, 5: 8 };
-
-function parseTiff(buf: Buffer): DimsResult {
-  const report: Record<string, unknown> = { source: "tiff" };
-  try {
-    const little = buf[0] === 0x49;
-    const readU16 = (o: number) => (little ? buf.readUInt16LE(o) : buf.readUInt16BE(o));
-    const readU32 = (o: number) => (little ? buf.readUInt32LE(o) : buf.readUInt32BE(o));
-    const ifdOffset = readU32(4);
-    const count = readU16(ifdOffset);
-    let widthPx: number | undefined;
-    let heightPx: number | undefined;
-    let xRes: { num: number; den: number } | undefined;
-    let resolutionUnit = 2; // default inches
-    for (let i = 0; i < count; i++) {
-      const entry = ifdOffset + 2 + i * 12;
-      const tag = readU16(entry);
-      const type = readU16(entry + 2);
-      const valueCount = readU32(entry + 4);
-      const size = TIFF_TYPE_SIZES[type] ?? 1;
-      if (size * valueCount > 4) continue; // value out of line — skip (rare for our tags)
-      const valueOffset = entry + 8;
-      switch (tag) {
-        case 256: // ImageWidth
-          widthPx = type === 3 ? readU16(valueOffset) : readU32(valueOffset);
-          break;
-        case 257: // ImageLength
-          heightPx = type === 3 ? readU16(valueOffset) : readU32(valueOffset);
-          break;
-        case 282: // XResolution RATIONAL (offset to two LONGs)
-          if (type === 5) {
-            const rationalAt = readU32(valueOffset);
-            xRes = { num: readU32(rationalAt), den: readU32(rationalAt + 4) };
-          }
-          break;
-        case 296: // ResolutionUnit
-          resolutionUnit = readU16(valueOffset);
-          break;
-      }
-    }
-    let dpi: number | undefined;
-    if (widthPx) report.widthPx = widthPx;
-    if (heightPx) report.heightPx = heightPx;
-    if (xRes && xRes.den > 0) {
-      const res = xRes.num / xRes.den;
-      if (resolutionUnit === 2 && res >= 10 && res <= 2400) {
-        dpi = Math.round(res);
-        report.dpiSource = "tiff_xresolution";
-      } else if (resolutionUnit === 3 && res >= 10 && res <= 945) {
-        dpi = Math.round(res * 2.54);
-        report.dpiSource = "tiff_xresolution_cm";
-      }
-    }
-    if (dpi) report.dpi = dpi;
-    return { widthPx, heightPx, dpi, report };
-  } catch {
-    return { report };
-  }
-}
-
-function parseEps(buf: Buffer): DimsResult {
-  const report: Record<string, unknown> = { source: "eps" };
-  try {
-    const head = buf.subarray(0, Math.min(buf.length, 64 * 1024)).toString("latin1");
-    const match = head.match(/%%BoundingBox:\s*(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)/);
-    if (match) {
-      const widthPt = Math.abs(Number(match[3]) - Number(match[1]));
-      const heightPt = Math.abs(Number(match[4]) - Number(match[2]));
-      report.widthPt = widthPt;
-      report.heightPt = heightPt;
-    }
-  } catch {
-    // best-effort only
-  }
-  return { report };
-}
-
 function parsePdf(buf: Buffer): DimsResult {
   const report: Record<string, unknown> = { source: "pdf" };
   try {
@@ -231,9 +148,4 @@ export function inspectDimensions(mime: AllowedMimeType, buf: Buffer): DimsResul
     case "application/pdf":
       return parsePdf(buf);
   }
-}
-
-export interface InspectedArtwork extends ArtworkUploadMeta {
-  sha256: string;
-  dpiReport: Record<string, unknown>;
 }

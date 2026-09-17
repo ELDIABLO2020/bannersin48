@@ -1,4 +1,3 @@
-import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { handlers } from "./mocks/handlers";

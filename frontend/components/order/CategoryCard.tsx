@@ -28,7 +28,7 @@ export function CategoryCard({
             type="button"
             data-testid={`hub-more-info-${product.slug}`}
             onClick={() => onMoreInfo(product.slug)}
-            className="rounded-btn border border-white/70 bg-darkest/55 px-md py-xs text-sm font-semibold text-white font-body backdrop-blur-sm hover:bg-darkest/80"
+            className="min-h-9 rounded-btn border border-line bg-surface px-sm py-xs text-body-sm font-semibold text-ink font-body hover:border-strong-accent"
           >
             More info
           </button>

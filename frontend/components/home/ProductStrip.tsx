@@ -1,9 +1,16 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
 import { catalogImage } from "@/content/catalogImages";
-import { PRODUCTS, CATALOG_NAV_PRODUCTS, productOrderHref, type ProductId } from "@bannersin48/shared";
+import { SectionHeading } from "@/components/ui/section-heading";
+import {
+  PRODUCTS,
+  CATALOG_NAV_PRODUCTS,
+  CATALOG_NEEDS,
+  catalogFilterHref,
+  productOrderHref,
+  type ProductId,
+} from "@bannersin48/shared";
 
 /** Four featured products on the homepage; the full catalog lives on /order. */
 const FEATURED: ReadonlyArray<ProductId> = ["HD_BANNER", "MESH", "POSTER", "RETRACTABLE"];
@@ -13,29 +20,30 @@ export function ProductStrip() {
     (FEATURED as readonly string[]).includes(id),
   );
   return (
-    <section id="products" className="bg-surface border-b border-line" aria-labelledby="products-h">
+    <section id="products" className="bg-surface" aria-labelledby="products-h">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <ScrollReveal className="mb-xl flex flex-col gap-md md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-strong-accent font-semibold text-sm mb-md font-body">Catalog</p>
-            <h2
-              id="products-h"
-              className="font-display tracking-tight text-[clamp(34px,4.5vw,52px)] leading-[1.05] text-ink uppercase"
-            >
-              Every banner we print
-            </h2>
-            <p className="text-body text-ink-muted mt-md max-w-2xl font-body">
-              Vinyl, mesh, paper, canvas, and stands — pick the product that matches the job.
-            </p>
-          </div>
-          <Link
-            href="/order"
-            className="inline-flex items-center gap-xs text-sm font-semibold text-link no-underline hover:underline font-body"
-          >
-            View all products
-            <ArrowRight className="h-4 w-4" aria-hidden />
+        <div className="mb-lg flex flex-col gap-md md:flex-row md:items-end md:justify-between">
+          <SectionHeading
+            id="products-h"
+            title="Every banner we print"
+            intro="Vinyl, mesh, paper, canvas, and stands. Start from the product, or from where it will hang."
+          />
+          <Link href="/order" className="text-body-sm font-bold text-link font-body shrink-0">
+            See all 8 products
           </Link>
-        </ScrollReveal>
+        </div>
+        <ul className="mb-xl flex flex-wrap gap-xs" aria-label="Choose by need">
+          {CATALOG_NEEDS.map((need) => (
+            <li key={need.id}>
+              <Link
+                href={catalogFilterHref(need.id)}
+                className="inline-flex min-h-11 items-center rounded-pill border border-line bg-surface px-md text-body-sm font-semibold text-ink no-underline transition-colors hover:border-link hover:text-link"
+              >
+                {need.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
         <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
           {featured.map((id) => {
             const product = PRODUCTS[id];

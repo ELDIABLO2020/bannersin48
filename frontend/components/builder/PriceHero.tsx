@@ -1,25 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useConfigurator } from "@/lib/stores/configurator";
 import { getApiClient } from "@/lib/api/client";
 import { useCart } from "@/lib/stores/cart";
 import { useCartDrawer } from "@/lib/stores/cart-drawer";
 import { formatUsd } from "@/lib/utils/format";
-import { formatCountdown } from "@/lib/utils/time";
+import { useCutoffCountdown } from "@/lib/hooks/useCutoffCountdown";
 import { Button } from "@/components/ui/button";
 import { Clock, ShoppingCart } from "lucide-react";
 import { materialLabel } from "./builderRules";
-import { RateMatrix } from "./RateMatrix";
 import { useBuilderQuote } from "./useBuilderQuote";
 import {
   PRODUCTS,
-  SHIPPING_FLAT_PER_UNIT_USD,
-  formatDimensionsWH,
-  formatBillableWH,
-  formatInchesWH,
 } from "@bannersin48/shared";
+import { cartLineFromQuote } from "@/lib/cart/quoteState";
 
 export function PriceHero() {
   const signs = useConfigurator((s) => s.signs);
@@ -32,20 +27,7 @@ export function PriceHero() {
 
   const { displayTotal, eligible, billableSqFt, isFetching, ineligibilityReason } = useBuilderQuote();
 
-  const { data: cutoff } = useQuery({
-    queryKey: ["next-cutoff"],
-    queryFn: () => getApiClient().getNextCutoff(),
-    refetchInterval: 60_000,
-  });
-
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const cutoffTs = cutoff ? new Date(cutoff.cutoffAtEt).getTime() : 0;
-  const { padded } = cutoff ? formatCountdown(cutoffTs - now) : { padded: "--:--:--" };
+  const { padded, deliveryDow } = useCutoffCountdown();
 
   const [adding, setAdding] = useState(false);
 
@@ -62,37 +44,19 @@ export function PriceHero() {
         });
         const line = quote.lines[0];
         if (!line || !quote.eligible) continue;
-        const signConfig = PRODUCTS[sign.productId];
-        addLine({
-          id: `cart_${Date.now()}_${sign.id}`,
-          product: signConfig.slug,
-          productId: sign.productId,
-          material: sign.material,
-          dimensions: sign.size,
-          finishing: sign.finishing,
-          quantity: sign.quantity,
-          artworkId: sign.artworkId!,
-          quoteId: quote.quoteId,
-          quoteValidUntil: quote.validUntil,
-          currency: quote.currency,
-          unitProduct: line.unitProduct,
-          addons: line.addons,
-          productSubtotal: line.productSubtotal,
-          shipping: line.shipping,
-          totalBeforeTax: line.totalBeforeTax,
-          billableSqFt: line.billableSqFt,
-          billableDims: line.billableDims,
-          display: {
-            requestedLabel:
-              signConfig.sizeMode === "fixed" && signConfig.fixedSizeIn
-                ? formatInchesWH(signConfig.fixedSizeIn.widthIn, signConfig.fixedSizeIn.heightIn)
-                : formatDimensionsWH(sign.size),
-            billableLabel:
-              signConfig.sizeMode === "fixed"
-                ? "Fixed size"
-                : formatBillableWH(line.billableDims),
+        const cartLine = cartLineFromQuote(
+          `cart_${Date.now()}_${sign.id}`,
+          {
+            productId: sign.productId,
+            material: sign.material,
+            dimensions: sign.size,
+            finishing: sign.finishing,
+            quantity: sign.quantity,
+            artworkId: sign.artworkId!,
           },
-        });
+          quote,
+        );
+        if (cartLine) addLine(cartLine);
       }
       openDrawer();
     } finally {
@@ -101,44 +65,31 @@ export function PriceHero() {
   }
 
   return (
-    <div data-testid="price-hero" className="rounded-feature border border-line bg-surface p-md shadow-sm">
-      <p className="text-xs uppercase tracking-widest text-ink-muted">Live price</p>
+    <div data-testid="price-hero" className="rounded-card border border-line bg-surface p-lg">
+      <p className="text-body-sm text-ink-muted">Your price, before tax</p>
       <p
         data-testid="price-total"
-        className="font-display text-3xl font-bold text-success mt-xs tabular-nums transition-opacity duration-200"
+        className="font-display text-section-h2 leading-none text-success mt-xs tabular-nums transition-opacity duration-200"
       >
         {formatUsd(displayTotal)}
         {isFetching && <span className="ml-2 text-body-sm text-ink-muted font-body font-normal">updating…</span>}
       </p>
       <p className="text-body-sm text-ink-muted mt-xs">
         {config.sizeMode === "fixed"
-          ? `${quantity} item${quantity === 1 ? "" : "s"} · ${config.title}`
-          : `${billableSqFt} sq ft · ${materialLabel(material)}`}
+          ? `${quantity} × ${config.title}, shipping included`
+          : `${billableSqFt} sq ft of ${materialLabel(material)}, shipping included`}
       </p>
 
-      {cutoff && (
+      {padded && (
         <div className="mt-md p-sm rounded-card bg-soft-accent text-center">
-          <p className="text-[10px] uppercase tracking-widest text-ink-muted">Order within</p>
-          <p className="font-display text-xl font-bold tabular-nums text-strong-accent leading-none mt-1">{padded}</p>
+          <p className="text-body-sm text-ink-muted">Order within</p>
+          <p className="font-display text-heading-h2 tabular-nums text-strong-accent leading-none mt-1">{padded}</p>
           <p className="text-xs text-ink mt-sm flex items-center justify-center gap-1">
             <Clock className="h-3 w-3" aria-hidden />
-            Delivery by {cutoff.guaranteedDeliveryDow} noon
+            Delivered {deliveryDow} by noon
           </p>
         </div>
       )}
-
-      {productId === "HD_BANNER" ? (
-        <RateMatrix
-          material={material}
-          showShippingNote
-          className="mt-md hidden min-[901px]:block"
-          title="Rates / sq ft"
-        />
-      ) : config.sizeMode === "custom" ? (
-        <p data-testid="rate-single" className="mt-md hidden min-[901px]:block text-[11px] text-ink-muted">
-          ${config.ratePerSqFt(material).toFixed(2)} / sq ft · Shipping ${SHIPPING_FLAT_PER_UNIT_USD.toFixed(0)} / banner
-        </p>
-      ) : null}
 
       <Button
         type="button"

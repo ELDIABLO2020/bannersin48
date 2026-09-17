@@ -20,7 +20,7 @@ export function addBusinessHours(start: Date, hours: number): Date {
   return new Date(cursor);
 }
 
-export function slaDeadline(placedAt: Date): Date {
+function slaDeadline(placedAt: Date): Date {
   return addBusinessHours(placedAt, 48);
 }
 

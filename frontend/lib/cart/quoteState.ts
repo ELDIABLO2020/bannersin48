@@ -130,6 +130,39 @@ function computeDisplay(
   };
 }
 
+/** Build a confirmed cart line from a fresh quote. Returns null when the quote priced no line. */
+export function cartLineFromQuote(
+  id: string,
+  config: CartConfigInput & { productId: ProductId },
+  quote: QuoteResponse,
+): CartLine | null {
+  const priced = quote.lines[0];
+  if (!priced) return null;
+  return {
+    id,
+    product: PRODUCTS[config.productId].slug,
+    productId: config.productId,
+    material: config.material,
+    dimensions: config.dimensions,
+    finishing: config.finishing,
+    quantity: config.quantity,
+    artworkId: config.artworkId,
+    quoteId: quote.quoteId,
+    quoteValidUntil: quote.validUntil,
+    currency: quote.currency,
+    unitProduct: priced.unitProduct,
+    addons: priced.addons,
+    productSubtotal: priced.productSubtotal,
+    shipping: priced.shipping,
+    totalBeforeTax: priced.totalBeforeTax,
+    tax: quote.tax ?? 0,
+    billableSqFt: priced.billableSqFt,
+    billableDims: priced.billableDims,
+    display: computeDisplay(config, config.productId, priced.billableDims),
+    quoteState: "confirmed",
+  };
+}
+
 /** Mark a line as refreshing and remember the attempted config for retry/revert. */
 export function beginRequote(line: CartLine, config: CartConfigInput): CartLine {
   return { ...line, quoteState: "refreshing", pendingConfig: config };
@@ -192,7 +225,6 @@ export function markStale(line: CartLine): CartLine {
 export function normalizeCartLine(line: CartLine): CartLine {
   return {
     ...line,
-    productId: line.productId,
     finishing: { ...line.finishing, webbing: line.finishing.webbing ?? false },
     tax: line.tax ?? 0,
     artwork: line.artwork ?? null,

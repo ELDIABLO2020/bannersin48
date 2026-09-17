@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { VisualCategoryCard } from "@/components/catalog/VisualCategoryCard";
 import { catalogImage } from "@/content/catalogImages";
 import { placeholders, type PlaceholderAsset } from "@/content/placeholders";
-import { ChevronRight, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { catalogFilterHref, productOrderHref, PRODUCTS, UPLOAD_REJECT } from "@bannersin48/shared";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "Which banner do I need?",
-    a: "Windy fences and construction → Mesh. Everyday hanging banners → HD Banner. Indoor short-term POP → Poster. Must lay flat → No-Curl. Stretch and frame → Canvas. Need hardware → Econostand or Retractable.",
+    a: "HD Banner for everyday hanging banners. Mesh for windy fences and jobsites. Poster for short-term indoor displays. No-Curl when it has to lie flat. Canvas for stretching and framing. Econostand or Retractable when you need the stand as well.",
   },
   {
     q: "What file types do you accept?",
@@ -25,7 +26,7 @@ const FAQS = [
   },
   {
     q: "Do all products include welding and grommets?",
-    a: "Only HD Banner and Mesh have finishing options (welding, grommets, pockets, and — on mesh — webbing). HDPE, poster, no-curl, canvas, and stands ship without that finishing dock.",
+    a: "Only HD Banner and Mesh have finishing options: welding, grommets, pole pockets, and webbing on mesh. HDPE, poster, no-curl, canvas, and stands ship without finishing.",
   },
   {
     q: "Are there size limits besides 10' × 10'?",
@@ -39,7 +40,7 @@ const FAQS = [
     q: "What if my banner arrives late?",
     a: "Delivery timing begins after order submission and manual payment confirmation. If your banner misses that estimate, email support and we'll review your order.",
   },
-  { q: "Do you ship outside the United States?", a: "No — V1 ships within the United States only." },
+  { q: "Do you ship outside the United States?", a: "No. We ship within the United States only." },
 ];
 
 const HELP_NEEDS: ReadonlyArray<{
@@ -89,18 +90,22 @@ const HELP_NEEDS: ReadonlyArray<{
 export default function HelpPage() {
   return (
     <div className="bg-surface-tint min-h-[60vh]">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <h1 className="font-display text-section-h2 text-ink leading-section-h2 mb-md text-center">
-          Help center
-        </h1>
-        <p className="text-body text-ink-muted text-center mb-2xl max-w-2xl mx-auto">
-          We support by email — reach us at support@bannersin48.com.
-        </p>
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl">
+        <PageHeader
+          title="Help center"
+          intro="Pick the right banner, check what we accept, or write to us. Support is by email."
+          actions={
+            <a href="mailto:support@bannersin48.com">
+              <Button variant="secondary" size="md">
+                <Mail className="mr-xs h-4 w-4" aria-hidden />
+                support@bannersin48.com
+              </Button>
+            </a>
+          }
+        />
 
-        <section className="mb-2xl" aria-labelledby="which-banner-h">
-          <h2 id="which-banner-h" className="font-bold text-heading-h4 text-ink mb-md text-center">
-            Which banner?
-          </h2>
+        <section className="mb-3xl" aria-labelledby="which-banner-h">
+          <SectionHeading id="which-banner-h" level="sub" title="Which banner do I need?" className="mb-lg" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
             {HELP_NEEDS.map((need) => (
               <VisualCategoryCard
@@ -114,32 +119,28 @@ export default function HelpPage() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 max-w-md mx-auto mb-2xl">
-          <Card className="bg-surface text-center">
-            <Mail className="h-8 w-8 text-link mx-auto" aria-hidden />
-            <h2 className="font-bold text-ink mt-sm">Email support</h2>
-            <p className="text-body-sm text-ink-muted">support@bannersin48.com</p>
-            <a href="mailto:support@bannersin48.com" className="inline-block mt-md">
-              <Button variant="cta" size="md">Send email</Button>
-            </a>
-          </Card>
-        </div>
-
-        <h2 id="faq" className="font-bold text-heading-h4 text-ink mb-md text-center">Quick answers</h2>
-        <ul className="max-w-2xl mx-auto space-y-sm">
-          {FAQS.map((f) => (
-            <li key={f.q} className="bg-surface rounded-feature p-md border border-line">
-              <p className="font-bold text-ink">{f.q}</p>
-              <p className="text-body-sm text-ink-muted mt-xs">{f.a}</p>
-            </li>
-          ))}
-        </ul>
-
-        <div className="text-center mt-2xl">
-          <Link href="/orders" className="text-link text-body-sm hover:underline">
-            Track an order <ChevronRight className="inline h-3 w-3" aria-hidden />
-          </Link>
-        </div>
+        <section aria-labelledby="faq" className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
+          <div className="lg:col-span-4">
+            <SectionHeading
+              id="faq"
+              level="sub"
+              title="Common questions"
+              intro={
+                <>
+                  Looking for an order you placed? <Link href="/orders">Track it from your account</Link>.
+                </>
+              }
+            />
+          </div>
+          <dl className="lg:col-span-8 border-t border-line">
+            {FAQS.map((f) => (
+              <div key={f.q} className="border-b border-line py-lg">
+                <dt className="font-bold text-body text-ink font-body">{f.q}</dt>
+                <dd className="mt-xs text-body text-ink-muted max-w-[70ch]">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </div>
     </div>
   );

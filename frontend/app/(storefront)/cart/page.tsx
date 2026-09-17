@@ -1,5 +1,7 @@
 "use client";
 
+import { PagePrompt } from "@/components/ui/page-prompt";
+import { PageHeader } from "@/components/ui/page-header";
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,7 +10,6 @@ import { requoteLine, retryLine, revertLine, revalidateQuotes } from "@/lib/cart
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
-import { ChevronRight, ShoppingBag } from "lucide-react";
 import { CartLineRow } from "@/components/cart/CartLineRow";
 
 export default function CartPage() {
@@ -26,36 +27,21 @@ export default function CartPage() {
 
   if (lines.length === 0) {
     return (
-      <div className="bg-surface-tint min-h-[60vh] flex items-center justify-center p-md">
-        <div className="bg-surface rounded-card p-3xl text-center max-w-md">
-          <ShoppingBag className="h-10 w-10 text-ink-muted mx-auto mb-md" aria-hidden />
-          <h1 className="font-display text-section-h2 text-ink leading-section-h2">Your cart is empty</h1>
-          <p className="text-body text-ink-muted mt-md">
-            Build a banner in under 3 minutes and it will show up here.
-          </p>
-          <Link href="/order">
-            <Button variant="cta" size="lg" className="mt-xl">Start an order</Button>
-          </Link>
-        </div>
-      </div>
+      <PagePrompt title="Your cart is empty" detail="Build a banner and it will show up here, with its price and delivery date.">
+        <Link href="/order">
+          <Button variant="cta" size="lg">Start your order</Button>
+        </Link>
+      </PagePrompt>
     );
   }
 
   return (
     <div className="bg-surface-tint min-h-[60vh]">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-xl">
-        <nav className="text-body-sm text-ink-muted mb-md" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-link no-underline">Home</Link>
-          <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
-          <span aria-current="page">Cart</span>
-        </nav>
-        <h1 className="font-display text-section-h2 text-ink leading-section-h2 mb-md">
-          Your cart
-        </h1>
-        <p className="text-body text-ink-muted mb-2xl">
-          Review your configuration. Prices are quoted by the server and refresh
-          automatically if a quote expires. We&rsquo;ll save it while you sign in at checkout.
-        </p>
+        <PageHeader
+          title="Your cart"
+          intro="Check each banner before checkout. Prices come from a live quote and refresh on their own if one expires."
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
           <div className="lg:col-span-8 space-y-md">
@@ -76,7 +62,7 @@ export default function CartPage() {
 
           <div className="lg:col-span-4">
             <Card className="bg-surface sticky top-20">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Order summary</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Order summary</h2>
               <dl className="text-sm space-y-xs">
                 <Row label="Subtotal" value={formatUsd(totals.subtotal)} />
                 <Row label="Shipping" value={formatUsd(totals.shipping)} />

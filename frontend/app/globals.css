@@ -58,36 +58,7 @@
     --color-badge-warning-text: #F57C00;
     --color-badge-error-bg: #FFEBEE;
     --color-badge-error-text: #CF2E2E;
-    --radius-none: 0px;
-    --radius-sm: 6px;
-    --radius-modal: 8px;
     --radius-button: 10px;
-    --radius-feature: 16px;
-    --radius-card: 16px;
-    --radius-pill: 100px;
-    --shadow-nav: 0 1px 0 rgba(16, 24, 40, 0.06);
-    --shadow-level-1: 0 1px 2px rgba(16, 24, 40, 0.05);
-    --shadow-level-2: 0 4px 12px rgba(16, 24, 40, 0.08);
-    --shadow-level-3: 0 8px 24px rgba(16, 24, 40, 0.12);
-    --shadow-level-4: 0 16px 40px rgba(16, 24, 40, 0.16);
-    --shadow-focus: 0 0 0 4px rgba(203, 16, 121, 0.25);
-    --shadow-focus-small: 0 0 0 3px rgba(203, 16, 121, 0.2);
-    --space-micro: 4px;
-    --space-xs: 8px;
-    --space-sm: 12px;
-    --space-md: 16px;
-    --space-md-lg: 20px;
-    --space-lg: 24px;
-    --space-xl: 32px;
-    --space-2xl: 40px;
-    --space-3xl: 64px;
-    --space-4xl: 80px;
-    --container-content: 1200px;
-    --container-hero: 1440px;
-    --bp-mobile: 320px;
-    --bp-tablet: 600px;
-    --bp-desktop: 1024px;
-    --bp-desktop-lg: 1400px;
     --z-tab-bar: 40;
     --z-dropdown: 50;
     --z-sticky: 60;
@@ -186,32 +157,6 @@
   outline-offset: 2px;
 }
 
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-.marquee-track {
-  animation: marquee-scroll 28s linear infinite;
-}
-
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-    flex-wrap: wrap;
-    width: 100%;
-    justify-content: center;
-  }
-}
-
 @media (max-width: 1023px) {
   .desktop-nav {
     display: none;
@@ -225,17 +170,6 @@
   .mobile-tab-bar {
     display: none;
   }
-}
-
-.serwist-offline-ready {
-  background: var(--color-bg-soft-accent);
-  color: var(--color-text-dark);
-  padding: 8px 16px;
-  border-radius: var(--radius-button);
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  z-index: 100;
 }
 
 @layer utilities {

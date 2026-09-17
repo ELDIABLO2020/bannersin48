@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/comm
 import type { Request } from "express";
 import { JwtAuthGuard } from "../common/jwt-auth.guard";
 import { CurrentUser } from "../common/current-user.decorator";
+import { ipOf } from "../common/client-ip";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderDetail, OrderListItem } from "./orders.service";
@@ -14,7 +15,7 @@ export class OrdersController {
 
   @Post()
   create(@CurrentUser() user: AuthedUser, @Body() dto: CreateOrderDto, @Req() req: Request): Promise<OrderDetail> {
-    const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.ip;
+    const ip = ipOf(req);
     return this.orders.create(user.id, dto, ip);
   }
 

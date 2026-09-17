@@ -42,7 +42,6 @@ export function useBuilderQuote() {
         finishing: debounced.finishing,
         quantity: debounced.quantity,
       }),
-    enabled: true,
   });
 
   const displayTotal = data?.total ?? optimistic.totalBeforeTax;
@@ -50,15 +49,5 @@ export function useBuilderQuote() {
   const billableSqFt = data?.lines[0]?.billableSqFt ?? optimistic.billableSqFt;
   const ineligibilityReason = data?.lines[0]?.ineligibilityReason ?? optimistic.ineligibilityReason;
 
-  return {
-    material,
-    size,
-    displayTotal,
-    eligible,
-    billableSqFt,
-    isFetching,
-    optimistic,
-    data,
-    ineligibilityReason,
-  };
+  return { displayTotal, eligible, billableSqFt, isFetching, ineligibilityReason };
 }

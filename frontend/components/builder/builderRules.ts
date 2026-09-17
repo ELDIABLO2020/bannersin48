@@ -49,20 +49,6 @@ export interface ControlEligibility {
   reason?: string;
 }
 
-export function sizeToDimensions(size: SizeState): Dimensions {
-  return {
-    widthFt: size.widthFt,
-    widthIn: size.widthIn,
-    heightFt: size.heightFt,
-    heightIn: size.heightIn,
-  };
-}
-
-/** Double-sided print is only offered on 18oz (VINYL_18OZ_DOUBLE). */
-export function canSelectDoubleSided(material: Material): boolean {
-  return material === "VINYL_18OZ_DOUBLE" || material === "VINYL_18OZ_SINGLE";
-}
-
 export function isDoubleSided(material: Material): boolean {
   return material === "VINYL_18OZ_DOUBLE";
 }
@@ -94,7 +80,7 @@ export function getControlEligibility(
     return { enabled: false, reason: "Not available for this product." };
   }
 
-  const dims = sizeToDimensions(size);
+  const dims: Dimensions = size;
 
   switch (control) {
     case "sides":

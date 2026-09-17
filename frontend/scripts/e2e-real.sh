@@ -2,10 +2,10 @@
 # Wave 11 release E2E orchestration (`npm run e2e:real`).
 #
 # Runs the canonical customer scenarios against the REAL NestJS backend backed
-# by Postgres 16 + Redis 7 (backend/docker-compose.yml). Lifecycle:
+# by Postgres 16 (backend/docker-compose.yml). Lifecycle:
 #
 #   1. preflight (docker + daemon reachable)
-#   2. docker compose up (postgres + redis)
+#   2. docker compose up (postgres)
 #   3. prisma migrate deploy + idempotent seed
 #   4. build + start the Nest API (PORT 3001)
 #   5. build + start the Next frontend WITHOUT mocks (PORT 3000)
@@ -33,7 +33,7 @@ echo "── Wave 11 release E2E against the real backend ──"
 
 # 1. Preflight: docker + reachable daemon.
 if ! command -v docker >/dev/null 2>&1; then
-  echo "BLOCKER: docker is not installed. e2e:real requires Postgres 16 + Redis 7" >&2
+  echo "BLOCKER: docker is not installed. e2e:real requires Postgres 16" >&2
   echo "         (see backend/docker-compose.yml). Install Docker and retry." >&2
   exit 2
 fi
@@ -53,7 +53,7 @@ source "${REPO_ROOT}/backend/.env"
 set +a
 
 # 2. Infra.
-echo "Starting Postgres + Redis…"
+echo "Starting Postgres…"
 docker compose -f "${REPO_ROOT}/backend/docker-compose.yml" up -d
 for i in $(seq 1 60); do
   if docker compose -f "${REPO_ROOT}/backend/docker-compose.yml" exec -T postgres \

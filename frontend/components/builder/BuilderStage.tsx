@@ -23,7 +23,6 @@ export function BuilderStage() {
   const productId = useConfigurator((s) => s.productId);
   const finishing = useConfigurator((s) => s.finishing);
   const artworkPreviewUrl = useConfigurator((s) => s.artworkPreviewUrl);
-  const fitMode = useConfigurator((s) => s.fitMode);
   const setPickerOpen = useConfigurator((s) => s.setPickerOpen);
 
   const pasteboardRef = useRef<HTMLDivElement>(null);
@@ -114,7 +113,7 @@ export function BuilderStage() {
         }}
       >
         {/* Corner */}
-        <div className="pointer-events-none flex items-center justify-center border-b border-r border-line bg-surface text-[9px] font-bold uppercase tracking-wide text-ink-muted">
+        <div className="pointer-events-none flex items-center justify-center border-b border-r border-line bg-surface text-[9px] font-bold text-ink-muted">
           W/H ft
         </div>
 
@@ -197,7 +196,7 @@ export function BuilderStage() {
                         backgroundImage: `url(${artworkPreviewUrl})`,
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
-                        backgroundSize: fitMode === "fit" ? "contain" : "cover",
+                        backgroundSize: "contain",
                       }
                     : undefined
                 }
@@ -211,7 +210,7 @@ export function BuilderStage() {
                   className="absolute inset-6 border-2 border-dashed border-line rounded-feature flex flex-col items-center justify-center gap-sm px-sm text-center text-ink-muted hover:border-strong-accent hover:text-strong-accent transition-colors"
                 >
                   <ImageIcon className="h-8 w-8" aria-hidden />
-                  <span className="text-sm font-bold uppercase tracking-wide">
+                  <span className="text-sm font-bold">
                     Specify dimensions or click to select an image
                   </span>
                   <span className="text-xs">Upload or pick from your library</span>
@@ -252,11 +251,7 @@ export function BuilderStage() {
                   className="pointer-events-none absolute inset-x-3 h-1 rounded-full bg-strong-accent/70"
                   style={{
                     top:
-                      finishing.ropePlacement === "BOTTOM"
-                        ? "auto"
-                        : finishing.ropePlacement === "TOP_AND_BOTTOM"
-                          ? "0.75rem"
-                          : "0.75rem",
+                      finishing.ropePlacement === "BOTTOM" ? "auto" : "0.75rem",
                     bottom:
                       finishing.ropePlacement === "BOTTOM" || finishing.ropePlacement === "TOP_AND_BOTTOM"
                         ? "0.75rem"
@@ -269,7 +264,7 @@ export function BuilderStage() {
               {finishing.polePockets && (
                 <div
                   data-testid="pocket-indicator"
-                  className="pointer-events-none absolute inset-x-0 top-0 bg-soft-accent/80 text-center text-[10px] font-bold uppercase tracking-wide text-ink py-1"
+                  className="pointer-events-none absolute inset-x-0 top-0 bg-soft-accent/80 text-center text-[10px] font-bold text-ink py-1"
                 >
                   Pole pocket {finishing.polePocketDepthIn ?? 2}&quot; ·{" "}
                   {(finishing.polePocketPlacement ?? "").replace(/_/g, " ")}

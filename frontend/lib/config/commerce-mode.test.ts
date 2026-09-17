@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCommerceMode, validateCommerceEnvironment } from "./commerce-mode";
+import { parseCommerceMode, validateCommerceEnvironment } from "@/scripts/lib/commerce-rules.mjs";
 
 describe("commerce mode configuration", () => {
   it("defaults to the locked internal manual mode", () => {

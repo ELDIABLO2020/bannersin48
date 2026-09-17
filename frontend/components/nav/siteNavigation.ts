@@ -16,9 +16,7 @@ const PRODUCT_ITEMS: ReadonlyArray<SiteNavigationItem> = [
     href: `/order/${PRODUCTS[id].slug}`,
     label: PRODUCTS[id].title,
   })),
-  { href: "/sizes", label: "All Sizes & Pricing" },
-  { href: "/order", label: "Order a banner" },
-  { href: "/help", label: "Artwork Guidelines" },
+  { href: "/sizes", label: "Sizes and pricing" },
 ];
 
 export const SITE_NAVIGATION_GROUPS: ReadonlyArray<SiteNavigationGroup> = [
@@ -27,23 +25,20 @@ export const SITE_NAVIGATION_GROUPS: ReadonlyArray<SiteNavigationGroup> = [
     items: PRODUCT_ITEMS,
   },
   {
-    title: "Company",
-    items: [{ href: "/#guarantee", label: "Delivery information" }],
-  },
-  {
     title: "Support",
     items: [
-      { href: "/help", label: "Help Center" },
-      { href: "/help", label: "FAQs" },
-      { href: "/orders", label: "Track Your Orders" },
-      { href: "mailto:support@bannersin48.com", label: "Email Support" },
+      { href: "/help", label: "Help center" },
+      { href: "/how-it-works", label: "How it works" },
+      { href: "/#guarantee", label: "Delivery information" },
+      { href: "/orders", label: "Track an order" },
+      { href: "mailto:support@bannersin48.com", label: "Email support" },
     ],
   },
   {
     title: "Account",
     items: [
-      { href: "/login", label: "Log In" },
-      { href: "/register", label: "Create Account" },
+      { href: "/login", label: "Log in" },
+      { href: "/register", label: "Create an account" },
       { href: "/dashboard", label: "Reorder" },
     ],
   },

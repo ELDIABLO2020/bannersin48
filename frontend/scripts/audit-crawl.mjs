@@ -56,7 +56,6 @@ export function isCrawlable(url, baseUrl) {
   const base = new URL(baseUrl);
   if (url.origin !== base.origin) return false;
   const path = url.pathname;
-  if (path.startsWith("/api/")) return false; // proxied to the (possibly absent) backend
   if (path.startsWith("/_next/")) return false; // build artifacts
   return true;
 }

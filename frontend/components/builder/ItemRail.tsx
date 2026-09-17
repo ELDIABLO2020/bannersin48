@@ -35,11 +35,11 @@ export function ItemRail() {
               className="w-full text-left"
             >
               <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] uppercase tracking-wider text-ink-muted font-bold">
+                <span className="text-xs text-ink-muted font-bold">
                   Item #{index + 1}
                 </span>
                 {ok && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] text-success-fg font-bold">
+                  <span className="inline-flex items-center gap-0.5 text-xs text-success-fg font-bold">
                     <Check className="h-3 w-3" aria-hidden />
                     OK
                   </span>
@@ -53,7 +53,7 @@ export function ItemRail() {
                     : undefined
                 }
               />
-              <p className="mt-xs text-[11px] text-ink truncate">
+              <p className="mt-xs text-xs text-ink truncate">
                 {PRODUCTS[sign.productId]?.sizeMode === "fixed" &&
                 PRODUCTS[sign.productId]?.fixedSizeIn
                   ? formatInchesWH(
@@ -62,8 +62,8 @@ export function ItemRail() {
                     )
                   : formatDimensionsWH(sign.size)}
               </p>
-              <p className="text-[10px] text-ink-muted truncate">{materialLabel(sign.material)}</p>
-              <p className="text-[10px] text-ink-muted">Qty {sign.quantity}</p>
+              <p className="text-xs text-ink-muted truncate">{materialLabel(sign.material)}</p>
+              <p className="text-xs text-ink-muted">Qty {sign.quantity}</p>
             </button>
             {signs.length > 1 && (
               <button
@@ -84,7 +84,7 @@ export function ItemRail() {
         type="button"
         data-testid="add-sign"
         onClick={() => addSign()}
-        className="shrink-0 w-28 min-h-[5.5rem] rounded-feature border border-dashed border-strong-accent bg-surface text-ink hover:bg-strong-accent hover:text-strong-accent-fg flex flex-col items-center justify-center gap-1 text-[11px] font-bold uppercase tracking-wide transition-colors"
+        className="shrink-0 w-28 min-h-[5.5rem] rounded-feature border border-dashed border-strong-accent bg-surface text-ink hover:bg-strong-accent hover:text-strong-accent-fg flex flex-col items-center justify-center gap-1 text-xs font-bold transition-colors"
       >
         <Plus className="h-4 w-4" aria-hidden />
         Add sign
@@ -95,15 +95,15 @@ export function ItemRail() {
         data-testid="open-color-match"
         onClick={() => setColorMatchOpen(true)}
         className={cn(
-          "shrink-0 w-28 rounded-feature border p-sm text-left text-[11px] transition-colors",
+          "shrink-0 w-28 rounded-feature border p-sm text-left text-xs transition-colors",
           colorMatching
             ? "border-strong-accent bg-soft-accent text-ink"
             : "border-line bg-surface text-ink-muted hover:border-strong-accent",
         )}
       >
         <Palette className="h-3.5 w-3.5 mb-1" aria-hidden />
-        <span className="font-bold uppercase tracking-wide block">Color match</span>
-        <span className="text-[10px]">{colorMatching ? "PMS notes saved" : "Optional PMS"}</span>
+        <span className="font-bold block">Color match</span>
+        <span className="text-xs">{colorMatching ? "PMS notes saved" : "Optional PMS"}</span>
       </button>
     </div>
   );

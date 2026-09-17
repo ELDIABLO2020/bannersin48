@@ -4,6 +4,7 @@ import { JwtAuthGuard } from "../common/jwt-auth.guard";
 import { RolesGuard } from "../common/roles.guard";
 import { Roles } from "../common/roles.decorator";
 import { CurrentUser } from "../common/current-user.decorator";
+import { ipOf } from "../common/client-ip";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { PricingAdminService } from "./pricing-admin.service";
 import {
@@ -160,8 +161,4 @@ export class PricingAdminController {
   ) {
     return this.pricing.deleteVolumeTier(user.id, id, ipOf(req));
   }
-}
-
-function ipOf(req: Request): string | undefined {
-  return (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.ip;
 }

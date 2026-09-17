@@ -7,10 +7,13 @@ import { useCart } from "@/lib/stores/cart";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatUsd } from "@/lib/utils/format";
-import { RETRACTABLE, MAX_QUANTITY_PER_LINE, formatInchesWH } from "@bannersin48/shared";
+import { RETRACTABLE, MAX_QUANTITY_PER_LINE, SHIPPING_FLAT_PER_UNIT_USD, formatInchesWH } from "@bannersin48/shared";
+import { cartLineFromQuote } from "@/lib/cart/quoteState";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PageHeader } from "@/components/ui/page-header";
+import { placeholders } from "@/content/placeholders";
 import { getApiClient } from "@/lib/api/client";
 import { ImagePickerOverlay } from "@/components/builder/ImagePickerOverlay";
 
@@ -30,33 +33,27 @@ export default function RetractableConfiguratorPage() {
   }, [setProduct]);
 
   const unitPrice = RETRACTABLE.priceUsd;
-  const shipping = 10 * quantity;
+  const shipping = SHIPPING_FLAT_PER_UNIT_USD * quantity;
   const total = unitPrice * quantity + shipping;
 
   return (
     <div className="bg-surface-tint min-h-[60vh]">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-xl">
-        <nav className="text-body-sm text-ink-muted mb-md" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-link no-underline">Home</Link>
-          <span className="mx-1" aria-hidden>/</span>
-          <Link href="/order" className="hover:text-link no-underline">Order</Link>
-          <span className="mx-1" aria-hidden>/</span>
-          <span className="text-ink">Retractable</span>
-        </nav>
-        <h1 className="font-display text-section-h2 text-ink leading-section-h2 mb-md">
-          Retractable banner
-        </h1>
-        <p className="mb-xl max-w-2xl text-body text-ink-muted">
-          A portable, professional display for trade shows, retail spaces, presentations, and
-          events. The stand, printed graphic, and carrying case are included.
-        </p>
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl">
+        <PageHeader
+          trail={[
+            { href: "/", label: "Home" },
+            { href: "/order", label: "Order" },
+          ]}
+          title="Retractable banner"
+          intro="A portable full-height display for trade shows, retail, and events. The stand, printed graphic, and carrying case are included."
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
           <div className="lg:col-span-7 space-y-lg">
             <ProductGallery />
 
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-sm">Specifications</h2>
+              <h2 className="text-heading-h4 text-ink mb-sm">Specifications</h2>
               <dl className="text-body-sm space-y-xs">
                 <Row label="Size" value={formatInchesWH(RETRACTABLE.widthIn, RETRACTABLE.heightIn)} />
                 <Row label="Hardware" value="Retractable stand + carrying case (included)" />
@@ -66,7 +63,7 @@ export default function RetractableConfiguratorPage() {
             </Card>
 
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-sm">Artwork (required)</h2>
+              <h2 className="text-heading-h4 text-ink mb-sm">Artwork (required)</h2>
               <p className="text-body-sm text-ink-muted mb-md">
                 {artworkFileName ?? "Select the completed file to print."}
               </p>
@@ -76,7 +73,7 @@ export default function RetractableConfiguratorPage() {
             </Card>
 
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-sm">Quantity</h2>
+              <h2 className="text-heading-h4 text-ink mb-sm">Quantity</h2>
               <div className="flex items-center gap-md">
                 <Button
                   variant="secondary"
@@ -107,7 +104,7 @@ export default function RetractableConfiguratorPage() {
               <p className="text-3xl font-bold text-ink mt-xs tabular-nums">{formatUsd(total)}</p>
               <dl className="mt-md text-sm space-y-xs">
                 <Row label="Product" value={formatUsd(unitPrice * quantity)} />
-                <Row label={`Shipping (${quantity} × $10)`} value={formatUsd(shipping)} />
+                <Row label={`Shipping (${quantity} × ${formatUsd(SHIPPING_FLAT_PER_UNIT_USD)})`} value={formatUsd(shipping)} />
                 <div className="border-t border-line my-sm" />
                 <Row label="Total before tax" value={formatUsd(total)} bold />
               </dl>
@@ -129,32 +126,13 @@ export default function RetractableConfiguratorPage() {
                       finishing,
                       quantity,
                     });
-                    const line = quote.lines[0];
-                    if (!line) return;
-                    addLine({
-                      id: `cart_${Date.now()}`,
-                      product: "retractable",
-                      productId: "RETRACTABLE",
-                      material: "RETRACTABLE",
-                      dimensions,
-                      finishing,
-                      quantity,
-                      artworkId,
-                      quoteId: quote.quoteId,
-                      quoteValidUntil: quote.validUntil,
-                      currency: quote.currency,
-                      unitProduct: line.unitProduct,
-                      addons: line.addons,
-                      productSubtotal: line.productSubtotal,
-                      shipping: line.shipping,
-                      totalBeforeTax: line.totalBeforeTax,
-                      billableSqFt: line.billableSqFt,
-                      billableDims: line.billableDims,
-                      display: {
-                        requestedLabel: formatInchesWH(RETRACTABLE.widthIn, RETRACTABLE.heightIn),
-                        billableLabel: "Fixed size",
-                      },
-                    });
+                    const cartLine = cartLineFromQuote(
+                      `cart_${Date.now()}`,
+                      { productId: "RETRACTABLE", material: "RETRACTABLE", dimensions, finishing, quantity, artworkId },
+                      quote,
+                    );
+                    if (!cartLine) return;
+                    addLine(cartLine);
                     router.push("/cart");
                   } finally {
                     setAdding(false);
@@ -201,19 +179,13 @@ function ProductGallery() {
 
       <div className="relative aspect-[16/9] min-h-[260px] overflow-hidden">
         <Image
-          src="/images/placeholders/industry-events.jpg"
-          alt="Large printed banner display welcoming guests to a professional event"
+          src={placeholders.catalogEconostand.src}
+          alt="Retractable banner stand with a printed graphic in a building lobby"
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 58vw"
-          className="object-cover object-[65%_center]"
+          className="object-cover"
         />
-        <div className="absolute inset-x-md bottom-md max-w-sm rounded-card bg-surface-dark/90 p-md text-ink-light backdrop-blur-sm">
-          <p className="font-display text-heading-h4 font-bold uppercase">Made to stand out</p>
-          <p className="mt-xs text-body-sm text-ink-light/80">
-            Portable full-height event display.
-          </p>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-px bg-line-subtle sm:grid-cols-2">
@@ -228,8 +200,8 @@ function ProductGallery() {
             />
           </div>
           <figcaption className="p-md">
-            <p className="font-bold text-ink">Artwork checked</p>
-            <p className="mt-xs text-body-sm text-ink-muted">PDF or JPEG files accepted.</p>
+            <p className="font-bold text-ink">You check the file</p>
+            <p className="mt-xs text-body-sm text-ink-muted">Upload a JPEG, PNG, or PDF and review it at checkout.</p>
           </figcaption>
         </figure>
 

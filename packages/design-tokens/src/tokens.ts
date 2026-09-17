@@ -118,6 +118,8 @@ export const typography = {
   fontSize: {
     heroH1: 64,
     sectionH2: 48,
+    headingH2: 32,
+    headingH3: 24,
     headingH4: 20,
     headingH5: 16,
     body: 16,
@@ -127,7 +129,9 @@ export const typography = {
   },
   lineHeight: {
     heroH1: 64,
-    sectionH2: 56,
+    sectionH2: 52,
+    headingH2: 36,
+    headingH3: 28,
     headingH4: 28,
     headingH5: 24,
     body: 28,

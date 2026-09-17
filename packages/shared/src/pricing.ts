@@ -1,14 +1,13 @@
-import { z } from "zod";
 import {
   ADDON_RATES,
   SHIPPING_FLAT_PER_UNIT_USD,
   WEBBING_PER_WIDTH_FT_PER_EDGE_USD,
 } from "./constants";
 import { billableDimensions, type Dimensions } from "./dimensions";
-import { materialSchema, type Material } from "./material";
+import type { Material } from "./material";
 import type { Finishing } from "./finishing";
 import type { Quantity } from "./quantity";
-import { PRODUCTS, productIdForMaterial, productIdSchema, validateProductSize, type ProductId } from "./product";
+import { PRODUCTS, productIdForMaterial, validateProductSize, type ProductId } from "./product";
 
 /**
  * Pricing engine from the plan §9.
@@ -154,42 +153,3 @@ export function priceOrder(lines: PricingInput[], rates?: PricingRates): Pricing
   const total = round2(subtotal + shipping);
   return { lines: priced, subtotal, shipping, total };
 }
-
-/**
- * Zod schema for a quote request, used by both backend pipes and frontend forms.
- */
-export const pricingRequestSchema = z
-  .object({
-    productId: productIdSchema.optional(),
-    material: materialSchema,
-    dimensions: z
-      .object({
-        widthFt: z.number().int().min(0),
-        widthIn: z.number().int().min(0).max(11),
-        heightFt: z.number().int().min(0),
-        heightIn: z.number().int().min(0).max(11),
-      })
-      .strict(),
-    finishing: z
-      .object({
-        welding: z.boolean(),
-        grommets: z.boolean(),
-        windSlits: z.boolean(),
-        polePockets: z.boolean(),
-        polePocketPlacement: z
-          .enum(["RIGHT", "LEFT", "LEFT_AND_RIGHT", "BOTTOM", "TOP", "TOP_AND_BOTTOM"])
-          .optional(),
-        polePocketDepthIn: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
-        rope: z.boolean().optional().default(false),
-        ropePlacement: z.enum(["TOP", "BOTTOM", "TOP_AND_BOTTOM"]).optional(),
-        grommetPreset: z.enum(["CORNERS", "TOP_AND_BOTTOM", "ALL_SIDES", "CUSTOM"]).optional(),
-        grommetSpacing: z.enum(["EVERY_2FT", "EVERY_3FT", "EVERY_2_3FT"]).optional(),
-        grommetPoints: z
-          .array(z.object({ xIn: z.number().nonnegative(), yIn: z.number().nonnegative() }).strict())
-          .optional(),
-        webbing: z.boolean().optional().default(false),
-      })
-      .strict(),
-    quantity: z.number().int().min(1).max(10),
-  })
-  .strict();

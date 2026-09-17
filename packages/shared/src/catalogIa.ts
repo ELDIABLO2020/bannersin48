@@ -11,15 +11,6 @@ export const CATALOG_NAV_PRODUCTS: ReadonlyArray<ProductId> = [
   "RETRACTABLE",
 ];
 
-export const CATALOG_BANNER_IDS: ReadonlyArray<ProductId> = [
-  "HD_BANNER",
-  "HDPE",
-  "MESH",
-  "POSTER",
-  "NO_CURL",
-  "CANVAS",
-];
-
 export const CATALOG_STAND_IDS: ReadonlyArray<ProductId> = ["ECONOSTAND", "RETRACTABLE"];
 
 export type CatalogNeedId = "indoor" | "outdoor" | "windy" | "lay-flat" | "art" | "stand";
@@ -130,6 +121,3 @@ export function productOrderHref(id: ProductId, query?: string): string {
   return query ? `${base}?${query}` : base;
 }
 
-export function isStandProduct(id: ProductId): boolean {
-  return id === "ECONOSTAND" || id === "RETRACTABLE";
-}

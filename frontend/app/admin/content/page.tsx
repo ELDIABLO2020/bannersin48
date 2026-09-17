@@ -1,5 +1,6 @@
 "use client";
 
+import { blockTypeLabel } from "@/lib/admin/labels";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminApiClient } from "@/lib/api/adminClient";
@@ -146,8 +147,10 @@ export default function AdminContentPage() {
     <div className="space-y-xl">
       <div className="flex items-start justify-between gap-md">
         <div>
-          <p className="text-body-sm text-ink-muted">CMS</p>
-          <h1 className="font-display text-section-h2 text-ink">Site content</h1>
+          <h1 className="font-display text-[clamp(36px,5vw,48px)] leading-[1.08] text-ink">Site content</h1>
+          <p className="text-body-sm text-ink-muted">
+            The storefront header shows the published <code>announcement</code> and <code>promo_strip</code> blocks.
+          </p>
         </div>
         <Button variant="secondary" onClick={() => requestSelect(null)}>New block</Button>
       </div>
@@ -158,7 +161,7 @@ export default function AdminContentPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
         <Card className="lg:col-span-4 bg-surface p-md h-fit">
-          <h2 className="font-bold text-ink mb-sm">Blocks</h2>
+          <h2 className="text-ink mb-sm">Blocks</h2>
           {blocks.isLoading ? (
             <p className="text-ink-muted text-body-sm" role="status">Loading blocks…</p>
           ) : (blocks.data ?? []).length === 0 ? (
@@ -177,7 +180,7 @@ export default function AdminContentPage() {
                     <span className="font-bold text-ink truncate">{block.key}</span>
                     <Badge variant={block.published ? "success" : "neutral"}>{block.published ? "Live" : "Draft"}</Badge>
                   </div>
-                  <p className="text-xs text-ink-muted mt-xs">{block.blockType.replace("_", " ")}</p>
+                  <p className="text-xs text-ink-muted mt-xs">{blockTypeLabel(block.blockType)}</p>
                 </button>
               ))}
             </div>
@@ -185,7 +188,7 @@ export default function AdminContentPage() {
         </Card>
 
         <Card className="lg:col-span-8 bg-surface p-lg">
-          <h2 className="font-bold text-heading-h4 text-ink mb-md">{selected ? `Edit ${selected}` : "Create block"}</h2>
+          <h2 className="text-heading-h4 text-ink mb-md">{selected ? `Edit ${selected}` : "Create block"}</h2>
 
           <div className="space-y-md">
             <label className="block" htmlFor="block-key">
@@ -208,7 +211,7 @@ export default function AdminContentPage() {
                 onChange={(e) => { setBlockType(e.target.value as BlockType); setDirty(true); }}
               >
                 {BLOCK_TYPES.map((type) => (
-                  <option key={type} value={type}>{type.replace("_", " ")}</option>
+                  <option key={type} value={type}>{blockTypeLabel(type)}</option>
                 ))}
               </select>
             </label>
@@ -280,7 +283,7 @@ export default function AdminContentPage() {
 
       {/* Live preview of the structured payload. */}
       <Card className="bg-surface p-lg">
-        <h2 className="font-bold text-heading-h4 text-ink mb-md">Preview</h2>
+        <h2 className="text-heading-h4 text-ink mb-md">Preview</h2>
         <ContentPreview blockType={blockType} payload={payload} />
       </Card>
 
@@ -359,7 +362,7 @@ function ContentPreview({ blockType, payload }: { blockType: BlockType; payload:
   // TEXT
   return (
     <div className="rounded-feature bg-surface p-md border border-line-subtle max-w-prose">
-      {stringField(payload.heading) && <h3 className="font-bold text-heading-h4 text-ink mb-sm">{stringField(payload.heading)}</h3>}
+      {stringField(payload.heading) && <h3 className="text-heading-h4 text-ink mb-sm">{stringField(payload.heading)}</h3>}
       <p className="text-body text-ink whitespace-pre-wrap">{stringField(payload.text) || "Body text"}</p>
     </div>
   );

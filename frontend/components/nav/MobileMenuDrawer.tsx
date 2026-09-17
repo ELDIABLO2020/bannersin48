@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { ArrowRight, X } from "lucide-react";
+import { X } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
@@ -227,7 +227,6 @@ export function MobileMenuDrawer({
           <Link href="/order" onClick={onClose}>
             <Button variant="cta" size="block" className="w-full">
               Order now
-              <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
             </Button>
           </Link>
         </div>

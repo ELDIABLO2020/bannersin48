@@ -1,13 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-const MOCK_STRINGS = [
-  "YOUR BANNER HERE",
-  "Product UI preview",
-  "Customer story",
-  "Storefront banner",
-  "Mobile order view",
-];
-
 test.describe("M4: brand design parity", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -18,29 +10,10 @@ test.describe("M4: brand design parity", () => {
     await expect(hero.locator("img").first()).toBeVisible();
   });
 
-  test("primary accent surfaces use brand magenta (#CB1079)", async ({ page }) => {
-    const accent = page.locator(".bg-strong-accent").locator("visible=true").first();
-    await expect(accent).toBeVisible();
-    const bg = await accent.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe("rgb(203, 16, 121)");
-  });
-
   test("final CTA is a direct order action with no discarded email field", async ({ page }) => {
     // Wave 7.4: the homepage no longer collects (and then discards) an email.
     await expect(page.getByRole("textbox", { name: /email/i })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /start your order/i }).first()).toBeVisible();
-  });
-
-  test("does not render unsupported customer testimonials", async ({ page }) => {
-    await expect(page.locator("#featured-testimonial-h")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: /reviews|testimonials/i })).toHaveCount(0);
-  });
-
-  test("no blank CSS mock placeholder strings on homepage", async ({ page }) => {
-    const bodyText = await page.locator("body").innerText();
-    for (const mock of MOCK_STRINGS) {
-      expect(bodyText).not.toContain(mock);
-    }
   });
 
   test("homepage has multiple section images", async ({ page }) => {

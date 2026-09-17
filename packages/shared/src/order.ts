@@ -110,13 +110,6 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   CANCELLED: "Cancelled",
 };
 
-export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
-  PENDING_PAYMENT: "Payment pending",
-  MARKED_PAID: "Payment confirmed",
-  PAID: "Paid",
-  REFUNDED: "Refunded",
-};
-
 export const ORDER_TIMELINE: ReadonlyArray<{
   key: string;
   label: string;

@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   getControlEligibility,
   materialForPrintSides,
-  canSelectDoubleSided,
   isDoubleSided,
   visibleTiles,
 } from "./builderRules";
@@ -23,8 +22,6 @@ describe("builderRules", () => {
         finishing: DEFAULT_FINISHING,
       }).enabled,
     ).toBe(false);
-    expect(canSelectDoubleSided("VINYL_13OZ_SINGLE")).toBe(false);
-    expect(canSelectDoubleSided("VINYL_18OZ_SINGLE")).toBe(true);
   });
 
   it("maps print sides to 18oz double material", () => {

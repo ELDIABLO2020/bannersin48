@@ -140,7 +140,7 @@ export function SizePanel() {
               )}
             >
               <span className="font-bold text-ink">{s.label}</span>
-              <span className="block text-[11px] text-ink-muted">{s.sqFt} sq ft</span>
+              <span className="block text-xs text-ink-muted">{s.sqFt} sq ft</span>
             </button>
           ))}
         </div>
@@ -164,9 +164,9 @@ function Axis({
 }) {
   return (
     <fieldset className="space-y-1">
-      <legend className="text-xs font-bold uppercase tracking-wide text-ink-muted">{label}</legend>
+      <legend className="text-xs font-bold text-ink-muted">{label}</legend>
       <div className="flex gap-1">
-        <label className="flex-1 text-[10px] text-ink-muted">
+        <label className="flex-1 text-xs text-ink-muted">
           ft
           <input
             type="number"
@@ -178,7 +178,7 @@ function Axis({
             className="mt-0.5 w-full rounded-btn border border-line px-2 py-1.5 text-sm tabular-nums"
           />
         </label>
-        <label className="flex-1 text-[10px] text-ink-muted">
+        <label className="flex-1 text-xs text-ink-muted">
           in
           <input
             type="number"
@@ -212,17 +212,17 @@ function OrientationDiagram({ size }: { size: { widthFt: number; widthIn: number
       className="rounded-card border border-line bg-surface-tint px-sm py-sm"
     >
       <div className="flex items-center justify-between gap-sm">
-        <p className="text-xs font-bold uppercase tracking-wide text-ink-muted">Orientation</p>
-        <span className="rounded-pill bg-soft-accent px-sm py-micro text-[11px] font-bold uppercase text-ink">
+        <p className="text-xs font-bold text-ink-muted">Orientation</p>
+        <span className="rounded-pill bg-soft-accent px-sm py-micro text-xs font-bold text-ink">
           {orientationLabel(orientation)}
         </span>
       </div>
       <div className="mt-sm flex min-h-[80px] items-center justify-center">
         <div className="relative">
-          <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase text-ink-muted">
+          <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold text-ink-muted">
             W
           </span>
-          <span className="absolute -left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase text-ink-muted">
+          <span className="absolute -left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-ink-muted">
             H
           </span>
           <div

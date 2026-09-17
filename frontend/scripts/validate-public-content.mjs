@@ -1,17 +1,9 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { UNSAFE_CUSTOMER_CONTENT as UNSAFE_PATTERNS } from "./lib/unsafe-content.mjs";
 
 const ROOTS = ["app", "components", "content"];
-const UNSAFE_PATTERNS = [
-  /\bstubbed\b/i,
-  /\bmock backend\b/i,
-  /\bphase\s+(?:1\.5|2|3)\b/i,
-  /\bdemo (?:password|credentials|account)\b/i,
-  /\bplaceholder proof\b/i,
-  /\brepresentative placeholders?\b/i,
-  /\breal feedback from verified customers\b/i,
-];
 
 async function sourceFiles(root) {
   const entries = await fs.readdir(root, { withFileTypes: true });

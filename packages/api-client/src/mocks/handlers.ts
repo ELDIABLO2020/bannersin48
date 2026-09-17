@@ -1,17 +1,17 @@
 /**
  * MSW request handlers — mock backend for frontend development & E2E.
- * Run with `npm run mocks` (configured in frontend).
+ * Enabled in the frontend with NEXT_PUBLIC_ENABLE_MOCKS=1.
  *
  * Important: do NOT import node-only modules here. MSW handlers run in both
  * Node (Vitest) and the browser (via msw/browser + service worker).
  */
 
 import { http, HttpResponse } from "msw";
-import { computeNextCutoff, store } from "./fixtures";
+import { store } from "./fixtures";
 import {
+  computeNextCutoff,
   priceOrder,
   type Order,
-  ORDER_STATUS_LABELS,
   PRODUCTS,
   BANNER_HUB_ORDER,
   productBySlug,
@@ -50,6 +50,9 @@ export const handlers = [
   http.get(`${API}/delivery/next-cutoff`, () => {
     return HttpResponse.json(computeNextCutoff());
   }),
+
+  // --- Site content: the mock backend has no published CMS blocks ---
+  http.get(`${API}/content`, () => HttpResponse.json([])),
 
   // --- Pricing engine ---
   http.post(`${API}/pricing/quote`, async ({ request }) => {
@@ -93,10 +96,6 @@ export const handlers = [
   }),
 
   // --- Catalog ---
-  http.get(`${API}/sizes/popular`, () => {
-    return HttpResponse.json(store["popularSizes" as keyof typeof store] ?? []);
-  }),
-
   http.get(`${API}/catalog/banner`, () =>
     HttpResponse.json(
       BANNER_HUB_ORDER.map((id) => {
@@ -482,5 +481,3 @@ export const handlers = [
     });
   }),
 ];
-
-export { ORDER_STATUS_LABELS };

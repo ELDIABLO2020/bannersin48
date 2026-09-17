@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeader } from "@/components/ui/page-header";
+import { roleLabel } from "@/lib/admin/labels";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -31,10 +33,7 @@ export default function AdminCustomersPage() {
 
   return (
     <div className="space-y-xl">
-      <div>
-        <p className="text-body-sm text-ink-muted">Customer management</p>
-        <h1 className="font-display text-section-h2 text-ink">Customers</h1>
-      </div>
+      <PageHeader title="Customers" className="mb-0" />
 
       <Card className="bg-surface p-lg">
         <form
@@ -65,7 +64,7 @@ export default function AdminCustomersPage() {
             >
               <option value="">All roles</option>
               {ROLES.map((r) => (
-                <option key={r} value={r}>{r.replace("_", " ")}</option>
+                <option key={r} value={r}>{roleLabel(r)}</option>
               ))}
             </select>
           </label>
@@ -112,7 +111,7 @@ export default function AdminCustomersPage() {
                       </Link>
                       <p className="text-xs text-ink-muted">{customer.email}</p>
                     </td>
-                    <td><Badge variant={customer.role === "CUSTOMER" ? "neutral" : "info"}>{customer.role.replace("_", " ")}</Badge></td>
+                    <td><Badge variant={customer.role === "CUSTOMER" ? "neutral" : "info"}>{roleLabel(customer.role)}</Badge></td>
                     <td className="text-ink tabular-nums">{customer.orderCount}</td>
                     <td className="text-ink tabular-nums">{customer.rewardsPoints}</td>
                     <td className="text-ink-muted">{new Date(customer.createdAt).toLocaleDateString()}</td>

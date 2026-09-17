@@ -1,63 +1,35 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Clock3, FileCheck2, MapPinned, Truck } from "lucide-react";
-import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { SectionHeading } from "@/components/ui/section-heading";
 
-const METRICS = [
-  { icon: Clock3, value: "9 PM ET", label: "daily order cutoff" },
-  { icon: Truck, value: "48 hr", label: "business-hour delivery estimate" },
-  { icon: MapPinned, value: "USA", label: "FedEx delivery region" },
-  { icon: FileCheck2, value: "3 types", label: "JPEG, PNG, PDF" },
+const FACTS = [
+  { term: "Daily cutoff", detail: "9:00 PM Eastern" },
+  { term: "Turnaround", detail: "48 business hours, delivered by noon" },
+  { term: "Delivery", detail: "FedEx, United States only" },
+  { term: "Artwork files", detail: "JPEG, PNG, or PDF" },
 ] as const;
 
 export function GuaranteePanel() {
   return (
     <section id="guarantee" className="bg-surface" aria-labelledby="guarantee-h">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
-        <ScrollReveal
-          className="grid grid-cols-1 gap-lg lg:grid-cols-[1fr_420px]"
-          selector=".gp-row"
-        >
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
-            {METRICS.map((metric) => {
-              const Icon = metric.icon;
-              return (
-                <article
-                  key={metric.label}
-                  className="gp-row rounded-card border border-line bg-surface p-lg text-center shadow-elev-1"
-                >
-                  <Icon className="mx-auto h-8 w-8 text-ink-muted" aria-hidden />
-                  <p className="mt-md font-display text-[clamp(32px,4vw,48px)] leading-none text-ink tabular-nums uppercase">
-                    {metric.value}
-                  </p>
-                  <p className="mt-sm text-sm text-ink-muted">{metric.label}</p>
-                </article>
-              );
-            })}
-          </div>
-
-          <div className="gp-row rounded-card border border-strong-accent bg-[linear-gradient(135deg,var(--color-bg-accent-tint),var(--color-bg-lightest))] p-xl shadow-elev-2">
-            <BadgeCheck className="h-12 w-12 text-strong-accent" aria-hidden />
-            <h2
-              id="guarantee-h"
-              className="mt-md font-display tracking-tight text-[34px] leading-tight text-ink uppercase"
-            >
-              Our 48-hour promise
-            </h2>
-            <p className="mt-md text-body text-ink-muted">
-              Delivery timing begins after order submission and manual payment confirmation.
-              FedEx delivery within the United States on our 48-business-hour schedule.
-            </p>
-            <Link
-              href="/help"
-              className="mt-lg inline-flex items-center gap-xs text-sm font-semibold text-link hover:underline"
-            >
-              Learn how delivery works
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-          </div>
-        </ScrollReveal>
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl grid grid-cols-1 lg:grid-cols-12 gap-2xl">
+        <div className="lg:col-span-5">
+          <SectionHeading
+            id="guarantee-h"
+            title="What the 48 hours covers"
+            intro="The clock starts once your order is submitted and staff have confirmed your payment. From there it runs on business hours until FedEx delivers."
+          />
+          <Link href="/help" className="mt-lg inline-block text-body-sm font-bold text-link font-body">
+            Read how delivery works
+          </Link>
+        </div>
+        <dl className="lg:col-span-7 border-t border-line">
+          {FACTS.map((fact) => (
+            <div key={fact.term} className="grid grid-cols-[10rem_1fr] gap-md border-b border-line py-md">
+              <dt className="text-body-sm text-ink-muted font-body">{fact.term}</dt>
+              <dd className="font-display text-heading-h3 text-ink">{fact.detail}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

@@ -117,7 +117,7 @@ export function ImagePickerOverlay() {
 
         {!auth.user ? (
           <div className="p-xl text-center">
-            <h3 className="font-bold text-heading-h4 text-ink">Sign in to use artwork</h3>
+            <h3 className="text-heading-h4 text-ink">Sign in to use artwork</h3>
             <p className="mt-sm text-body-sm text-ink-muted">
               Artwork is private to an account. Your current configuration will remain in this browser.
             </p>
@@ -209,7 +209,7 @@ export function ImagePickerOverlay() {
                   />
                   <p className="mt-1 text-xs font-bold text-ink truncate">{item.filename}</p>
                   {item.widthPx && item.heightPx && (
-                    <p className="text-[10px] text-ink-muted">
+                    <p className="text-xs text-ink-muted">
                       {item.widthPx}×{item.heightPx}px · {item.dpi ?? ARTWORK_DEFAULT_DPI} DPI
                     </p>
                   )}

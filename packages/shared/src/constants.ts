@@ -6,8 +6,6 @@
 export const CUTOFF_HOUR_ET = 21; // 9:00 PM Eastern Time
 export const CUTOFF_MINUTE_ET = 0;
 export const TIMEZONE_ET = "America/New_York";
-export const DELIVERY_HOUR_LOCAL = 12; // 12:00 PM noon (local FedEx delivery)
-export const DELIVERY_MINUTE = 0;
 
 export const MAX_BILLABLE_FT = 10;
 export const MIN_BILLABLE_FT = 1;
@@ -186,7 +184,6 @@ export const COLOR_MATCH_DELAY_MESSAGE =
 
 export const WEBBING_HELP =
   "Webbing reinforces the top and bottom welds. Recommended for mesh banners wider than 8 ft.";
-export const ROPE_HELP = "Nylon cord welded into the banner edge with slack on both ends.";
 export const POCKET_DIAMETER_HELP =
   "Pole pocket size is the diameter of the pole. We add the material needed to fit that pole; the pocket is welded.";
 export const DS_WELD_BORDER_MSG =

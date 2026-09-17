@@ -16,12 +16,9 @@ import {
   pixelsToDimensions,
   isWindSlitsEligible,
   MAX_QUANTITY_PER_LINE,
-  MAX_BILLABLE_FT,
   DS_WELD_BORDER_MSG,
   DS_POCKETS_BLEED_MSG,
 } from "@bannersin48/shared";
-
-export type FitMode = "fit" | "center";
 
 export interface SizeState {
   widthFt: number;
@@ -41,7 +38,6 @@ export interface SignDraft {
   artworkFileName: string | null;
   artworkPreviewUrl: string | null;
   colorMatching?: ColorMatching;
-  fitMode: FitMode;
   aspectLocked: boolean;
 }
 
@@ -77,7 +73,6 @@ export interface ConfiguratorState {
   artworkFileName: string | null;
   artworkPreviewUrl: string | null;
   colorMatching?: ColorMatching;
-  fitMode: FitMode;
   aspectLocked: boolean;
 
   setProduct: (p: ProductId) => void;
@@ -94,16 +89,13 @@ export interface ConfiguratorState {
     meta?: { widthPx?: number; heightPx?: number; dpi?: number; autoSize?: boolean },
   ) => void;
   setColorMatching: (notes: string | null) => void;
-  setFitMode: (mode: FitMode) => void;
   setAspectLocked: (locked: boolean) => void;
   setGrommetPoints: (points: GrommetPoint[]) => void;
-  clearFinishingMessage: () => void;
   flashMessage: (msg: string | null) => void;
 
   addSign: () => void;
   removeSign: (id: string) => void;
   selectSign: (id: string) => void;
-  duplicateActiveSign: () => void;
 
   setActiveDockPanel: (panel: DockPanel) => void;
   setPickerOpen: (open: boolean) => void;
@@ -130,7 +122,6 @@ export function createDefaultSign(partial?: Partial<SignDraft>): SignDraft {
     artworkFileName: null,
     artworkPreviewUrl: null,
     colorMatching: undefined,
-    fitMode: "fit",
     aspectLocked: true,
     ...partial,
   };
@@ -147,7 +138,6 @@ function mirrorFromSign(sign: SignDraft) {
     artworkFileName: sign.artworkFileName,
     artworkPreviewUrl: sign.artworkPreviewUrl,
     colorMatching: sign.colorMatching,
-    fitMode: sign.fitMode,
     aspectLocked: sign.aspectLocked,
   };
 }
@@ -259,10 +249,8 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
       return { productId, ...patch };
     }),
 
-  setMaterial: (m) =>
+  setMaterial: (material) =>
     set((state) => {
-      let material = m;
-      if (m === "VINYL_18OZ_DOUBLE") material = "VINYL_18OZ_DOUBLE";
       const extras =
         material === "VINYL_18OZ_DOUBLE" ? { lastFinishingMessage: DS_WELD_BORDER_MSG } : {};
       const next = updateActive(state, { material }, extras);
@@ -368,13 +356,6 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
       return next;
     }),
 
-  setFitMode: (fitMode) =>
-    set((state) => {
-      const next = updateActive(state, { fitMode });
-      persistSession(next.signs as SignDraft[], state.activeSignId);
-      return next;
-    }),
-
   setAspectLocked: (aspectLocked) =>
     set((state) => {
       const next = updateActive(state, { aspectLocked });
@@ -397,7 +378,6 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
       return next;
     }),
 
-  clearFinishingMessage: () => set({ lastFinishingMessage: null }),
   flashMessage: (msg) => set({ lastFinishingMessage: msg }),
 
   addSign: () =>
@@ -436,7 +416,6 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
       return { activeSignId: id, ...mirrorFromSign(active) };
     }),
 
-  duplicateActiveSign: () => get().addSign(),
 
   setActiveDockPanel: (panel) => set({ activeDockPanel: panel }),
   setPickerOpen: (open) => set({ pickerOpen: open }),
@@ -464,5 +443,3 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
     });
   },
 }));
-
-export { MAX_BILLABLE_FT, MAX_QUANTITY_PER_LINE };

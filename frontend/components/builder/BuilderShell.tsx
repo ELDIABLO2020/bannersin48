@@ -20,18 +20,18 @@ export function BuilderShell({
     <div
       data-testid="builder-shell"
       className={cn(
-        "min-h-[calc(100vh-4rem)] bg-soft-accent",
+        "min-h-[calc(100vh-4rem)] bg-surface-tint",
         className,
       )}
     >
-      <div className="mx-auto max-w-content px-md lg:px-xl py-md lg:py-lg">
-        <div className="grid grid-cols-1 min-[901px]:grid-cols-[7.5rem_minmax(0,1fr)_16rem] gap-md lg:gap-lg min-h-[70vh]">
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-md lg:py-lg">
+        <div className="grid grid-cols-1 min-[901px]:grid-cols-[8rem_minmax(0,1fr)_18rem] gap-md lg:gap-lg">
           {/* Mobile order: price → stage/dock → rail. Desktop: rail | stage/dock | price */}
           <aside className="order-1 min-[901px]:order-3 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-20">
             {price}
           </aside>
           <div className="order-2 min-[901px]:order-2 flex flex-col gap-md min-w-0">
-            <div className="flex min-h-[280px] flex-1 items-stretch">{stage}</div>
+            <div className="flex h-[clamp(320px,56vh,560px)] items-stretch">{stage}</div>
             <div className="shrink-0">{dock}</div>
           </div>
           <aside className="order-3 min-[901px]:order-1 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-20">

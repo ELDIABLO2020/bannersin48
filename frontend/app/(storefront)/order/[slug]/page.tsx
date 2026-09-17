@@ -1,9 +1,8 @@
 "use client";
 
+import { Breadcrumbs } from "@/components/ui/page-header";
 import { Suspense, useEffect } from "react";
 import { useParams, useSearchParams, notFound } from "next/navigation";
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { productBySlug, resolveSizeParams } from "@bannersin48/shared";
 import { useConfigurator } from "@/lib/stores/configurator";
 import { BuilderShell } from "@/components/builder/BuilderShell";
@@ -64,19 +63,14 @@ function ProductBuilder() {
 
   return (
     <>
-      <div className="bg-surface-tint border-b border-line">
-        <div className="mx-auto max-w-content px-md lg:px-xl pt-md pb-sm">
-          <nav className="text-body-sm text-ink-muted mb-sm" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-link no-underline">
-              Home
-            </Link>
-            <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
-            <Link href="/order" className="hover:text-link no-underline">
-              Order
-            </Link>
-            <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
-            <span aria-current="page">{config.title}</span>
-          </nav>
+      <div className="bg-surface-tint">
+        <div className="mx-auto max-w-content px-md lg:px-2xl pt-lg">
+          <Breadcrumbs
+            trail={[
+              { href: "/", label: "Home" },
+              { href: "/order", label: "Order" },
+            ]}
+          />
         </div>
       </div>
 

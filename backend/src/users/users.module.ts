@@ -7,6 +7,5 @@ import { UsersService } from "./users.service";
   imports: [AuthModule], // re-exports JwtModule used by the auth guard
   controllers: [UsersController],
   providers: [UsersService],
-  exports: [UsersService],
 })
 export class UsersModule {}

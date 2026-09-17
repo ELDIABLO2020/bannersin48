@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeader } from "@/components/ui/page-header";
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -13,8 +14,8 @@ const PAGE_SIZE = 25;
 const LABELS: Record<string, string> = {
   RECEIVED: "New",
   AWAITING_PAYMENT: "Awaiting payment",
-  IN_PROCESSING: "Paid · in processing",
-  ACCEPTED: "Accepted · tracking",
+  IN_PROCESSING: "Paid, in processing",
+  ACCEPTED: "Accepted, tracking added",
   SHIPPED: "Shipped",
   DELIVERED: "Delivered",
   ON_HOLD: "On hold",
@@ -35,10 +36,7 @@ export default function AdminOrderBoardPage() {
 
   return (
     <div className="space-y-xl">
-      <div>
-        <p className="text-body-sm text-ink-muted">Operations</p>
-        <h1 className="font-display text-section-h2 text-ink">Order board</h1>
-      </div>
+      <PageHeader title="Order board" intro="Open orders by stage. Pick a stage to list its orders." className="mb-0" />
 
       {buckets.isError && <ErrorBox error={buckets.error} />}
       <fieldset className="border-0 p-0 m-0">
@@ -71,7 +69,7 @@ export default function AdminOrderBoardPage() {
 
       <Card className="bg-surface p-lg overflow-hidden">
         <div className="flex items-center justify-between mb-md">
-          <h2 className="font-bold text-heading-h4 text-ink">{LABELS[selected] ?? selected}</h2>
+          <h2 className="text-heading-h4 text-ink">{LABELS[selected] ?? selected}</h2>
           <span className="text-body-sm text-ink-muted" aria-live="polite">
             {orders.isLoading ? "Loading…" : `${total} orders`}
           </span>

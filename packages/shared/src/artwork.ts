@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ARTWORK_MIME_TYPES, ARTWORK_MAX_BYTES_DEFAULT, ARTWORK_DEFAULT_DPI } from "./constants";
+import { ARTWORK_MIME_TYPES, ARTWORK_DEFAULT_DPI } from "./constants";
 
 /**
  * Artwork upload rules — PDF, JPG/JPEG, PNG. Max size and DPI configurable.
@@ -19,18 +19,6 @@ export const artworkUploadMetaSchema = z
 
 export type ArtworkMimeType = z.infer<typeof artworkMimeTypeSchema>;
 export type ArtworkUploadMeta = z.infer<typeof artworkUploadMetaSchema>;
-
-export interface ArtworkConfig {
-  maxBytes: number;
-  acceptedMimeTypes: ReadonlyArray<ArtworkMimeType>;
-  recommendedDpi: number;
-}
-
-export const DEFAULT_ARTWORK_CONFIG: ArtworkConfig = {
-  maxBytes: ARTWORK_MAX_BYTES_DEFAULT,
-  acceptedMimeTypes: ARTWORK_MIME_TYPES,
-  recommendedDpi: ARTWORK_DEFAULT_DPI,
-};
 
 export const colorMatchingSchema = z
   .object({
@@ -66,10 +54,6 @@ export const artworkFolderSchema = z
   .strict();
 
 export type ArtworkFolder = z.infer<typeof artworkFolderSchema>;
-
-export function isAcceptedMimeType(mime: string, accepted: ReadonlyArray<ArtworkMimeType>): mime is ArtworkMimeType {
-  return (accepted as ReadonlyArray<string>).includes(mime);
-}
 
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;

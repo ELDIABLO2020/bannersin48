@@ -123,16 +123,7 @@ export const MATERIALS: ReadonlyArray<MaterialInfo> = [
   },
 ];
 
-export function isRetractable(m: Material): boolean {
-  return m === "RETRACTABLE";
-}
-
 export function isVinyl(m: Material): boolean {
   return m.startsWith("VINYL_");
 }
 
-export function materialInfo(m: Material): MaterialInfo {
-  const found = MATERIALS.find((mi) => mi.id === m);
-  if (!found) throw new Error(`Unknown material: ${m}`);
-  return found;
-}

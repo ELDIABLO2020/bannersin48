@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/Hero";
-import { HelpMeChoose } from "@/components/home/HelpMeChoose";
 import { ProductStrip } from "@/components/home/ProductStrip";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { GuaranteePanel } from "@/components/home/GuaranteePanel";
@@ -18,7 +17,6 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <HelpMeChoose />
       <ProductStrip />
       <HowItWorks />
       <GuaranteePanel />

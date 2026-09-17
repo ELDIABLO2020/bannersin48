@@ -3,10 +3,9 @@ import { JwtService } from "@nestjs/jwt";
 import { createHash, randomBytes } from "crypto";
 import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
-import { serializeUser, type SerializedUser } from "../common/user.serializer";
+import { serializeAddress, serializeUser, type SerializedUser } from "../common/user.serializer";
 import type { RegisterDto, LoginDto } from "./auth.dto";
 
-const ACCESS_TOKEN_TTL_SECONDS = 15 * 60; // 15 minutes
 const REFRESH_TOKEN_TTL_DAYS = 30;
 const BCRYPT_ROUNDS = 10;
 
@@ -175,16 +174,7 @@ export class AuthService {
     });
     return serializeUser(
       user,
-      user.addresses.map((a) => ({
-        id: a.id,
-        label: a.label,
-        line1: a.line1,
-        line2: a.line2,
-        city: a.city,
-        state: a.state,
-        zip: a.zip,
-        country: a.country,
-      })),
+      user.addresses.map(serializeAddress),
     );
   }
 
@@ -227,10 +217,8 @@ export class AuthService {
   }
 }
 
-export function splitFullName(fullName: string): { firstName: string; lastName: string } {
+function splitFullName(fullName: string): { firstName: string; lastName: string } {
   const parts = fullName.trim().split(/\s+/);
   if (parts.length === 1) return { firstName: parts[0]!, lastName: "" };
   return { firstName: parts.slice(0, -1).join(" "), lastName: parts.at(-1)! };
 }
-
-export { ACCESS_TOKEN_TTL_SECONDS };

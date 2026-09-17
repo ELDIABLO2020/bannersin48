@@ -39,7 +39,7 @@ export function RateMatrix({
   material,
   className,
   showShippingNote = false,
-  title = "Pricing and shipping",
+  title = "Rate per sq ft",
 }: {
   material: Material;
   className?: string;
@@ -47,13 +47,13 @@ export function RateMatrix({
   title?: string;
 }) {
   return (
-    <div data-testid="rate-matrix" className={cn("text-[11px] text-ink-muted", className)}>
-      <p className="font-bold text-ink uppercase tracking-wide text-[10px] mb-1.5 underline underline-offset-2 decoration-line">
+    <div data-testid="rate-matrix" className={cn("text-body-sm text-ink-muted", className)}>
+      <p className="font-bold text-ink text-body-sm mb-1">
         {title}
       </p>
       <table className="w-full border-collapse">
         <thead>
-          <tr className="text-[10px] uppercase tracking-wide text-ink-muted">
+          <tr className="text-ink-muted">
             <th scope="col" className="pb-1 pr-2 text-left font-normal" />
             <th scope="col" className="pb-1 px-1 text-right font-normal">
               Single-sided
@@ -83,7 +83,7 @@ export function RateMatrix({
         </tbody>
       </table>
       {showShippingNote && (
-        <p className="mt-1.5 text-[10px] text-ink-muted">
+        <p className="mt-1.5 text-xs text-ink-muted">
           Shipping ${SHIPPING_FLAT_PER_UNIT_USD.toFixed(0)} / banner
         </p>
       )}

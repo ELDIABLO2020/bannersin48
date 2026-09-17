@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { serializeUser, type SerializedUser, type SerializedAddress } from "../common/user.serializer";
+import { serializeAddress, serializeUser, type SerializedUser, type SerializedAddress } from "../common/user.serializer";
 import type { AddressDto, UpdateProfileDto } from "./users.dto";
 
 @Injectable()
@@ -96,26 +96,4 @@ export class UsersService {
       throw new NotFoundException("Address not found.");
     }
   }
-}
-
-function serializeAddress(a: {
-  id: string;
-  label: string | null;
-  line1: string;
-  line2: string | null;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-}): SerializedAddress {
-  return {
-    id: a.id,
-    label: a.label,
-    line1: a.line1,
-    line2: a.line2,
-    city: a.city,
-    state: a.state,
-    zip: a.zip,
-    country: a.country,
-  };
 }

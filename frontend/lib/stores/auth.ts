@@ -8,7 +8,6 @@ interface AuthState {
   user: User | null;
   token: string | null;
   setAuth: (user: User, token: string) => void;
-  setUser: (user: User | null) => void;
   clear: () => void;
 }
 
@@ -23,7 +22,6 @@ export const useAuth = create<AuthState>()(
         }
         set({ user, token });
       },
-      setUser: (user) => set({ user }),
       clear: () => {
         if (typeof window !== "undefined") {
           window.localStorage.removeItem("bi48.token");

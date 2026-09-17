@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findUnsafeCustomerContent } from "./unsafe-content";
+import { findUnsafeCustomerContent } from "@/scripts/lib/unsafe-content.mjs";
 
 describe("unsafe customer content validation", () => {
   it.each([

@@ -8,7 +8,7 @@
  * and StatusHeroCard).
  */
 
-import { colors, radius, shadow, spacing, breakpoints, container, zIndex } from "./tokens";
+import { colors, radius, zIndex } from "./tokens";
 
 export const cssVarName = {
   // ── Backgrounds ────────────────────────────────────────────────────────
@@ -86,44 +86,7 @@ export const cssVarName = {
   badgeErrorText: "--color-badge-error-text",
 
   // ── Radius ─────────────────────────────────────────────────────────────
-  radiusNone: "--radius-none",
-  radiusSm: "--radius-sm",
-  radiusModal: "--radius-modal",
   radiusButton: "--radius-button",
-  radiusFeature: "--radius-feature",
-  radiusCard: "--radius-card",
-  radiusPill: "--radius-pill",
-
-  // ── Shadows ────────────────────────────────────────────────────────────
-  shadowNav: "--shadow-nav",
-  shadowL1: "--shadow-level-1",
-  shadowL2: "--shadow-level-2",
-  shadowL3: "--shadow-level-3",
-  shadowL4: "--shadow-level-4",
-  shadowFocus: "--shadow-focus",
-  shadowFocusSmall: "--shadow-focus-small",
-
-  // ── Spacing ────────────────────────────────────────────────────────────
-  spaceMicro: "--space-micro",
-  spaceXs: "--space-xs",
-  spaceSm: "--space-sm",
-  spaceMd: "--space-md",
-  spaceMdLg: "--space-md-lg",
-  spaceLg: "--space-lg",
-  spaceXl: "--space-xl",
-  space2xl: "--space-2xl",
-  space3xl: "--space-3xl",
-  space4xl: "--space-4xl",
-
-  // ── Containers ─────────────────────────────────────────────────────────
-  containerContent: "--container-content",
-  containerHero: "--container-hero",
-
-  // ── Breakpoints (read via media queries, but expose for JS) ─────────────
-  bpMobile: "--bp-mobile",
-  bpTablet: "--bp-tablet",
-  bpDesktop: "--bp-desktop",
-  bpDesktopLg: "--bp-desktop-lg",
 
   // ── Z-index ────────────────────────────────────────────────────────────
   zTabBar: "--z-tab-bar",
@@ -211,44 +174,7 @@ export const cssVars: Record<string, string> = {
   [cssVarName.badgeErrorText]: colors.badgeErrorText,
 
   // Radius
-  [cssVarName.radiusNone]: `${radius.none}px`,
-  [cssVarName.radiusSm]: `${radius.sm}px`,
-  [cssVarName.radiusModal]: `${radius.modal}px`,
   [cssVarName.radiusButton]: `${radius.button}px`,
-  [cssVarName.radiusFeature]: `${radius.featureCard}px`,
-  [cssVarName.radiusCard]: `${radius.card}px`,
-  [cssVarName.radiusPill]: `${radius.pill}px`,
-
-  // Shadows
-  [cssVarName.shadowNav]: shadow.nav,
-  [cssVarName.shadowL1]: shadow.level1,
-  [cssVarName.shadowL2]: shadow.level2,
-  [cssVarName.shadowL3]: shadow.level3,
-  [cssVarName.shadowL4]: shadow.level4,
-  [cssVarName.shadowFocus]: shadow.focusGlow,
-  [cssVarName.shadowFocusSmall]: shadow.focusGlowSmall,
-
-  // Spacing
-  [cssVarName.spaceMicro]: `${spacing.micro}px`,
-  [cssVarName.spaceXs]: `${spacing.xs}px`,
-  [cssVarName.spaceSm]: `${spacing.sm}px`,
-  [cssVarName.spaceMd]: `${spacing.md}px`,
-  [cssVarName.spaceMdLg]: `${spacing.mdLg}px`,
-  [cssVarName.spaceLg]: `${spacing.lg}px`,
-  [cssVarName.spaceXl]: `${spacing.xl}px`,
-  [cssVarName.space2xl]: `${spacing["2xl"]}px`,
-  [cssVarName.space3xl]: `${spacing["3xl"]}px`,
-  [cssVarName.space4xl]: `${spacing["4xl"]}px`,
-
-  // Containers
-  [cssVarName.containerContent]: `${container.contentMax}px`,
-  [cssVarName.containerHero]: `${container.heroMax}px`,
-
-  // Breakpoints
-  [cssVarName.bpMobile]: `${breakpoints.mobile}px`,
-  [cssVarName.bpTablet]: `${breakpoints.tablet}px`,
-  [cssVarName.bpDesktop]: `${breakpoints.desktop}px`,
-  [cssVarName.bpDesktopLg]: `${breakpoints.desktopLg}px`,
 
   // Z-index
   [cssVarName.zTabBar]: `${zIndex.tabBar}`,

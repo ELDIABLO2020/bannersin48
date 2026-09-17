@@ -2,7 +2,6 @@ import { z } from "zod";
 
 /** Locked V1 geography. */
 export const countrySchema = z.literal("US");
-export type Country = z.infer<typeof countrySchema>;
 
 export const addressSchema = z
   .object({

@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
-import { Type } from "class-transformer";
 import { IsBoolean, IsIn, IsObject, IsOptional, IsString, MaxLength } from "class-validator";
 import { JwtAuthGuard } from "../common/jwt-auth.guard";
 import { RolesGuard } from "../common/roles.guard";
 import { Roles } from "../common/roles.decorator";
 import { CurrentUser } from "../common/current-user.decorator";
+import { ipOf } from "../common/client-ip";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { ContentService, AdminContentService } from "./content-admin.service";
 import { AdminCustomersService } from "./customers-admin.service";
@@ -100,8 +100,4 @@ export class PublicContentController {
   getPublished(@Param("key") key: string) {
     return this.content.getPublished(key);
   }
-}
-
-function ipOf(req: Request): string | undefined {
-  return (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.ip;
 }

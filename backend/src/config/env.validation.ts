@@ -4,7 +4,6 @@
  */
 export interface Env {
   DATABASE_URL: string;
-  REDIS_URL: string;
   JWT_SECRET: string;
   PORT: number;
   NODE_ENV: string;
@@ -15,7 +14,7 @@ export interface Env {
 export function validateEnv(config: Record<string, unknown>): Env {
   const errors: string[] = [];
 
-  for (const required of ["DATABASE_URL", "REDIS_URL", "JWT_SECRET"]) {
+  for (const required of ["DATABASE_URL", "JWT_SECRET"]) {
     if (typeof config[required] !== "string" || (config[required] as string).length === 0) {
       errors.push(`Missing required environment variable: ${required}`);
     }
@@ -35,7 +34,6 @@ export function validateEnv(config: Record<string, unknown>): Env {
 
   return {
     DATABASE_URL: String(config.DATABASE_URL),
-    REDIS_URL: String(config.REDIS_URL ?? "redis://localhost:6379"),
     JWT_SECRET: String(config.JWT_SECRET),
     PORT: Number(config.PORT ?? 3001),
     NODE_ENV: String(config.NODE_ENV ?? "development"),

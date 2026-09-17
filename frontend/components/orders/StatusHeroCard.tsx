@@ -4,15 +4,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Truck, Clock, CheckCircle2, AlertCircle, XCircle, Package, Send, type LucideIcon } from "lucide-react";
 
-const VARIANT: Record<OrderStatus, { bg: string; icon: LucideIcon; tone: "info" | "success" | "warning" | "error" | "neutral" }> = {
-  RECEIVED: { bg: "var(--color-bg-soft-accent)", icon: Package, tone: "info" },
-  AWAITING_PAYMENT: { bg: "var(--color-bg-soft-accent)", icon: Clock, tone: "info" },
-  IN_PROCESSING: { bg: "var(--color-bg-soft-accent)", icon: Package, tone: "info" },
-  ACCEPTED: { bg: "var(--color-strong-accent)", icon: Send, tone: "info" },
-  ON_HOLD: { bg: "var(--color-warning)", icon: AlertCircle, tone: "warning" },
-  SHIPPED: { bg: "var(--color-strong-accent)", icon: Truck, tone: "info" },
-  DELIVERED: { bg: "var(--color-success)", icon: CheckCircle2, tone: "success" },
-  CANCELLED: { bg: "var(--color-error)", icon: XCircle, tone: "error" },
+const VARIANT: Record<OrderStatus, { bg: string; icon: LucideIcon }> = {
+  RECEIVED: { bg: "var(--color-bg-soft-accent)", icon: Package },
+  AWAITING_PAYMENT: { bg: "var(--color-bg-soft-accent)", icon: Clock },
+  IN_PROCESSING: { bg: "var(--color-bg-soft-accent)", icon: Package },
+  ACCEPTED: { bg: "var(--color-strong-accent)", icon: Send },
+  ON_HOLD: { bg: "var(--color-warning)", icon: AlertCircle },
+  SHIPPED: { bg: "var(--color-strong-accent)", icon: Truck },
+  DELIVERED: { bg: "var(--color-success)", icon: CheckCircle2 },
+  CANCELLED: { bg: "var(--color-error)", icon: XCircle },
 };
 
 export function StatusHeroCard({
@@ -43,7 +43,7 @@ export function StatusHeroCard({
           <p className={isLight ? "text-body-sm text-ink-muted" : "text-body-sm text-white/70"}>
             Order {orderNumber}
           </p>
-          <h1 className="font-display font-extrabold tracking-tight text-2xl mt-xs">
+          <h1 className="font-display tracking-tight text-2xl mt-xs">
             {ORDER_STATUS_LABELS[status]}
           </h1>
           {status !== "CANCELLED" && (

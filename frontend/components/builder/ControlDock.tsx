@@ -104,7 +104,7 @@ export function ControlDock() {
           </p>
         )}
 
-        <div className="flex gap-1 overflow-x-auto p-sm border-b border-line">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(4rem,1fr))] gap-1 p-sm border-b border-line">
           {TILES.filter((tile) => shown.includes(tile.control)).map((tile) => {
             const eligibility = getControlEligibility(tile.control, { productId, material, size, finishing });
             const Icon = tile.icon;
@@ -125,7 +125,7 @@ export function ControlDock() {
                   openPanel(tile.id);
                 }}
                 className={cn(
-                  "shrink-0 flex flex-col items-center gap-1 rounded-card px-3 py-2 text-[11px] font-bold min-w-[4.5rem] transition-colors",
+                  "flex min-w-0 flex-col items-center gap-1 rounded-card px-1 py-2 text-center text-xs font-bold leading-tight transition-colors",
                   active ? "bg-soft-accent text-strong-accent" : "text-ink-muted hover:bg-surface-tint hover:text-ink",
                   hardDisabled ? "opacity-40 cursor-help" : "",
                 )}
@@ -171,7 +171,7 @@ export function ControlDock() {
         {activeDockPanel && (
           <div
             data-testid={`dock-panel-${activeDockPanel}`}
-            className="max-h-[min(40vh,22rem)] overflow-y-auto p-md border-t border-line animate-in fade-in"
+            className="max-h-[min(40vh,22rem)] overflow-y-auto p-md border-t border-line animate-fade-in"
           >
             {activeDockPanel === "size" && <SizePanel />}
             {activeDockPanel === "material" && (
@@ -301,7 +301,7 @@ export function ControlDock() {
                 {finishing.polePockets && (
                   <>
                     <p className="text-sm text-ink-muted">{POCKET_DIAMETER_HELP}</p>
-                    <p className="text-xs font-bold uppercase tracking-wide text-ink-muted mt-sm">Depth</p>
+                    <p className="text-xs font-bold text-ink-muted mt-sm">Depth</p>
                     <div className="flex flex-wrap gap-sm">
                       {POLE_POCKET_DEPTH_OPTIONS.map((opt) => (
                         <Toggle
@@ -313,7 +313,7 @@ export function ControlDock() {
                         />
                       ))}
                     </div>
-                    <p className="text-xs font-bold uppercase tracking-wide text-ink-muted mt-sm">Placement</p>
+                    <p className="text-xs font-bold text-ink-muted mt-sm">Placement</p>
                     <div className="flex flex-wrap gap-sm">
                       {POLE_POCKET_PLACEMENT_OPTIONS.map((opt) => (
                         <Toggle

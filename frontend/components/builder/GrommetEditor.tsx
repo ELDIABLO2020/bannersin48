@@ -152,7 +152,7 @@ export function GrommetEditor() {
             className="relative mx-auto w-full max-w-sm aspect-[4/3] rounded-card border border-dashed border-line bg-surface-tint cursor-crosshair"
             style={{ aspectRatio: `${widthIn} / ${heightIn}` }}
           >
-            <p className="absolute inset-x-0 top-2 text-center text-[10px] text-ink-muted pointer-events-none">
+            <p className="absolute inset-x-0 top-2 text-center text-xs text-ink-muted pointer-events-none">
               Click to add · click a dot to remove
             </p>
             {points.map((p, i) => (

@@ -1,5 +1,6 @@
 "use client";
 
+import { priceModelLabel, tierRateLabel } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminApiClient } from "@/lib/api/adminClient";
@@ -69,8 +70,7 @@ export default function AdminPricingPage() {
     <div className="space-y-xl">
       <div className="flex items-start justify-between gap-md">
         <div>
-          <p className="text-body-sm text-ink-muted">Pricing control</p>
-          <h1 className="font-display text-section-h2 text-ink">Products & rates</h1>
+          <h1 className="font-display text-[clamp(36px,5vw,48px)] leading-[1.08] text-ink">Products and rates</h1>
         </div>
         {!canEdit && <Badge variant="neutral">Read only</Badge>}
       </div>
@@ -84,8 +84,8 @@ export default function AdminPricingPage() {
           <Card key={product.id} className="bg-surface p-lg">
             <div className="flex items-center justify-between mb-md">
               <div>
-                <h2 className="font-bold text-heading-h4 text-ink">{product.name}</h2>
-                <p className="text-xs text-ink-muted">{product.code} · {product.sizeMode}</p>
+                <h2 className="text-heading-h4 text-ink">{product.name}</h2>
+                <p className="text-xs text-ink-muted">{product.sizeMode === "FIXED" ? "Fixed size, flat price" : "Custom size, priced per sq ft"}</p>
               </div>
               <div className="flex items-center gap-sm">
                 <Badge variant={product.active ? "success" : "neutral"}>{product.active ? "Active" : "Inactive"}</Badge>
@@ -146,7 +146,7 @@ export default function AdminPricingPage() {
       </section>
 
       <Card className="bg-surface p-lg">
-        <h2 className="font-bold text-heading-h4 text-ink mb-md">Finishing adders</h2>
+        <h2 className="text-heading-h4 text-ink mb-md">Finishing adders</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-body-sm">
             <caption className="sr-only">Finishing option adders and rates</caption>
@@ -163,7 +163,7 @@ export default function AdminPricingPage() {
               {(finishings.data ?? []).map((option) => (
                 <tr key={option.id} className="border-b border-line-subtle last:border-0">
                   <td className="py-sm font-bold text-ink">{option.name}</td>
-                  <td className="text-ink-muted">{option.priceModel.replace("_", " ")}</td>
+                  <td className="text-ink-muted">{priceModelLabel(option.priceModel)}</td>
                   <td className="w-32">
                     <label className="sr-only" htmlFor={`amount-${option.id}`}>Amount for {option.name}</label>
                     <Input
@@ -194,7 +194,7 @@ export default function AdminPricingPage() {
 
       <Card className="bg-surface p-lg">
         <div className="mb-md">
-          <h2 className="font-bold text-heading-h4 text-ink">Volume tiers</h2>
+          <h2 className="text-heading-h4 text-ink">Volume tiers</h2>
           <p className="text-xs text-ink-muted">Discounted rates apply at the minimum billable square footage.</p>
         </div>
         <div className="space-y-sm">
@@ -202,7 +202,7 @@ export default function AdminPricingPage() {
             <div key={tier.id} className="flex flex-wrap items-center justify-between gap-md border border-line-subtle rounded-feature p-md">
               <div>
                 <p className="font-bold text-ink">{tier.minBillableSqft}+ sqft</p>
-                <p className="text-xs text-ink-muted">{JSON.stringify(tier.rates)}</p>
+                <p className="text-xs text-ink-muted">{tierRateLabel(tier.rates)}</p>
               </div>
               {canEdit && (
                 <Button size="sm" variant="ghost" onClick={() => setDeleteTier({ id: tier.id, label: `${tier.minBillableSqft}+ sqft` })}>

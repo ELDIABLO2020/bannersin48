@@ -1,7 +1,7 @@
 # Backend, Dashboard & Database Scope — Banners In 48
 
-Status: DRAFT for review · Created from founder Q&A session
-Frontend is source of truth for UX flows; MSW handlers in `packages/api-client/src/mocks/handlers.ts` define the API contract this backend must implement.
+Status: original scope from the founder Q&A session. The backend in `backend/` now implements the core of it and is the API contract; the MSW handlers in `packages/api-client/src/mocks/handlers.ts` mirror it for frontend development.
+Not built yet: the BullMQ worker and Redis (§15 — the placeholder heartbeat worker was removed until a real background job exists), S3 storage, FedEx, and real email transport.
 
 ---
 

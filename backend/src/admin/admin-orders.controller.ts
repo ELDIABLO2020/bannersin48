@@ -5,6 +5,7 @@ import { JwtAuthGuard } from "../common/jwt-auth.guard";
 import { RolesGuard } from "../common/roles.guard";
 import { Roles } from "../common/roles.decorator";
 import { CurrentUser } from "../common/current-user.decorator";
+import { ipOf } from "../common/client-ip";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { AdminOrdersService } from "./admin-orders.service";
 import { IsIn, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
@@ -107,8 +108,4 @@ export class AdminOrdersController {
       .transitionTo(id, dto.status as never, user.id, dto.reason, ipOf(req))
       .then(() => this.admin.detail(id));
   }
-}
-
-function ipOf(req: Request): string | undefined {
-  return (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.ip;
 }

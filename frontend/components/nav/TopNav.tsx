@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { ArrowRight, ChevronDown, Menu, X, ShoppingCart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, ChevronDown, ShoppingCart } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
+import { useAuth } from "@/lib/stores/auth";
 import { useCart } from "@/lib/stores/cart";
 import { useCartDrawer } from "@/lib/stores/cart-drawer";
 import {
@@ -34,15 +35,18 @@ function navLinkClass(active: boolean) {
 
 export function TopNav() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  // The auth store rehydrates from localStorage, so only trust it after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const signedIn = useAuth((s) => s.user !== null) && mounted;
   const lineCount = useCart((s) => s.lines.reduce((n, l) => n + l.quantity, 0));
   const toggleDrawer = useCartDrawer((s) => s.toggle);
   const bannersActive = pathname === "/order" || pathname.startsWith("/order/");
 
   return (
     <header className="desktop-nav sticky top-0 z-sticky bg-surface border-b border-line shadow-nav" aria-label="Banners In 48 home">
-      <div className="mx-auto max-w-hero flex items-center h-16 px-md lg:px-2xl">
+      <div className="mx-auto max-w-content flex items-center h-16 px-md lg:px-2xl">
         <BrandLogo className="mr-xl" priority />
 
         <nav className="hidden lg:flex items-center gap-xs flex-1">
@@ -115,11 +119,11 @@ export function TopNav() {
             href="/orders"
             className="text-link text-body px-md py-sm hover:underline no-underline font-medium font-body"
           >
-            Track Order
+            Track order
           </Link>
           <div className="flex items-stretch">
             <Link
-              href="/login"
+              href={signedIn ? "/dashboard" : "/login"}
               className={cn(
                 "inline-flex items-center justify-center shrink-0 no-underline",
                 "h-11 rounded-l-pill rounded-r-none border border-line-input border-r-0 px-md",
@@ -128,12 +132,11 @@ export function TopNav() {
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent focus-visible:ring-offset-2",
               )}
             >
-              Log In
+              {signedIn ? "Account" : "Log in"}
             </Link>
             <Link href="/order" className="shrink-0">
               <Button variant="cta-attached" size="attached" className="h-11 sm:h-11 px-md text-sm sm:text-sm">
                 Order now
-                <ArrowRight className="ml-xs h-4 w-4" aria-hidden />
               </Button>
             </Link>
           </div>
@@ -154,80 +157,7 @@ export function TopNav() {
             )}
           </button>
         </div>
-
-        <button
-          type="button"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          className="ml-auto lg:hidden p-sm"
-          onClick={() => setMobileOpen((s) => !s)}
-        >
-          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
       </div>
-
-      {mobileOpen && (
-        <div className="lg:hidden border-t border-line bg-surface shadow-elev-2">
-          <nav className="px-md py-md flex flex-col gap-xs">
-            {CENTER_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="flex items-center justify-between px-md py-sm text-body text-ink hover:bg-soft-accent rounded-btn no-underline font-body"
-                onClick={() => setMobileOpen(false)}
-              >
-                {l.label}
-              </Link>
-            ))}
-            <div className="border-t border-line my-sm" />
-            <button
-              type="button"
-              onClick={() => {
-                setMobileOpen(false);
-                toggleDrawer();
-              }}
-              className="flex items-center justify-between w-full px-md py-sm text-ink hover:bg-soft-accent rounded-btn font-body"
-            >
-              <span className="flex items-center gap-sm">
-                <ShoppingCart className="h-5 w-5" aria-hidden />
-                Cart
-              </span>
-              {lineCount > 0 && (
-                <span className="min-w-[20px] h-5 px-1 rounded-full bg-strong-accent text-white text-xs font-bold flex items-center justify-center">
-                  {lineCount}
-                </span>
-              )}
-            </button>
-            <Link
-              href="/orders"
-              className="px-md py-sm text-link no-underline font-body"
-              onClick={() => setMobileOpen(false)}
-            >
-              Track Order
-            </Link>
-            <div className="flex items-stretch">
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "inline-flex flex-1 items-center justify-center no-underline",
-                  "h-12 sm:h-[54px] rounded-l-pill rounded-r-none border border-line-input border-r-0 px-lg",
-                  "bg-surface text-ink font-input text-sm sm:text-body font-medium",
-                  "hover:bg-soft-accent hover:text-link transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent focus-visible:ring-offset-2",
-                )}
-              >
-                Log In
-              </Link>
-              <Link href="/order" onClick={() => setMobileOpen(false)} className="shrink-0">
-                <Button variant="cta-attached" size="attached">
-                  Order now
-                  <ArrowRight className="ml-sm h-5 w-5" aria-hidden />
-                </Button>
-              </Link>
-            </div>
-          </nav>
-        </div>
-      )}
     </header>
   );
 }

@@ -8,7 +8,7 @@ Speed-first custom banner ordering platform — npm workspaces monorepo.
 |---|---|
 | `frontend/` | Next.js 14 app (App Router, Tailwind, GSAP, PWA) |
 | `packages/` | Shared design tokens, schemas, and API client |
-| `backend/` | NestJS API scaffold (not yet implemented) |
+| `backend/` | NestJS + Prisma API (auth, catalog, pricing, artwork, orders, admin) |
 | `docs/` | Plans, research, and design notes — see [docs/README.md](docs/README.md) |
 | `.github/` | CI workflows |
 
@@ -21,7 +21,7 @@ npm install
 npm run dev
 ```
 
-The frontend runs at [http://localhost:3000](http://localhost:3000). In development, MSW mocks intercept API calls automatically.
+The frontend runs at [http://localhost:3000](http://localhost:3000). Set `NEXT_PUBLIC_ENABLE_MOCKS=1` to have MSW mocks intercept API calls instead of a running backend.
 
 Other useful commands:
 
@@ -50,4 +50,4 @@ Production domain: `https://bannersin48.com` (project `bannersin48-frontend`).
 | `NEXT_PUBLIC_SITE_URL` | `https://bannersin48.com` |
 | `NEXT_PUBLIC_API_BASE_URL` | Backend URL when deployed |
 
-Design tokens (navy foundations, gold CTAs, blue links) live in [`packages/design-tokens/src/tokens.ts`](packages/design-tokens/src/tokens.ts).
+Design tokens (brand magenta, green, and black) live in [`packages/design-tokens/src/tokens.ts`](packages/design-tokens/src/tokens.ts).

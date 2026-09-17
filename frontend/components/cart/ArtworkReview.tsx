@@ -60,7 +60,7 @@ function dpiAdvisory(dpi: number): string {
 export function ArtworkReview({ lines, artworkById, loading, error, onRetry }: ArtworkReviewProps) {
   return (
     <section aria-labelledby="artwork-review-heading" className="space-y-md">
-      <h2 id="artwork-review-heading" className="font-bold text-heading-h4 text-ink">
+      <h2 id="artwork-review-heading" className="text-heading-h4 text-ink">
         Review uploaded artwork
       </h2>
       <p className="text-body-sm text-ink-muted">
@@ -96,7 +96,6 @@ export function ArtworkReview({ lines, artworkById, loading, error, onRetry }: A
           {lines.map((line) => {
             const productId: ProductId =
               (line.productId as ProductId | undefined) ?? productIdForMaterial(line.material);
-            const product = PRODUCTS[productId];
             const art = artworkById.get(line.artworkId);
             const finish = finishingSummary(productId, line.finishing);
             const mat = materialLabel(line.material);

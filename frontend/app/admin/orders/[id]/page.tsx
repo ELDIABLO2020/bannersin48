@@ -1,5 +1,6 @@
 "use client";
 
+import { materialName, orderStatusLabel, paymentStatusLabel } from "@/lib/admin/labels";
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -46,19 +47,17 @@ export default function AdminOrderWorkspacePage() {
   const order = detail.data;
   const ship = order.shipTo ?? {};
 
-  const confirmDescription = (a: ConfirmAction) => a.description;
-
   return (
     <div className="space-y-xl">
       <div className="flex flex-wrap items-start justify-between gap-md">
         <div>
           <Link href="/admin" className="text-body-sm text-link no-underline hover:underline">← Order board</Link>
-          <div className="flex items-center gap-sm mt-xs">
-            <h1 className="font-display text-section-h2 text-ink">{order.orderNumber}</h1>
-            <Badge variant={order.status === "DELIVERED" ? "success" : order.status === "CANCELLED" ? "error" : "info"}>{order.status.replace("_", " ")}</Badge>
+          <div className="flex flex-wrap items-center gap-sm mt-xs">
+            <h1 className="font-display text-[clamp(32px,5vw,48px)] leading-[1.08] text-ink whitespace-nowrap">{order.orderNumber}</h1>
+            <Badge variant={order.status === "DELIVERED" ? "success" : order.status === "CANCELLED" ? "error" : "info"}>{orderStatusLabel(order.status)}</Badge>
             {order.slaBreached && <Badge variant="error">Past SLA</Badge>}
           </div>
-          <p className="text-body-sm text-ink-muted">{order.customer.email} · Payment: {order.paymentStatus.replace("_", " ")}</p>
+          <p className="text-body-sm text-ink-muted">{order.customer.email}. {paymentStatusLabel(order.paymentStatus)}.</p>
         </div>
         <div className="text-right">
           <p className="font-display text-heading-h3 text-ink">${order.total.toFixed(2)}</p>
@@ -71,7 +70,7 @@ export default function AdminOrderWorkspacePage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
         <section className="lg:col-span-8 space-y-lg">
           <Card className="bg-surface p-lg">
-            <h2 className="font-bold text-heading-h4 text-ink mb-md">Configuration & artwork</h2>
+            <h2 className="text-heading-h4 text-ink mb-md">Configuration & artwork</h2>
             <div className="space-y-lg">
               {order.items.map((raw, index) => {
                 const item = raw as Record<string, unknown>;
@@ -80,7 +79,7 @@ export default function AdminOrderWorkspacePage() {
                 return (
                   <div key={String(item.id ?? index)} className="border border-line-subtle rounded-feature p-md">
                     <div className="flex flex-wrap justify-between gap-sm">
-                      <div><p className="font-bold text-ink">{String(item.productName ?? item.description ?? "Banner")}</p><p className="text-body-sm text-ink-muted">{String(item.material ?? "")} · Qty {String(item.quantity ?? "")}</p></div>
+                      <div><p className="font-bold text-ink">{String(item.productName ?? item.description ?? "Banner")}</p><p className="text-body-sm text-ink-muted">{materialName(String(item.material ?? ""))}, qty {String(item.quantity ?? "")}</p></div>
                       <p className="font-bold text-ink">${Number(item.totalBeforeTax ?? 0).toFixed(2)}</p>
                     </div>
                     <dl className="grid grid-cols-2 md:grid-cols-4 gap-sm mt-md text-body-sm">
@@ -107,7 +106,7 @@ export default function AdminOrderWorkspacePage() {
           </Card>
 
           <Card className="bg-surface p-lg">
-            <h2 className="font-bold text-heading-h4 text-ink mb-md">History & audit trail</h2>
+            <h2 className="text-heading-h4 text-ink mb-md">History & audit trail</h2>
             {order.events.length === 0 ? (
               <p className="text-body-sm text-ink-muted">No status events recorded yet.</p>
             ) : (
@@ -115,7 +114,7 @@ export default function AdminOrderWorkspacePage() {
                 {order.events.map((event) => (
                   <li key={event.id} className="flex gap-md text-body-sm">
                     <time className="w-40 shrink-0 text-ink-muted">{new Date(event.createdAt).toLocaleString()}</time>
-                    <div><span className="font-bold text-ink">{event.toStatus.replace("_", " ")}</span>{event.note && <span className="text-ink-muted"> · {event.note}</span>}</div>
+                    <div><span className="font-bold text-ink">{orderStatusLabel(event.toStatus)}</span>{event.note && <span className="text-ink-muted"> · {event.note}</span>}</div>
                   </li>
                 ))}
               </ol>
@@ -125,7 +124,7 @@ export default function AdminOrderWorkspacePage() {
 
         <aside className="lg:col-span-4 space-y-lg">
           <Card className="bg-surface p-lg">
-            <h2 className="font-bold text-heading-h4 text-ink mb-md">Fulfillment checklist</h2>
+            <h2 className="text-heading-h4 text-ink mb-md">Fulfillment checklist</h2>
             <ol className="space-y-lg">
               <Step number="1" title="Payment received" complete={order.paymentStatus !== "PENDING_PAYMENT"}>
                 {order.paymentStatus === "PENDING_PAYMENT" && (
@@ -160,7 +159,7 @@ export default function AdminOrderWorkspacePage() {
                     <label className="sr-only" htmlFor="tracking-number">FedEx tracking number</label>
                     <Input id="tracking-number" placeholder="FedEx tracking number" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
                     <label className="sr-only" htmlFor="label-pdf">Label PDF</label>
-                    <input id="label-pdf" aria-label="Label PDF" type="file" accept="application/pdf" className="text-xs text-ink-muted" onChange={(e) => setLabel(e.target.files?.[0])} />
+                    <input id="label-pdf" aria-label="Label PDF" type="file" accept="application/pdf" className="block w-full text-body-sm text-ink-muted file:mr-sm file:rounded-btn file:border file:border-line-input file:bg-surface file:px-md file:py-xs file:text-body-sm file:font-semibold file:text-ink hover:file:border-strong-accent" onChange={(e) => setLabel(e.target.files?.[0])} />
                     <Button variant="secondary" disabled={trackingNumber.length < 6 || mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().attachTracking(id, { trackingNumber, label }))} className="w-full">Attach tracking</Button>
                   </div>
                 )}
@@ -179,13 +178,13 @@ export default function AdminOrderWorkspacePage() {
           </Card>
 
           <Card className="bg-surface p-lg">
-            <h2 className="font-bold text-heading-h4 text-ink mb-sm">Shipping address</h2>
+            <h2 className="text-heading-h4 text-ink mb-sm">Shipping address</h2>
             <address className="not-italic text-body-sm text-ink-muted leading-relaxed">{String(ship.fullName ?? "")}<br />{String(ship.street1 ?? "")} {String(ship.street2 ?? "")}<br />{String(ship.city ?? "")}, {String(ship.region ?? "")} {String(ship.postalCode ?? "")}<br />{String(ship.country ?? "")}</address>
           </Card>
 
           {!['DELIVERED', 'CANCELLED'].includes(order.status) && (
             <Card className="bg-surface p-lg">
-              <h2 className="font-bold text-ink mb-sm">Exception controls</h2>
+              <h2 className="text-ink mb-sm">Exception controls</h2>
               <label className="sr-only" htmlFor="exception-reason">Reason / note</label>
               <Input id="exception-reason" placeholder="Reason / note" value={reason} onChange={(e) => setReason(e.target.value)} />
               <div className="flex gap-sm mt-sm">
@@ -201,8 +200,8 @@ export default function AdminOrderWorkspacePage() {
         open={confirm != null}
         onOpenChange={(open) => { if (!open) setConfirm(null); }}
         title={confirm?.title ?? ""}
-        description={confirm ? confirmDescription(confirm) : ""}
-        confirmLabel={confirm?.kind === "markPaid" ? "Mark paid" : confirm?.kind === "transition" ? "Confirm" : "Confirm"}
+        description={confirm?.description ?? ""}
+        confirmLabel={confirm?.kind === "markPaid" ? "Mark paid" : "Confirm"}
         destructive={confirm != null && confirm.kind === "transition" && confirm.destructive}
         busy={mutation.isPending}
         onConfirm={() => {

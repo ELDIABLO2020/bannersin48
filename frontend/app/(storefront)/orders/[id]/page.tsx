@@ -64,7 +64,7 @@ export default function OrderDetailPage() {
             />
 
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Tracking</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Tracking</h2>
               {order.fedexTracking ? (
                 <div>
                   <p className="text-sm text-ink-muted">Tracking number</p>
@@ -81,7 +81,7 @@ export default function OrderDetailPage() {
             </Card>
 
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Order details</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Order details</h2>
               <ul className="space-y-md">
                 {order.lines.map((l) => {
                   const productId: ProductId =
@@ -108,7 +108,7 @@ export default function OrderDetailPage() {
             </Card>
 
             <Card className="bg-surface">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Price breakdown</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Price breakdown</h2>
               <dl className="text-sm space-y-xs">
                 <Row label="Subtotal" value={formatUsd(order.subtotal)} />
                 <Row label="Shipping" value={formatUsd(order.shipping)} />
@@ -144,7 +144,7 @@ export default function OrderDetailPage() {
 
           <aside className="lg:col-span-4">
             <Card className="bg-surface sticky top-20">
-              <h2 className="font-bold text-heading-h4 text-ink mb-md">Timeline</h2>
+              <h2 className="text-heading-h4 text-ink mb-md">Timeline</h2>
               <OrderTimeline status={order.status} />
             </Card>
           </aside>

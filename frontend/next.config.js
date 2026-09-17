@@ -2,22 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // Contract: the canonical API URL is read from the env var. In dev, rewrite
-  // /api/* to the backend so the same client code works in both environments.
-  async rewrites() {
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
-    if (!apiBase) return [];
+  // Retired routes. Query strings carry over (e.g. /order/vinyl?width=3 keeps its size).
+  async redirects() {
     return [
-      {
-        source: "/api/:path*",
-        destination: `${apiBase.replace(/\/$/, "")}/:path*`,
-      },
+      { source: "/order/vinyl", destination: "/order/hd-banner", permanent: false },
+      { source: "/order/artwork", destination: "/order", permanent: false },
+      { source: "/faq", destination: "/help", permanent: false },
+      { source: "/orders/lookup", destination: "/orders", permanent: false },
+      { source: "/orders/:id/proof", destination: "/orders/:id", permanent: false },
     ];
-  },
-  images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "**" },
-    ],
   },
 };
 

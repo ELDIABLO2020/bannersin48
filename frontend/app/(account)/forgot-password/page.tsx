@@ -44,10 +44,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <div
-      className="min-h-[80vh] flex items-center justify-center px-md py-3xl"
-      style={{ backgroundColor: "var(--color-bg-soft-accent)" }}
+      className="flex items-start justify-center px-md py-3xl"
     >
-      <Card variant="default" className="bg-surface w-full max-w-md">
+      <Card className="bg-surface w-full max-w-md">
         <h1 className="font-display text-section-h2 text-ink leading-tight">Reset your password</h1>
         <p className="text-body-sm text-ink-muted mt-xs">
           Enter the email for your account and we&apos;ll send you a password reset link.

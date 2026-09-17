@@ -22,6 +22,7 @@ import {
   type CartConfigInput,
   type CartLine,
   type QuoteState,
+  cartLineFromQuote,
 } from "@/lib/cart/quoteState";
 import type { QuoteResponse } from "@bannersin48/api-client";
 
@@ -89,34 +90,13 @@ export const useCart = create<CartState>()(
         set((state) => ({ lines: state.lines.filter((l) => l.id !== id) })),
       clear: () => set({ lines: [] }),
       loadFromReorder: (reorder) => {
-        const lines: CartLine[] = reorder.lines.map((line) => {
-          const productId = line.productId as ProductId;
-          const priced = line.quote.lines[0]!;
-          return normalizeCartLine({
-            id: `cart_${Date.now()}_${line.sourceOrderLineId}`,
-            product: PRODUCTS[productId].slug,
-            productId,
-            material: line.material,
-            dimensions: line.dimensions,
-            finishing: line.finishing,
-            quantity: line.quantity,
-            artworkId: line.artworkId,
-            quoteId: line.quote.quoteId,
-            quoteValidUntil: line.quote.validUntil,
-            currency: line.quote.currency,
-            unitProduct: priced.unitProduct,
-            addons: priced.addons,
-            productSubtotal: priced.productSubtotal,
-            shipping: priced.shipping,
-            totalBeforeTax: priced.totalBeforeTax,
-            tax: line.quote.tax ?? 0,
-            billableSqFt: priced.billableSqFt,
-            billableDims: priced.billableDims,
-            display: {
-              requestedLabel: formatDimensionsWH(line.dimensions),
-              billableLabel: formatBillableWH(priced.billableDims),
-            },
-          });
+        const lines = reorder.lines.flatMap((line) => {
+          const cartLine = cartLineFromQuote(
+            `cart_${Date.now()}_${line.sourceOrderLineId}`,
+            { ...line, productId: line.productId as ProductId },
+            line.quote,
+          );
+          return cartLine ? [normalizeCartLine(cartLine)] : [];
         });
         set({ lines });
       },

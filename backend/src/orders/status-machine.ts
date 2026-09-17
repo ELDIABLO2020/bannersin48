@@ -5,7 +5,7 @@ import type { OrderStatus } from "@prisma/client";
  * The §4 status machine, enforced here (service layer). Every transition is
  * recorded in order_events by OrdersService.transition.
  */
-export const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   RECEIVED: ["IN_PROCESSING", "ON_HOLD", "CANCELLED"],
   AWAITING_PAYMENT: ["IN_PROCESSING", "ON_HOLD", "CANCELLED"],
   IN_PROCESSING: ["ACCEPTED", "ON_HOLD", "CANCELLED"],

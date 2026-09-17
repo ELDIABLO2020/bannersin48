@@ -1,8 +1,6 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { createHash, randomBytes } from "crypto";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
-import { EmailService } from "../notifications/email.service";
 import type { BlockType } from "@prisma/client";
 
 const VALID_BLOCK_TYPES = ["BANNER_IMAGE", "TEXT", "ANNOUNCEMENT", "PROMO_STRIP"];

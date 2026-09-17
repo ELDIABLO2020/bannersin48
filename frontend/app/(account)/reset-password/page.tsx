@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useState, type InputHTMLAttributes } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -8,9 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { getApiClient } from "@/lib/api/client";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { PasswordField } from "@/components/ui/password-field";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Eye, EyeOff, KeyRound, CheckCircle2 } from "lucide-react";
+import { AlertCircle, KeyRound, CheckCircle2 } from "lucide-react";
 
 const formSchema = z
   .object({
@@ -23,32 +23,6 @@ const formSchema = z
   });
 
 type ResetForm = z.infer<typeof formSchema>;
-
-const PasswordField = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(
-  function PasswordField(props, ref) {
-    const [visible, setVisible] = useState(false);
-    return (
-      <div className="relative">
-        <Input
-          ref={ref}
-          type={visible ? "text" : "password"}
-          autoComplete="new-password"
-          className="pr-11"
-          {...props}
-        />
-      <button
-        type="button"
-        onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? "Hide password" : "Show password"}
-        aria-pressed={visible}
-        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-strong-accent rounded-r-btn"
-      >
-        {visible ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
-      </button>
-    </div>
-    );
-  },
-);
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -86,10 +60,9 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <div
-        className="min-h-[80vh] flex items-center justify-center px-md py-3xl"
-        style={{ backgroundColor: "var(--color-bg-soft-accent)" }}
+        className="flex items-start justify-center px-md py-3xl"
       >
-        <Card variant="default" className="bg-surface w-full max-w-md">
+        <Card className="bg-surface w-full max-w-md">
           <h1 className="font-display text-section-h2 text-ink leading-tight">Reset link missing</h1>
           <p className="text-body-sm text-ink-muted mt-xs">
             This page needs a token from a password reset email.
@@ -107,10 +80,9 @@ export default function ResetPasswordPage() {
   if (done) {
     return (
       <div
-        className="min-h-[80vh] flex items-center justify-center px-md py-3xl"
-        style={{ backgroundColor: "var(--color-bg-soft-accent)" }}
+        className="flex items-start justify-center px-md py-3xl"
       >
-        <Card variant="default" className="bg-surface w-full max-w-md">
+        <Card className="bg-surface w-full max-w-md">
           <div role="status" className="flex items-start gap-sm p-md rounded-feature bg-info-tint">
             <CheckCircle2 className="h-5 w-5 text-link shrink-0 mt-0.5" aria-hidden />
             <p className="text-sm text-ink">
@@ -133,10 +105,9 @@ export default function ResetPasswordPage() {
 
   return (
     <div
-      className="min-h-[80vh] flex items-center justify-center px-md py-3xl"
-      style={{ backgroundColor: "var(--color-bg-soft-accent)" }}
+      className="flex items-start justify-center px-md py-3xl"
     >
-      <Card variant="default" className="bg-surface w-full max-w-md">
+      <Card className="bg-surface w-full max-w-md">
         <h1 className="font-display text-section-h2 text-ink leading-tight">Choose a new password</h1>
         <p className="text-body-sm text-ink-muted mt-xs">
           Pick a new password for your account.
@@ -146,14 +117,14 @@ export default function ResetPasswordPage() {
             <label htmlFor="reset-password" className="text-body-sm text-ink-muted block mb-xs">
               New password
             </label>
-            <PasswordField id="reset-password" invalid={!!errors.password} {...register("password")} />
+            <PasswordField autoComplete="new-password" id="reset-password" invalid={!!errors.password} {...register("password")} />
             {errors.password && <p className="text-body-sm text-danger mt-xs">{errors.password.message}</p>}
           </div>
           <div>
             <label htmlFor="reset-confirm" className="text-body-sm text-ink-muted block mb-xs">
               Confirm new password
             </label>
-            <PasswordField id="reset-confirm" invalid={!!errors.confirm} {...register("confirm")} />
+            <PasswordField autoComplete="new-password" id="reset-confirm" invalid={!!errors.confirm} {...register("confirm")} />
             {errors.confirm && <p className="text-body-sm text-danger mt-xs">{errors.confirm.message}</p>}
           </div>
           {submitError && (

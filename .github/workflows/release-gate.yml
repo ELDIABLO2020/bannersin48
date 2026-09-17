@@ -1,7 +1,7 @@
 name: Release gate
 
 # Wave 11 release definition of done. Runs the canonical customer scenarios
-# against the REAL Nest + Postgres/Redis backend (no mocks) in addition to the
+# against the REAL Nest + Postgres backend (no mocks) in addition to the
 # MSW-backed suite and the content/performance audit. Trigger manually before
 # a release, or automatically on version tags.
 on:
@@ -40,5 +40,5 @@ jobs:
       - name: Content/performance audit
         run: npm run audit:ci
 
-      - name: Real-backend release E2E (docker Postgres + Redis)
+      - name: Real-backend release E2E (docker Postgres)
         run: npm run e2e:real

@@ -15,6 +15,8 @@ const twMerge = extendTailwindMerge({
           text: [
             "hero-h1",
             "section-h2",
+            "heading-h2",
+            "heading-h3",
             "heading-h4",
             "heading-h5",
             "body",

@@ -4,18 +4,7 @@
  * Artwork/label uploads send FormData.
  */
 
-import type { ApiClientConfig, ApiError } from "./types";
-
-export class AdminApiError extends Error {
-  status: number;
-  payload: ApiError | null;
-  constructor(message: string, status: number, payload: ApiError | null) {
-    super(message);
-    this.name = "AdminApiError";
-    this.status = status;
-    this.payload = payload;
-  }
-}
+import { HttpClient } from "./http";
 
 export interface AdminOrderBucket {
   status: string;
@@ -84,44 +73,7 @@ export interface AdminContentBlock {
   updatedAt: string;
 }
 
-export class AdminApiClient {
-  private baseUrl: string;
-  private getToken?: () => string | null;
-  private fetchImpl: typeof fetch;
-
-  constructor(config: ApiClientConfig) {
-    this.baseUrl = config.baseUrl.replace(/\/$/, "");
-    this.getToken = config.getToken;
-    this.fetchImpl = config.fetchImpl ?? globalThis.fetch.bind(globalThis);
-  }
-
-  private async request<T>(method: string, path: string, body?: unknown, init?: RequestInit): Promise<T> {
-    const headers: Record<string, string> = { Accept: "application/json", ...(init?.headers as Record<string, string>) };
-    const token = this.getToken?.();
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-    let payload: BodyInit | undefined;
-    if (body !== undefined) {
-      if (body instanceof FormData) {
-        payload = body;
-      } else {
-        headers["Content-Type"] = "application/json";
-        payload = JSON.stringify(body);
-      }
-    }
-    const res = await this.fetchImpl(`${this.baseUrl}${path}`, { method, headers, body: payload, ...init });
-    if (!res.ok) {
-      let parsed: ApiError | null = null;
-      try {
-        parsed = (await res.json()) as ApiError;
-      } catch {
-        /* ignore */
-      }
-      throw new AdminApiError(parsed?.message ?? `${method} ${path} failed with ${res.status}`, res.status, parsed);
-    }
-    if (res.status === 204) return undefined as T;
-    return (await res.json()) as T;
-  }
-
+export class AdminApiClient extends HttpClient {
   // --- Orders / fulfillment ---------------------------------------------------
 
   buckets() {

@@ -1,4 +1,4 @@
-import type { User } from "@prisma/client";
+import type { Address, User } from "@prisma/client";
 
 export interface SerializedAddress {
   id: string;
@@ -21,6 +21,19 @@ export interface SerializedUser {
   savedAddresses: SerializedAddress[];
   role?: string;
   createdAt: string;
+}
+
+export function serializeAddress(a: Address): SerializedAddress {
+  return {
+    id: a.id,
+    label: a.label,
+    line1: a.line1,
+    line2: a.line2,
+    city: a.city,
+    state: a.state,
+    zip: a.zip,
+    country: a.country,
+  };
 }
 
 function splitName(user: Pick<User, "firstName" | "lastName" | "email">): string {

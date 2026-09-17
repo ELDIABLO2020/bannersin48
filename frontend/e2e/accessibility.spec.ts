@@ -190,7 +190,7 @@ test.describe("Wave 11: accessibility suite", () => {
       test.skip(testInfo.project.name !== "desktop-chromium", "Desktop");
       await page.goto("/checkout");
       await expect(page.getByRole("heading", { level: 1, name: /cart is empty/i })).toBeVisible();
-      const cta = page.getByRole("link", { name: /start an order/i });
+      const cta = page.getByRole("link", { name: /start your order/i });
       await cta.focus();
       await expect(cta).toBeFocused();
     });
@@ -232,7 +232,7 @@ test.describe("Wave 11: accessibility suite", () => {
         );
       });
       await page.goto("/admin");
-      await expect(page.getByRole("link", { name: "BI48 Ops" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Banners In 48 staff home" })).toBeVisible();
       const trigger = page.getByRole("button", { name: /open admin menu/i });
       await trigger.focus();
       await page.keyboard.press("Enter");
@@ -280,7 +280,7 @@ test.describe("Wave 11: accessibility suite", () => {
       for (const [name, locator] of [
         ["Order now", page.getByRole("link", { name: /order now/i }).first()],
         ["Open cart", page.getByRole("button", { name: /open cart/i })],
-        ["Log in", page.getByRole("banner").getByRole("link", { name: "Log In" })],
+        ["Log in", page.getByRole("banner").getByRole("link", { name: "Log in" })],
       ] as const) {
         const box = await sizeOf(locator);
         expect(box.width, `${name} width`).toBeGreaterThanOrEqual(44);
