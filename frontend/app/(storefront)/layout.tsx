@@ -21,6 +21,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
         {children}
       </main>
       <Footer />
+      <div aria-hidden className="mobile-tab-bar-spacer bg-darkest" />
       <BottomTabBar />
       <CartDrawer />
     </>

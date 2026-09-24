@@ -24,8 +24,6 @@ import {
   Anchor,
   Wind,
   Link2,
-  ChevronUp,
-  ChevronDown,
 } from "lucide-react";
 import { isDoubleSided, materialForPrintSides } from "./builderRules";
 
@@ -60,8 +58,6 @@ export function ControlDock() {
   const activeDockPanel = useConfigurator((s) => s.activeDockPanel);
   const setActiveDockPanel = useConfigurator((s) => s.setActiveDockPanel);
   const setPickerOpen = useConfigurator((s) => s.setPickerOpen);
-  const mobileDockOpen = useConfigurator((s) => s.mobileDockOpen);
-  const setMobileDockOpen = useConfigurator((s) => s.setMobileDockOpen);
   const lastMessage = useConfigurator((s) => s.lastFinishingMessage);
   const [eligibilityHint, setEligibilityHint] = useState<string | null>(null);
   const config = PRODUCTS[productId];
@@ -80,20 +76,7 @@ export function ControlDock() {
 
   return (
     <div data-testid="control-dock" className="rounded-feature border border-line bg-surface overflow-hidden">
-      {/* Mobile show-options toggle */}
-      <div className="min-[901px]:hidden border-b border-line">
-        <button
-          type="button"
-          data-testid="show-options"
-          className="w-full flex items-center justify-between px-md py-sm text-sm font-bold text-ink"
-          onClick={() => setMobileDockOpen(!mobileDockOpen)}
-        >
-          <span>{mobileDockOpen ? "Hide options" : "+ Show options"}</span>
-          {mobileDockOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-        </button>
-      </div>
-
-      <div className={cn("min-[901px]:block", mobileDockOpen ? "block" : "hidden")}>
+      <div>
         {lastMessage && (
           <p
             role="status"

@@ -6,7 +6,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 export function EmailCapture() {
   return (
     <section className="bg-darkest text-white" aria-labelledby="cta-h">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl flex flex-col gap-lg lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl sm:py-3xl flex flex-col gap-lg lg:flex-row lg:items-end lg:justify-between">
         <SectionHeading
           id="cta-h"
           onDark

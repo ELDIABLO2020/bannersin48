@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <div
-        className="flex items-start justify-center px-md py-3xl"
+        className="flex items-start justify-center px-md py-xl sm:py-3xl"
       >
         <Card className="bg-surface w-full max-w-md">
           <h1 className="font-display text-section-h2 text-ink leading-tight">Reset link missing</h1>
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
   if (done) {
     return (
       <div
-        className="flex items-start justify-center px-md py-3xl"
+        className="flex items-start justify-center px-md py-xl sm:py-3xl"
       >
         <Card className="bg-surface w-full max-w-md">
           <div role="status" className="flex items-start gap-sm p-md rounded-feature bg-info-tint">
@@ -105,7 +105,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div
-      className="flex items-start justify-center px-md py-3xl"
+      className="flex items-start justify-center px-md py-xl sm:py-3xl"
     >
       <Card className="bg-surface w-full max-w-md">
         <h1 className="font-display text-section-h2 text-ink leading-tight">Choose a new password</h1>

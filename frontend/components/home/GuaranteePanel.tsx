@@ -11,7 +11,7 @@ const FACTS = [
 export function GuaranteePanel() {
   return (
     <section id="guarantee" className="bg-surface" aria-labelledby="guarantee-h">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl grid grid-cols-1 lg:grid-cols-12 gap-2xl">
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl sm:py-3xl grid grid-cols-1 lg:grid-cols-12 gap-2xl">
         <div className="lg:col-span-5">
           <SectionHeading
             id="guarantee-h"

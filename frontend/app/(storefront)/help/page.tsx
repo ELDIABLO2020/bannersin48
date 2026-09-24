@@ -104,7 +104,7 @@ export default function HelpPage() {
           }
         />
 
-        <section className="mb-3xl" aria-labelledby="which-banner-h">
+        <section className="mb-2xl sm:mb-3xl" aria-labelledby="which-banner-h">
           <SectionHeading id="which-banner-h" level="sub" title="Which banner do I need?" className="mb-lg" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
             {HELP_NEEDS.map((need) => (

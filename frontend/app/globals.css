@@ -161,13 +161,15 @@
   .desktop-nav {
     display: none;
   }
-  main {
-    padding-bottom: 80px;
+  /* Keeps the end of the footer clear of the fixed tab bar / builder price bar. */
+  .mobile-tab-bar-spacer {
+    height: calc(72px + env(safe-area-inset-bottom));
   }
 }
 
 @media (min-width: 1024px) {
-  .mobile-tab-bar {
+  .mobile-tab-bar,
+  .mobile-tab-bar-spacer {
     display: none;
   }
 }

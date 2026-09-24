@@ -26,15 +26,15 @@ export function BuilderShell({
     >
       <div className="mx-auto max-w-content px-md lg:px-2xl py-md lg:py-lg">
         <div className="grid grid-cols-1 min-[901px]:grid-cols-[8rem_minmax(0,1fr)_18rem] gap-md lg:gap-lg">
-          {/* Mobile order: price → stage/dock → rail. Desktop: rail | stage/dock | price */}
-          <aside className="order-1 min-[901px]:order-3 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-20">
+          {/* Mobile order: stage/dock → rail → price. Desktop: rail | stage/dock | price */}
+          <aside className="order-3 min-[901px]:order-3 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-20">
             {price}
           </aside>
-          <div className="order-2 min-[901px]:order-2 flex flex-col gap-md min-w-0">
-            <div className="flex h-[clamp(320px,56vh,560px)] items-stretch">{stage}</div>
+          <div className="order-1 min-[901px]:order-2 flex flex-col gap-md min-w-0">
+            <div className="flex h-[clamp(300px,46vh,560px)] min-[901px]:h-[clamp(320px,56vh,560px)] items-stretch">{stage}</div>
             <div className="shrink-0">{dock}</div>
           </div>
-          <aside className="order-3 min-[901px]:order-1 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-20">
+          <aside className="order-2 min-[901px]:order-1 min-[901px]:self-start min-[901px]:sticky min-[901px]:top-20">
             {rail}
           </aside>
         </div>

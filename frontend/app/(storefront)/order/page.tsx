@@ -160,7 +160,7 @@ function Chip({
 
 function ComparisonStrip() {
   return (
-    <section className="mt-3xl" aria-labelledby="hub-compare-h" data-testid="hub-comparison">
+    <section className="mt-2xl sm:mt-3xl" aria-labelledby="hub-compare-h" data-testid="hub-comparison">
       <h2 id="hub-compare-h" className="font-display text-heading-h4 text-ink mb-md">
         Not sure which product?
       </h2>

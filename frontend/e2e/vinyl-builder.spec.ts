@@ -177,6 +177,22 @@ test.describe("Vinyl builder", () => {
     );
   });
 
+  test("add artwork action opens the picker for the sign missing art", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Desktop multi-sign");
+    await expect(page.getByTestId("add-to-cart")).toHaveCount(0);
+    await page.getByTestId("add-artwork").click();
+    await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("library-item-art_sample_1").click();
+    await expect(page.getByTestId("add-to-cart")).toBeEnabled();
+    await page.getByTestId("add-sign").click();
+    await expect(page.getByTestId("add-artwork")).toHaveText(/Add artwork to sign 2/);
+    await page.getByTestId("item-rail-select-0").click();
+    await page.getByTestId("add-artwork").click();
+    await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("library-item-art_sample_2").click();
+    await expect(page.getByTestId("add-to-cart")).toHaveText(/Add 2 signs to cart/);
+  });
+
   test("ADD SIGN then add to cart adds two lines", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "Desktop multi-sign");
     // Artwork is required for every sign before add-to-cart.
@@ -193,13 +209,20 @@ test.describe("Vinyl builder", () => {
     await expect(page.getByRole("dialog", { name: /your cart/i })).toContainText(/2 items/i);
   });
 
-  test("mobile: show options dock and add to cart", async ({ page }, testInfo) => {
+  test("mobile: dock is open and the price bar stays pinned", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile-webkit", "Mobile only");
     await expect(page.getByTestId("stage-header").getByTestId("rate-matrix")).toBeHidden();
-    await expect(page.getByTestId("show-options")).toBeVisible();
-    await page.getByTestId("show-options").click();
+    // Stage comes before the price panel, and the price bar replaces the tab bar.
+    const stageBox = await page.getByTestId("builder-stage").boundingBox();
+    const heroBox = await page.getByTestId("price-hero").boundingBox();
+    expect(stageBox!.y).toBeLessThan(heroBox!.y);
+    await expect(page.getByRole("navigation", { name: "Primary mobile navigation" })).toBeHidden();
+    const viewport = page.viewportSize()!;
+    // Without artwork the pinned action opens the picker.
+    const addBox = await page.getByTestId("add-artwork").boundingBox();
+    expect(addBox!.y + addBox!.height).toBeLessThanOrEqual(viewport.height);
     await expect(page.getByTestId("dock-images")).toBeVisible();
-    await page.getByTestId("dock-images").click();
+    await page.getByTestId("add-artwork").click();
     await expect(page.getByTestId("image-picker")).toBeVisible({ timeout: 10_000 });
     await page.getByTestId("library-item-art_sample_2").click();
     await expect(page.getByTestId("dock-size")).toBeVisible();

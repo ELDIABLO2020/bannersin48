@@ -152,7 +152,7 @@ export default function SizesAndPricingPage() {
 
 function MaterialGuide() {
   return (
-    <section className="mb-3xl" aria-labelledby="material-guide-h">
+    <section className="mb-2xl sm:mb-3xl" aria-labelledby="material-guide-h">
       <SectionHeading
         level="sub"
         className="mb-lg"
@@ -184,7 +184,7 @@ function MaterialGuide() {
 
 function PricingMatrix() {
   return (
-    <section className="mb-3xl" aria-labelledby="pricing-matrix-h">
+    <section className="mb-2xl sm:mb-3xl" aria-labelledby="pricing-matrix-h">
       <SectionHeading
         level="sub"
         className="mb-lg"
@@ -195,7 +195,43 @@ function PricingMatrix() {
         )} flat shipping per banner.`}
       />
 
-      <div className="overflow-x-auto rounded-card border border-line-subtle bg-surface shadow-elev-1">
+      {/* Phones: one row per size with every weight's price visible, instead of
+          a table whose price columns scroll out of view. */}
+      <ul className="sm:hidden divide-y divide-line-subtle rounded-card border border-line-subtle bg-surface shadow-elev-1 overflow-hidden">
+        {POPULAR_SIZES.map((s) => {
+          const isPopular = s.id === "4x8";
+          return (
+            <li key={s.id} className={isPopular ? "bg-info-tint" : undefined}>
+              <Link
+                href={`/order/hd-banner?width=${s.widthFt}&height=${s.heightFt}`}
+                className="block px-md py-md no-underline"
+              >
+                <span className="flex items-center justify-between gap-sm">
+                  <span className="font-bold text-link">
+                    {s.label}
+                    {isPopular && (
+                      <span className="ml-sm inline-block rounded-pill bg-strong-accent px-sm py-micro text-xs font-bold text-strong-accent-text align-middle">
+                        Most popular
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-body-sm text-ink-muted tabular-nums">{s.sqFt} sq ft</span>
+                </span>
+                <span className="mt-sm grid grid-cols-2 gap-x-md gap-y-xs text-body-sm">
+                  {VINYL_MATERIALS.map((m) => (
+                    <span key={m.id} className="flex justify-between gap-xs">
+                      <span className="text-ink-muted">{m.shortName}</span>
+                      <span className="text-ink tabular-nums">{formatUsd(s.sqFt * m.ratePerSqFt)}</span>
+                    </span>
+                  ))}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="hidden sm:block overflow-x-auto rounded-card border border-line-subtle bg-surface shadow-elev-1">
         <table className="w-full border-collapse text-body-sm">
           <caption className="sr-only">
             Vinyl banner product price for each popular size across four materials.
@@ -276,7 +312,7 @@ function PricingMatrix() {
 
 function FinishingSection() {
   return (
-    <section className="mb-3xl" aria-labelledby="finishing-h">
+    <section className="mb-2xl sm:mb-3xl" aria-labelledby="finishing-h">
       <SectionHeading
         level="sub"
         className="mb-lg"
@@ -319,7 +355,7 @@ function FinishingSection() {
 
 function OtherProductsSection() {
   return (
-    <section className="mb-3xl" aria-labelledby="other-products-h">
+    <section className="mb-2xl sm:mb-3xl" aria-labelledby="other-products-h">
       <SectionHeading
         level="sub"
         className="mb-lg"
@@ -376,7 +412,7 @@ function StandsSection() {
   ];
 
   return (
-    <section className="mb-3xl" aria-labelledby="stands-h">
+    <section className="mb-2xl sm:mb-3xl" aria-labelledby="stands-h">
       <SectionHeading
         level="sub"
         className="mb-lg"
@@ -427,7 +463,7 @@ function StandsSection() {
 
 function ConstraintsSection() {
   return (
-    <section className="mb-3xl" aria-labelledby="constraints-h">
+    <section className="mb-2xl sm:mb-3xl" aria-labelledby="constraints-h">
       <SectionHeading
         level="sub"
         className="mb-lg"

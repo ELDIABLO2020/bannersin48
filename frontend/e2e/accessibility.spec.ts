@@ -289,7 +289,8 @@ test.describe("accessibility suite", () => {
 
       await page.goto("/order/mesh");
       await expect(page.getByTestId("builder-shell")).toBeVisible({ timeout: 30_000 });
-      const addToCart = await sizeOf(page.getByTestId("add-to-cart"));
+      // Before artwork is chosen the same slot holds "Add artwork".
+      const addToCart = await sizeOf(page.getByTestId("price-actions").getByRole("button"));
       expect(addToCart.height).toBeGreaterThanOrEqual(44);
 
       for (const [name, locator] of [

@@ -50,7 +50,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="flex items-start justify-center px-md py-3xl"
+      className="flex items-start justify-center px-md py-xl sm:py-3xl"
     >
       <Card className="bg-surface w-full max-w-md">
         <h1 className="font-display text-section-h2 text-ink leading-tight">Log in</h1>

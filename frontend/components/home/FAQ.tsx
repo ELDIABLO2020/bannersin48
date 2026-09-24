@@ -120,7 +120,7 @@ export function FAQ() {
 
   return (
     <section className="bg-surface-tint" aria-labelledby="faq-h">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl sm:py-3xl">
         <SectionHeading id="faq-h" title="Questions before you order" className="mb-xl" />
         <ul className="max-w-3xl space-y-sm">
           {FAQS.map((f, i) => {

@@ -21,7 +21,7 @@ export function ProductStrip() {
   );
   return (
     <section id="products" className="bg-surface" aria-labelledby="products-h">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl sm:py-3xl">
         <div className="mb-lg flex flex-col gap-md md:flex-row md:items-end md:justify-between">
           <SectionHeading
             id="products-h"

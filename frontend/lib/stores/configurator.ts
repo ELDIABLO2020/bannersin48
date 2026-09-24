@@ -62,7 +62,6 @@ export interface ConfiguratorState {
   activeDockPanel: DockPanel;
   pickerOpen: boolean;
   colorMatchOpen: boolean;
-  mobileDockOpen: boolean;
 
   /** Flattened active-sign mirrors for existing consumers (retractable page). */
   material: Material;
@@ -100,7 +99,6 @@ export interface ConfiguratorState {
   setActiveDockPanel: (panel: DockPanel) => void;
   setPickerOpen: (open: boolean) => void;
   setColorMatchOpen: (open: boolean) => void;
-  setMobileDockOpen: (open: boolean) => void;
 
   reset: () => void;
 }
@@ -225,7 +223,6 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
   activeDockPanel: null,
   pickerOpen: false,
   colorMatchOpen: false,
-  mobileDockOpen: false,
   ...mirrorFromSign(bootActive),
 
   setProduct: (productId) =>
@@ -420,7 +417,6 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
   setActiveDockPanel: (panel) => set({ activeDockPanel: panel }),
   setPickerOpen: (open) => set({ pickerOpen: open }),
   setColorMatchOpen: (open) => set({ colorMatchOpen: open }),
-  setMobileDockOpen: (open) => set({ mobileDockOpen: open }),
 
   reset: () => {
     const sign = createDefaultSign({ id: "sign_initial" });
@@ -438,7 +434,6 @@ export const useConfigurator = create<ConfiguratorState>((set, get) => ({
       activeDockPanel: null,
       pickerOpen: false,
       colorMatchOpen: false,
-      mobileDockOpen: false,
       ...mirrorFromSign(sign),
     });
   },

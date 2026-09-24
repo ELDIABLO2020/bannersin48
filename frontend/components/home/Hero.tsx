@@ -44,7 +44,7 @@ export function Hero() {
       className="relative isolate overflow-hidden bg-lightest text-ink"
       aria-labelledby="hero-heading"
     >
-      <div className="mx-auto max-w-content px-md lg:px-2xl pt-3xl pb-3xl">
+      <div className="mx-auto max-w-content px-md lg:px-2xl pt-xl pb-2xl sm:pt-3xl sm:pb-3xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-center">
           <div className="lg:col-span-6 max-w-2xl">
             <h1
@@ -59,12 +59,12 @@ export function Hero() {
             </p>
             <div className="hero-actions mt-xl flex flex-col sm:flex-row gap-sm">
               <Link href="/order">
-                <Button variant="cta" size="lg">
+                <Button variant="cta" size="lg" className="w-full sm:w-auto">
                   Start your order
                 </Button>
               </Link>
               <Link href="/#products">
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
                   See products
                 </Button>
               </Link>

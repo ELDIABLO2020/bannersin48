@@ -7,12 +7,21 @@ import { LayoutGrid, Menu, ShoppingCart, User } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useCart } from "@/lib/stores/cart";
 import { useCartDrawer } from "@/lib/stores/cart-drawer";
+import { productBySlug } from "@bannersin48/shared";
 import { MobileMenuDrawer } from "./MobileMenuDrawer";
 
 const TABS = [
   { href: "/sizes", label: "Sizes", icon: LayoutGrid },
   { href: "/dashboard", label: "Account", icon: User },
 ] as const;
+
+/** Product builder pages pin their own price bar below 901px instead of the tabs. */
+function isBuilderRoute(pathname: string) {
+  const match = /^\/order\/([^/]+)$/.exec(pathname);
+  if (!match) return false;
+  const product = productBySlug(match[1]);
+  return product !== undefined && product.id !== "RETRACTABLE";
+}
 
 export function BottomTabBar() {
   const pathname = usePathname();
@@ -25,7 +34,10 @@ export function BottomTabBar() {
   return (
     <>
       <nav
-        className="mobile-tab-bar fixed bottom-0 inset-x-0 bg-darkest border-t z-tab-bar"
+        className={cn(
+          "mobile-tab-bar fixed bottom-0 inset-x-0 bg-darkest border-t z-tab-bar",
+          isBuilderRoute(pathname) && "max-[900px]:hidden",
+        )}
         style={{ borderTopColor: "var(--color-border-on-dark)", paddingBottom: "env(safe-area-inset-bottom)" }}
         aria-label="Primary mobile navigation"
       >

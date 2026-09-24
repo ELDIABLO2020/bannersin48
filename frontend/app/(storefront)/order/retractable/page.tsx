@@ -177,7 +177,7 @@ function ProductGallery() {
         Retractable banner product gallery
       </h2>
 
-      <div className="relative aspect-[16/9] min-h-[260px] overflow-hidden">
+      <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] sm:min-h-[260px] overflow-hidden">
         <Image
           src={placeholders.catalogEconostand.src}
           alt="Retractable banner stand with a printed graphic in a building lobby"

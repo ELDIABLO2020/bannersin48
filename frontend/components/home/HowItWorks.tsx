@@ -25,7 +25,7 @@ export function HowItWorks() {
 
   return (
     <section className="bg-surface-tint text-ink" aria-labelledby="how-h">
-      <div className="mx-auto max-w-content px-md lg:px-2xl py-3xl">
+      <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl sm:py-3xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2xl items-center">
           <div className="lg:col-span-7">
             <SectionHeading
