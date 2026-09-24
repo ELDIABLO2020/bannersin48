@@ -105,11 +105,11 @@ export const tailwindPreset: Partial<Config> = {
         "badge-error": { bg: colors.badgeErrorBg, fg: colors.badgeErrorText },
         "badge-warning": { bg: colors.badgeWarningBg, fg: colors.badgeWarningText },
 
-        // Badges (legacy nested shapes used by `bg-warning-bg` etc.)
+        // Flat warning badge aliases (`bg-warning-bg`, `text-warning-fg`)
         "warning-bg": colors.badgeWarningBg,
         "warning-fg": colors.badgeWarningText,
 
-        // Tab bar (legacy)
+        // Tab bar
         "tab-bar": shadow.tabBarBorder,
       },
       fontFamily: {

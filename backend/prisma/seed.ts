@@ -1,5 +1,5 @@
 /**
- * Phase 0 seed — idempotent (safe to re-run).
+ * Database seed — idempotent (safe to re-run).
  *
  * Creates:
  *  - super-admin user (ADMIN_EMAIL / ADMIN_PASSWORD env, with local defaults)
@@ -71,7 +71,7 @@ async function seedCatalog(): Promise<void> {
           // RETRACTABLE is orderable but is not part of the banner-hub grid.
           inHub: BANNER_HUB_ORDER.includes(code as never),
           hubCopy: p.hubCopy,
-          // Locked D2 convention (width = horizontal, height = vertical): the
+          // Dimension convention (width = horizontal, height = vertical): the
           // default size is read from the shared catalog, never hardcoded here.
           defaultSize: p.defaultSize,
           printSides: p.printSides,
@@ -97,7 +97,7 @@ async function seedCatalog(): Promise<void> {
           hasMoreInfo: p.hasMoreInfo,
           inHub: BANNER_HUB_ORDER.includes(code as never),
           hubCopy: p.hubCopy,
-          // Locked D2 convention (width = horizontal, height = vertical).
+          // Dimension convention (width = horizontal, height = vertical).
           defaultSize: p.defaultSize,
           printSides: p.printSides,
         },

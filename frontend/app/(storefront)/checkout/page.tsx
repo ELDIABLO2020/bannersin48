@@ -69,7 +69,7 @@ export default function CheckoutPage() {
     },
   });
 
-  // Revalidate expired quotes when checkout loads (P0-01 / Wave 3).
+  // Revalidate expired quotes when checkout loads.
   useEffect(() => {
     void revalidateQuotes();
   }, []);
@@ -90,7 +90,7 @@ export default function CheckoutPage() {
   }, [auth.user, watchAll.street1, watchAll.street2, watchAll.city, watchAll.region, watchAll.postalCode, watchAll.country]);
 
   // Authenticated artwork library — resolves every line's uploaded file for the
-  // uploaded-file review (Wave 4). Requires an account (D5).
+  // uploaded-file review. Requires an account.
   const artworkLibrary = useQuery({
     queryKey: ["artwork", "library"],
     queryFn: () => getApiClient().listArtwork(),
@@ -243,7 +243,7 @@ export default function CheckoutPage() {
               </Card>
             )}
 
-            {/* Uploaded-file review (Wave 4) */}
+            {/* Uploaded-file review */}
             {auth.user ? (
               <Card className="bg-surface">
                 <ArtworkReview

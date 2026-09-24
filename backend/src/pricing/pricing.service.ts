@@ -75,7 +75,7 @@ export class PricingService {
       });
     }
 
-    // Persist the quote snapshot (§4 quotes table).
+    // Persist the quote snapshot (quotes table).
     const quote = await this.prisma.quote.create({
       data: {
         request: dto as object,

@@ -153,7 +153,7 @@ function updateActive(
 }
 
 const BUILDER_STORAGE_KEY = "bi48.builder";
-/** v2 marks the locked D2 dimension semantics (width = horizontal, height = vertical). */
+/** v2 marks the canonical dimension semantics (width = horizontal, height = vertical). */
 const BUILDER_SCHEMA_VERSION = 2;
 
 function persistSession(signs: SignDraft[], activeSignId: string) {

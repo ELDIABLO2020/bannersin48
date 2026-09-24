@@ -1,5 +1,5 @@
 /**
- * Broken internal link/image crawl for the Wave 11 release gate.
+ * Broken internal link/image crawl for the release gate.
  *
  * Fetches every seed route, extracts internal href/src targets (links, images,
  * preload hints), and verifies each returns a 2xx/3xx response. External URLs

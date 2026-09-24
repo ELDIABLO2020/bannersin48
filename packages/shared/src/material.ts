@@ -2,7 +2,7 @@ import { z } from "zod";
 import { MATERIAL_RATES, PRODUCT_RATES } from "./constants";
 
 /**
- * Material options from the plan §6.1 plus BANNER catalog products.
+ * Material options for vinyl banners plus the other BANNER catalog products.
  * - 13 oz vinyl banner: single-sided only
  * - 15 oz vinyl banner: single-sided only
  * - 18 oz vinyl banner: single-sided OR double-sided (only material that can be DS)

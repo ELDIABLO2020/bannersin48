@@ -34,7 +34,7 @@ jobs:
       - name: CI gate (typecheck, lint, test, build, MSW e2e + axe)
         run: npm run ci
 
-  # Wave 11 content/perf gate: production unsafe-content scan, broken
+  # Content/perf gate: production unsafe-content scan, broken
   # link/image crawl, metadata snapshot, console/network error assertions.
   audit:
     runs-on: ubuntu-latest

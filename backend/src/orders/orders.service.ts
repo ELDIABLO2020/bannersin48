@@ -36,7 +36,7 @@ export class OrdersService {
   // --- Creation -------------------------------------------------------------
 
   async create(userId: string, dto: CreateOrderDto, ip?: string): Promise<OrderDetail> {
-    // Idempotency (Wave 5.7): replaying the same submission key returns the
+    // Idempotency: replaying the same submission key returns the
     // existing order instead of creating a duplicate.
     if (dto.idempotencyKey) {
       const existingOrder = await this.prisma.order.findUnique({
@@ -130,7 +130,7 @@ export class OrdersService {
           paymentStatus: "PENDING_PAYMENT",
           subtotal: dec(priced.subtotal),
           discountAmount: dec(0),
-          taxAmount: dec(0), // sales tax deferred (§7.2)
+          taxAmount: dec(0), // sales tax deferred in V1
           shippingAmount: dec(priced.shipping),
           total: dec(priced.total),
           shipAddress: this.shipAddressSnapshot(dto, normalizedAddress, now) as object,
@@ -562,7 +562,7 @@ export class OrdersService {
   }
 }
 
-// --- Public shapes (documented in docs/backend-scope.md notes) ----------------
+// --- Public shapes ------------------------------------------------------------
 
 export interface OrderListItem {
   id: string;

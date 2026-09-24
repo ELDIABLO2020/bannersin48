@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Wave 11 release E2E orchestration (`npm run e2e:real`).
+# Release E2E orchestration (`npm run e2e:real`).
 #
 # Runs the canonical customer scenarios against the REAL NestJS backend backed
 # by Postgres 16 (backend/docker-compose.yml). Lifecycle:
@@ -29,7 +29,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "── Wave 11 release E2E against the real backend ──"
+echo "── Release E2E against the real backend ──"
 
 # 1. Preflight: docker + reachable daemon.
 if ! command -v docker >/dev/null 2>&1; then
@@ -120,4 +120,4 @@ echo "Frontend ready on ${FRONTEND_URL}"
 REAL_API_BASE_URL="${API_URL}" PLAYWRIGHT_BASE_URL="${FRONTEND_URL}" \
   npx playwright test --config=playwright.real.config.ts
 
-echo "── Wave 11 release E2E passed ✅ ──"
+echo "── Release E2E passed ✅ ──"

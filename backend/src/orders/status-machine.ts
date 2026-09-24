@@ -2,7 +2,7 @@ import { BadRequestException } from "@nestjs/common";
 import type { OrderStatus } from "@prisma/client";
 
 /**
- * The §4 status machine, enforced here (service layer). Every transition is
+ * The order status machine, enforced here (service layer). Every transition is
  * recorded in order_events by OrdersService.transition.
  */
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {

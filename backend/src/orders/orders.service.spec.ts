@@ -15,7 +15,7 @@ import type { CreateOrderDto } from "./orders.dto";
  * Order creation must reproduce the known pricing cases server-side
  * (3×6 HD Banner 15oz qty 1 → $85.50 product + $10 shipping = $95.50),
  * snapshot everything, validate artwork ownership, and enforce the
- * §4 status machine.
+ * order status machine.
  */
 const HD_ROW = {
   id: "prod_hd",
@@ -324,7 +324,7 @@ describe("OrdersService.create", () => {
 });
 
 describe("status machine", () => {
-  it("allows the §4 flow", () => {
+  it("allows the standard fulfillment flow", () => {
     expect(() => assertTransition("RECEIVED", "IN_PROCESSING")).not.toThrow();
     expect(() => assertTransition("IN_PROCESSING", "ACCEPTED")).not.toThrow();
     expect(() => assertTransition("ACCEPTED", "SHIPPED")).not.toThrow();

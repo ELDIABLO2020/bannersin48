@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("M4: brand design parity", () => {
+test.describe("brand design", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
@@ -11,7 +11,7 @@ test.describe("M4: brand design parity", () => {
   });
 
   test("final CTA is a direct order action with no discarded email field", async ({ page }) => {
-    // Wave 7.4: the homepage no longer collects (and then discards) an email.
+    // The homepage no longer collects (and then discards) an email.
     await expect(page.getByRole("textbox", { name: /email/i })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /start your order/i }).first()).toBeVisible();
   });

@@ -26,7 +26,8 @@ export class UpsertContentDto {
 }
 
 /**
- * §3d CMS content + §3e customer management. ADMIN only; mutations audited.
+ * CMS content (CONTENT_EDITOR + ADMIN) and customer management (STAFF + ADMIN).
+ * Mutations audited.
  * Public reads live on /content (no auth).
  */
 @Controller("admin")
@@ -84,7 +85,7 @@ export class AdminContentCustomersController {
 }
 
 /**
- * Public content reads (§3d): GET /content → all published blocks,
+ * Public content reads: GET /content → all published blocks,
  * GET /content/:key → one published block.
  */
 @Controller("content")

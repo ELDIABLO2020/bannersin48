@@ -1,5 +1,5 @@
 /**
- * Pure cart quote-state transitions (Wave 3, P0-01).
+ * Pure cart quote-state transitions.
  *
  * The frontend never derives a price from a mutable quantity/config — every
  * quantity or configuration change produces a new server quote. This module is
@@ -36,7 +36,7 @@ export interface CartConfigInput {
   artworkId: string;
 }
 
-/** Artwork metadata used by the Wave 4 uploaded-file review at checkout. */
+/** Artwork metadata used by the uploaded-file review at checkout. */
 export interface CartArtworkMeta {
   filename: string;
   mimeType: string;
@@ -55,7 +55,7 @@ export interface CartLine {
   finishing: Finishing;
   quantity: number;
   artworkId: string;
-  /** Optional artwork metadata for the uploaded-file review (Wave 4). */
+  /** Optional artwork metadata for the uploaded-file review. */
   artwork?: CartArtworkMeta | null;
   quoteId: string;
   quoteValidUntil: string;

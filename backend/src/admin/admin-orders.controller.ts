@@ -27,7 +27,7 @@ export class StatusTransitionDto {
 }
 
 /**
- * Admin/staff operations APIs (§3a/§3b). Every mutation is audited and
+ * Order buckets + fulfillment workspace APIs. Every mutation is audited and
  * writes an order_events row. STAFF = fulfillment; ADMIN = everything.
  */
 @Controller("admin/orders")

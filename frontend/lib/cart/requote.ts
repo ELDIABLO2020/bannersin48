@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Cart re-quote orchestration (Wave 3, P0-01).
+ * Cart re-quote orchestration.
  *
  * Wires the pure transitions in `quoteState.ts` to the API client so a
  * quantity/config change never mutates a derived total: mark refreshing →

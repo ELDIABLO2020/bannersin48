@@ -10,7 +10,7 @@ export interface SendEmailInput {
 
 /**
  * Local transactional-email stub: logs to console + persists every send into
- * email_log. SES replaces the transport in Phase 1 — call sites stay put.
+ * email_log. A real transport (e.g. SES) replaces only this class — call sites stay put.
  */
 @Injectable()
 export class EmailService {

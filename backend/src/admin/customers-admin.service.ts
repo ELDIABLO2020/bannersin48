@@ -7,7 +7,7 @@ import { serializeAddress, serializeUser } from "../common/user.serializer";
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
 
-/** Admin customer management (§3e): search, profile + orders, password reset. */
+/** Customer management (STAFF + ADMIN): search, profile + orders, password reset. */
 @Injectable()
 export class AdminCustomersService {
   constructor(

@@ -17,7 +17,7 @@ export default function CartPage() {
   const removeLine = useCart((s) => s.removeLine);
   const router = useRouter();
 
-  // Revalidate expired quotes when the cart page loads (P0-01 / Wave 3).
+  // Revalidate expired quotes when the cart page loads.
   useEffect(() => {
     void revalidateQuotes();
   }, []);

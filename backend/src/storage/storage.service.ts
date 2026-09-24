@@ -6,7 +6,7 @@ import * as crypto from "node:crypto";
 
 /**
  * Storage abstraction. The backend only ever talks to `StorageService`;
- * swapping LOCAL for S3 in Phase 1 means adding a driver here — no other
+ * adding an S3 driver means implementing StorageDriver here — no other
  * module changes (keys stay opaque; the DB stores key + bucket).
  */
 export interface StoredObject {
@@ -54,8 +54,8 @@ export class LocalStorageDriver implements StorageDriver {
   }
 }
 
-// Phase 1: class S3StorageDriver implements StorageDriver { … } — drop-in via
-// STORAGE_DRIVER=s3 + AWS credentials from the task role. No other changes.
+// Only the local driver exists. An S3 driver would implement StorageDriver and
+// be selected here via STORAGE_DRIVER=s3; nothing else needs to change.
 
 @Injectable()
 export class StorageService {
@@ -67,7 +67,6 @@ export class StorageService {
       case "local":
         this.driver = new LocalStorageDriver(config.get<string>("LOCAL_STORAGE_DIR") ?? "./storage");
         break;
-      // case "s3": this.driver = new S3StorageDriver(config); break;
       default:
         throw new Error(`Unknown STORAGE_DRIVER "${driverName}".`);
     }

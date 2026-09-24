@@ -30,7 +30,7 @@ export type { CartLine, QuoteState, CartConfigInput };
 export { canCheckout, cartTotals, configOf };
 
 /**
- * Migrate a pre-fix (v2 and below) cart line to the locked D2 dimension
+ * Migrate a pre-fix (v2 and below) cart line to the canonical dimension
  * semantics. Legacy lines stored "4′ × 8′" as width 4 / height 8; the corrected
  * semantics are width 8 / height 4 (horizontal × vertical). Fixed-size stands
  * keep their zeroed dimensions and existing labels. Exported for unit tests.

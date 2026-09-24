@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Wave 11 release E2E — runs the canonical customer scenarios against the
+ * Release E2E — runs the canonical customer scenarios against the
  * REAL Nest + Postgres backend (no MSW). The orchestrator
  * (scripts/e2e-real.sh) owns the full service lifecycle; this config only
  * drives the browser against the already-running frontend/backend.

@@ -8,7 +8,7 @@ import {
 import type { Dimensions } from "./dimensions";
 
 /**
- * Finishing options — plan §8 + Vinyl Builder parity.
+ * Finishing options and their compatibility rules.
  * Pole pockets ⊥ welding + grommets.
  * Rope ⊥ grommets.
  * Wind slits gated by size band (both dims > 24" and < 120").

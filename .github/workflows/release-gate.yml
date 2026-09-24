@@ -1,6 +1,6 @@
 name: Release gate
 
-# Wave 11 release definition of done. Runs the canonical customer scenarios
+# Release definition of done. Runs the canonical customer scenarios
 # against the REAL Nest + Postgres backend (no mocks) in addition to the
 # MSW-backed suite and the content/performance audit. Trigger manually before
 # a release, or automatically on version tags.

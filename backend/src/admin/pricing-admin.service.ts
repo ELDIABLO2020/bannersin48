@@ -4,7 +4,7 @@ import { AuditService } from "../audit/audit.service";
 import type { CreateProductDto, UpdateMaterialDto, UpsertFinishingOptionDto, UpsertVolumeTierDto, UpdateProductDto } from "./pricing-admin.dto";
 
 /**
- * Pricing control (§3c). ADMIN only. Every mutation is audited (old→new).
+ * Pricing control. Mutations are ADMIN-only (enforced in the controller). Every mutation is audited (old→new).
  * Rows referenced by existing orders are deactivated, never hard-deleted.
  */
 @Injectable()

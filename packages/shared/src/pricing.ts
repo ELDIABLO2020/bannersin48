@@ -10,7 +10,7 @@ import type { Quantity } from "./quantity";
 import { PRODUCTS, productIdForMaterial, validateProductSize, type ProductId } from "./product";
 
 /**
- * Pricing engine from the plan §9.
+ * Pricing engine.
  *   Unit Product Price = (Billable Sq Ft × Material Rate) + add-ons per sq ft
  *   Line Product Subtotal = Unit Product Price × Quantity
  *   Line Shipping = Quantity × $10

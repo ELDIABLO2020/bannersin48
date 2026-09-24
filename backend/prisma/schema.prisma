@@ -1,5 +1,4 @@
-// Banners In 48 — Phase 0 schema
-// Implements docs/backend-scope.md §4 in full.
+// Banners In 48 — database schema. Overview: docs/architecture.md.
 //
 // Conventions:
 // - Money is stored as Prisma Decimal (never floats) or Int cents where noted.

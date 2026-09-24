@@ -44,7 +44,7 @@ export interface DimensionsDisplay {
 }
 
 /**
- * Rounding rule from §7.1: any fractional measurement rounds UP to the next whole foot.
+ * Rounding rule: any fractional measurement rounds UP to the next whole foot.
  *   widthFt = entered width, rounded up to next whole foot if inches > 0
  *   heightFt = entered height, rounded up to next whole foot if inches > 0
  *   sqFt = widthFt × heightFt
@@ -136,7 +136,7 @@ export interface ResolvedSize {
  * Resolve a builder size from query parameters.
  *
  * Canonical parameters are `width` and `height` (width = horizontal, height =
- * vertical), matching the locked D2 semantics. Legacy `w`/`h` parameters used
+ * vertical), matching the canonical dimension semantics. Legacy `w`/`h` parameters used
  * the pre-fix convention where popular sizes stored the first number as width
  * (e.g. "4′ × 8′" was `w=4&h=8` while the physical banner is 8′ wide × 4′
  * high). Those legacy axes are swapped so a legacy link resolves to the same

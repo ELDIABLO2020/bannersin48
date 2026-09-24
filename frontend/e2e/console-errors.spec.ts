@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 /**
- * Wave 11 content/perf gate — console and network error assertions.
+ * Content/perf gate — console and network error assertions.
  *
  * Runs against a production server (see scripts/audit-ci.sh). Each primary
  * route must load with no uncaught exception, no app console.error, and no

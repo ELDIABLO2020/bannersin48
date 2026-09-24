@@ -18,7 +18,7 @@ import {
 } from "./pricing-admin.dto";
 
 /**
- * Pricing control (§3c) — ADMIN only, every change audited.
+ * Pricing control — STAFF may read, only ADMIN may mutate; every change audited.
  * Effective immediately for new quotes/orders; existing orders keep snapshots.
  */
 @Controller("admin")

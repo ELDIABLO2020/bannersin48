@@ -121,8 +121,8 @@ export class AuthService {
   // --- Password reset ---------------------------------------------------------
 
   /**
-   * Always succeeds (no account enumeration). In Phase 0 the reset link/token
-   * is logged to the server console; SES email delivery arrives in Phase 2.
+   * Always succeeds (no account enumeration). There is no email transport yet,
+   * so the reset token is logged to the server console.
    */
   async forgotPassword(email: string): Promise<{ ok: true }> {
     const normalized = email.toLowerCase().trim();

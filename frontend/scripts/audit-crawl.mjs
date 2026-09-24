@@ -1,5 +1,5 @@
 /**
- * Shared crawler helpers for the Wave 11 audit scripts (audit-links.mjs and
+ * Shared crawler helpers for the audit scripts (audit-links.mjs and
  * audit-metadata.mjs). These run against a *running* production server whose
  * base URL is supplied via AUDIT_BASE_URL (default http://localhost:3100).
  */

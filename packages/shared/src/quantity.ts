@@ -2,7 +2,7 @@ import { z } from "zod";
 import { MAX_QUANTITY_PER_LINE } from "./constants";
 
 /**
- * Per-line quantity from the plan §9.4.
+ * Per-line quantity.
  * Max 10 per configuration. More than 10 = add another line item.
  */
 export const quantitySchema = z

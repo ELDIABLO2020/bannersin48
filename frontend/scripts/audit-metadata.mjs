@@ -1,5 +1,5 @@
 /**
- * Metadata snapshot for the Wave 11 release gate.
+ * Metadata snapshot for the release gate.
  *
  * Fetches every seed route from a running production server and snapshots
  * <title>, meta description, canonical, robots, and Open Graph fields into

@@ -1,7 +1,7 @@
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 
 /**
- * Wave 11 release suite — canonical customer scenarios against the real
+ * Release suite — canonical customer scenarios against the real
  * Nest + Postgres backend.
  *
  * The first test drives the full storefront journey through the browser UI.
@@ -119,7 +119,7 @@ async function createOrder(
   });
 }
 
-test.describe("Wave 11 real-backend release suite", () => {
+test.describe("real-backend release suite", () => {
   test("canonical storefront journey: register→configure→artwork→cart→checkout→track", async ({
     page,
   }, testInfo) => {

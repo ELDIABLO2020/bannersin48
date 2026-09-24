@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Wave 11 audit config — runs ONLY the console/network error assertion spec
+ * Audit config — runs ONLY the console/network error assertion spec
  * against an already-running production server (started by scripts/audit-ci.sh).
  * No webServer here: the orchestrator owns the server lifecycle.
  */

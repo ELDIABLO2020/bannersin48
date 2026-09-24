@@ -32,7 +32,7 @@ export class ContentService {
   }
 }
 
-/** Admin CMS + customer management (§3d/§3e). ADMIN only; mutations audited. */
+/** CMS content blocks (CONTENT_EDITOR + ADMIN). Mutations audited. */
 @Injectable()
 export class AdminContentService {
   constructor(

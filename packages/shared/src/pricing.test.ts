@@ -6,9 +6,9 @@ import { normalizeFinishing, DEFAULT_FINISHING } from "./finishing";
 const fin = (patch: Partial<typeof DEFAULT_FINISHING> = {}) => ({ ...DEFAULT_FINISHING, ...patch });
 
 /**
- * The 5 plan pricing examples (plan §9.5) — these MUST match exactly.
+ * The 5 reference pricing examples — these MUST match exactly.
  */
-describe("priceLine — plan examples (must match §9.5)", () => {
+describe("priceLine — reference examples (must match exactly)", () => {
   it("4' × 8' 13 oz, qty 1, no add-ons → $138", () => {
     const result = priceLine({
       material: "VINYL_13OZ_SINGLE",
@@ -103,7 +103,7 @@ describe("priceLine — plan examples (must match §9.5)", () => {
   });
 });
 
-describe("billableDimensions — plan rounding examples (§7.2)", () => {
+describe("billableDimensions — rounding examples", () => {
   const cases: Array<[string, [number, number, number, number], [number, number, number], boolean]> = [
     ["2 ft 0 in × 4 ft 0 in", [2, 0, 4, 0], [2, 4, 8], true],
     ["2 ft 1 in × 4 ft 0 in", [2, 1, 4, 0], [3, 4, 12], true],
@@ -122,7 +122,7 @@ describe("billableDimensions — plan rounding examples (§7.2)", () => {
   }
 });
 
-describe("normalizeFinishing — pole pocket incompatibility (§8.2)", () => {
+describe("normalizeFinishing — pole pocket incompatibility", () => {
   it("auto-removes welding and grommets when pole pockets are enabled", () => {
     const r = normalizeFinishing({
       ...DEFAULT_FINISHING,

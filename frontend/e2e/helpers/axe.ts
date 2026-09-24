@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 
 /**
- * Shared axe helper for the Wave 11 accessibility gate.
+ * Shared axe helper for the accessibility gate.
  *
  * Impact gating is two-tier so the PR suite stays green while the release bar
  * remains strict:

@@ -3,7 +3,7 @@ import { scanA11y, formatViolations } from "./helpers/axe";
 import { seedDemoAuth } from "./helpers/auth";
 
 /**
- * Wave 11 accessibility gate.
+ * Accessibility gate.
  *
  * - axe (WCAG A/AA) on primary routes + states. PR gate fails on critical
  *   only and logs serious findings; `AXE_STRICT=1` fails on serious too.
@@ -42,7 +42,7 @@ async function assertNoHorizontalOverflow(page: Page) {
   ).toBeLessThanOrEqual(overflow.clientWidth + 1);
 }
 
-test.describe("Wave 11: accessibility suite", () => {
+test.describe("accessibility suite", () => {
   test.describe("axe scans on primary routes", () => {
     test.describe.configure({ mode: "serial" });
 

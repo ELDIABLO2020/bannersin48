@@ -9,7 +9,7 @@ import type { OrderDetail, OrderListItem } from "./orders.service";
 import { CreateOrderDto } from "./orders.dto";
 
 @Controller("orders")
-@UseGuards(JwtAuthGuard) // no guest checkout (§7)
+@UseGuards(JwtAuthGuard) // no guest checkout
 export class OrdersController {
   constructor(private readonly orders: OrdersService) {}
 

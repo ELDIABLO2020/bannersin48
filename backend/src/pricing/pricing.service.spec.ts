@@ -9,7 +9,7 @@ import type { QuoteRequestDto } from "./quote-request.dto";
 
 /**
  * Quote math must reproduce the known cases from packages/shared pricing.test.ts
- * (plan §9.5 examples). The engine runs for real; only Prisma + catalog are faked.
+ * (reference pricing examples). The engine runs for real; only Prisma + catalog are faked.
  */
 const HD_BANNER_DB_ROW = {
   id: "prod_hd",

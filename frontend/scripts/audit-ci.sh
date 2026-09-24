@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Wave 11 release content gate (`npm run audit:ci`).
+# Release content gate (`npm run audit:ci`).
 #
 # Runs, against a production build served locally:
 #   1. production unsafe-content scan + commerce-config scan
@@ -16,7 +16,7 @@ cd "$(dirname "$0")/.."
 PORT="${AUDIT_PORT:-3100}"
 BASE_URL="${AUDIT_BASE_URL:-http://localhost:${PORT}}"
 
-echo "── Wave 11 audit: content, links, metadata, console/network ──"
+echo "── Audit: content, links, metadata, console/network ──"
 
 # 1. Production unsafe-content + commerce-config scans (source level).
 npm run validate:content
@@ -54,4 +54,4 @@ node scripts/audit-metadata.mjs
 # 5. Console/network error assertions against the production server.
 npx playwright test --config=playwright.audit.config.ts
 
-echo "── Wave 11 audit passed ✅ ──"
+echo "── Audit passed ✅ ──"

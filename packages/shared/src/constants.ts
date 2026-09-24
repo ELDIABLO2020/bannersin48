@@ -1,6 +1,5 @@
 /**
  * Business constants for Banners In 48.
- * Source: bannersin48-final-website-structured-plan.md
  */
 
 export const CUTOFF_HOUR_ET = 21; // 9:00 PM Eastern Time
@@ -67,7 +66,7 @@ export const ARTWORK_DEFAULT_DPI = 150;
 
 
 /**
- * The 6 cutoff cycles from the plan §5.1.
+ * The 6 cutoff cycles.
  * Order approval cutoff (in ET) → guaranteed FedEx delivery (ET day, local time).
  * Indexed 0..5.
  */
@@ -200,9 +199,8 @@ export const HUB_SUBTITLE = "Pick a product to start building. Every banner ship
 
 /**
  * Standard quick-pick sizes (13 oz, single-sided, qty 1, no add-ons, +$10 shipping).
- * Source: bannersin48-final-website-structured-plan.md §7.3
  *
- * Locked D2 convention: labels are industry-facing "height × width" and the
+ * Dimension convention: labels are industry-facing "height × width" and the
  * stored `widthFt`/`heightFt` follow the canonical semantics (width = horizontal,
  * height = vertical). So "4′ H × 8′ W" is stored as widthFt 8 / heightFt 4.
  */
