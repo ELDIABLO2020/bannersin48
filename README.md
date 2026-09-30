@@ -11,7 +11,7 @@ Speed-first custom banner ordering platform — npm workspaces monorepo.
 | `packages/shared` | Pricing engine, product config, dimensions, delivery rules, used by both frontend and backend |
 | `packages/api-client` | Typed API client + MSW mock handlers |
 | `packages/design-tokens` | Brand tokens and Tailwind preset |
-| `docs/` | [Architecture & decisions](docs/architecture.md), [API map](docs/api.md) |
+| `docs/` | [Architecture & decisions](docs/architecture.md), [API map](docs/api.md), [backend plan](docs/backend-plan.md), [security review](docs/backend-security-review.md) |
 
 ## Local development
 

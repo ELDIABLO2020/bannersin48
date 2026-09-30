@@ -72,15 +72,17 @@ These are local stand-ins. Each sits behind an interface, so a real implementati
 
 | Concern | Today | Planned |
 |---|---|---|
-| Artwork storage | `LocalStorageDriver` (`STORAGE_DRIVER=local`) | S3 driver, 6-month lifecycle expiry |
-| Email | `EmailService` logs to console + `email_log`; reset tokens logged | Real transport (SES) |
-| Login throttle | In-memory (5 failures → 15-min lock) | Shared store when multi-instance |
+| Artwork storage | `LocalStorageDriver` (`STORAGE_DRIVER=local`) | S3/R2 driver + CDN, 6-month lifecycle expiry (after go-live) |
+| Email | `EmailService` logs to console + `email_log`; reset tokens logged | Real transport (SES or similar), before go-live |
+| Login throttle | In-memory (5 failures → 15-min lock) | `@nestjs/throttler` + IP+email backoff; Redis store when multi-instance |
 | Malware scan | Artwork rows stay `scanStatus = PENDING` | Scanner |
 | Tracking | Tracking number, label PDF and a FedEx deep link | FedEx Tracking API for automatic shipped/delivered |
 | Payments, tax | None (see operating model) | Provider integrations |
-| Hosting | Frontend on Vercel. No backend deployment exists | — |
+| Hosting | Frontend on Vercel. No backend deployment exists | Hostinger VPS: Caddy → Nest → Postgres 16 in Docker Compose |
 
-Remove `devResetToken` from the admin password-reset response once real email exists.
+Auth stays custom and is hardened rather than replaced with a hosted provider. The work is sequenced in
+[backend-plan.md](backend-plan.md), from the findings in [backend-security-review.md](backend-security-review.md).
+`devResetToken` is removed before the first deploy, not when real email lands.
 
 ## Local accounts
 
