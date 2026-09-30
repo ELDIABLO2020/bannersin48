@@ -1,0 +1,7 @@
+[Unit]
+Description=Banners In 48: disk usage alert
+Documentation=file:///srv/bannersin48/app/deploy/README.md
+
+[Service]
+Type=oneshot
+ExecStart=/srv/bannersin48/app/deploy/scripts/disk-alert.sh

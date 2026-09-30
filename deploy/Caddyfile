@@ -1,0 +1,89 @@
+# Banners In 48 - edge proxy for the API.
+#
+# Caddy is the only container that publishes ports (80, 443/tcp, 443/udp).
+# It terminates TLS (automatic Let's Encrypt certificate for API_DOMAIN),
+# compresses responses and forwards to the single Nest process at api:3001.
+#
+# Environment (from /srv/bannersin48/secrets/site.env):
+#   API_DOMAIN  e.g. 179-236-230-7.sslip.io, later api.bannersin48.com
+#   ACME_EMAIL  contact address for the ACME account (expiry notices)
+#
+# Apply changes without downtime:
+#   docker compose -f deploy/docker-compose.prod.yml exec caddy \
+#     caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+{
+	email {$ACME_EMAIL}
+
+	# trusted_proxies is intentionally NOT set: Caddy is the edge, so it ignores
+	# any client-supplied X-Forwarded-For / X-Forwarded-Proto and sets them from
+	# the real connection. The API must use `app.set("trust proxy", 1)` (exactly
+	# one hop: this Caddy) and read the client address from req.ip.
+
+	servers {
+		timeouts {
+			read_header 10s
+			# 50 MiB artwork uploads on slow links need a generous body window.
+			read_body 5m
+			write 10m
+			idle 2m
+		}
+	}
+
+	grace_period 15s
+}
+
+{$API_DOMAIN} {
+	# zstd/gzip for JSON and text. Caddy's default matcher skips images and
+	# PDFs, which are already compressed. No compression in Nest itself.
+	encode zstd gzip
+
+	# Artwork uploads are capped at 50 MiB by the API; allow multipart overhead.
+	request_body {
+		max_size 55MiB
+	}
+
+	header {
+		# HSTS is set HERE ONLY. The API's helmet() must be configured with
+		# `hsts: false` so the header is not sent twice with different values.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# Do not advertise server software.
+		-Server
+		-Via
+		-X-Powered-By
+	}
+
+	reverse_proxy api:3001 {
+		# Active health checks against the API's public liveness endpoint.
+		health_uri /health
+		health_interval 10s
+		health_timeout 3s
+		health_status 2xx
+
+		# While `deploy.sh` recreates the api container, hold requests and retry
+		# the upstream for a few seconds instead of failing immediately.
+		lb_try_duration 15s
+		lb_try_interval 250ms
+
+		transport http {
+			dial_timeout 3s
+		}
+	}
+
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 50MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+		# Authorization and Cookie headers are redacted by Caddy by default.
+		# Also strip bearer tokens that legacy clients put in the query string.
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace access_token REDACTED
+				}
+			}
+		}
+	}
+}

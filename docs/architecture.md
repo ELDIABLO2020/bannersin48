@@ -78,7 +78,7 @@ These are local stand-ins. Each sits behind an interface, so a real implementati
 | Malware scan | Artwork rows stay `scanStatus = PENDING` | Scanner |
 | Tracking | Tracking number, label PDF and a FedEx deep link | FedEx Tracking API for automatic shipped/delivered |
 | Payments, tax | None (see operating model) | Provider integrations |
-| Hosting | Frontend on Vercel. No backend deployment exists | Hostinger VPS: Caddy → Nest → Postgres 16 in Docker Compose |
+| Hosting | Frontend on Vercel. Backend deploy files in [`deploy/`](../deploy/README.md), not yet live | Hostinger VPS: Caddy → Nest → Postgres 16 in Docker Compose |
 
 Auth stays custom and is hardened rather than replaced with a hosted provider. The work is sequenced in
 [backend-plan.md](backend-plan.md), from the findings in [backend-security-review.md](backend-security-review.md).

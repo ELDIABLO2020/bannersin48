@@ -1,14 +1,20 @@
+# LOCAL DEVELOPMENT ONLY. Production uses deploy/docker-compose.prod.yml.
+#
+# The banners/banners credentials below are throwaway dev values; they are
+# never used anywhere else. Postgres is published on 127.0.0.1 only: Docker's
+# port publishing bypasses host firewalls (ufw), so "5432:5432" would expose
+# this database to the whole network.
 version: "3.8"
 
 services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: banners
-      POSTGRES_PASSWORD: banners
+      POSTGRES_USER: banners # dev-only
+      POSTGRES_PASSWORD: banners # dev-only
       POSTGRES_DB: bannersin48
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 

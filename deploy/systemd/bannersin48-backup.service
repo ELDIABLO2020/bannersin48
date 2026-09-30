@@ -1,0 +1,13 @@
+[Unit]
+Description=Banners In 48: nightly pg_dump + restic off-site backup
+Documentation=file:///srv/bannersin48/app/deploy/README.md
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/srv/bannersin48/app/deploy/scripts/backup.sh
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=3h

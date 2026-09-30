@@ -1,0 +1,14 @@
+[Unit]
+Description=Banners In 48: DOCKER-USER firewall (only 80/443 reach containers from outside)
+Documentation=file:///srv/bannersin48/app/deploy/README.md
+# Re-applied whenever Docker (re)starts, since that is when its chains are rebuilt.
+After=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/bannersin48-docker-user-firewall apply
+
+[Install]
+WantedBy=docker.service
