@@ -32,10 +32,10 @@ Security:
 10. [x] Stream uploads to disk and downloads from disk; streaming sha256; upload concurrency cap; per-user quota (H9).
 
 Platform:
-11. [ ] Node 24, NestJS 11.1.18+, multer ≥2.4; CI on Node 24; `npm audit --omit=dev --audit-level=high` gate; Dependabot (H7, M13).
-12. [ ] Production deploy files: backend `Dockerfile` (non-root, pinned base), `docker-compose.prod.yml` (only Caddy publishes 80/443; Postgres on the compose network; read-only rootfs, `cap_drop: [ALL]`, `no-new-privileges`, `env_file` 600), `Caddyfile` (HSTS, `encode zstd gzip`, log rolling), `prisma migrate deploy` one-shot before the API starts (C2).
-13. [ ] Postgres: `bannersin48_migrate` (owner) and `bannersin48_app` (DML + sequences only) roles; tuned `postgresql.conf` with lz4 TOAST, zstd WAL and memory settings; lz4 on wide jsonb columns (M12, §7).
-14. [ ] VPS: Docker daemon log rotation, journald cap, DOCKER-USER drop rule, nightly `pg_dump` + artwork backup with `restic` off-site, disk-usage alert at 70% (§7, §9).
+11. [x] Node 24, NestJS 11.1.18+, multer ≥2.4; CI on Node 24; `npm audit --omit=dev --audit-level=high` gate; Dependabot (H7, M13).
+12. [x] Production deploy files: backend `Dockerfile` (non-root, pinned base), `docker-compose.prod.yml` (only Caddy publishes 80/443; Postgres on the compose network; read-only rootfs, `cap_drop: [ALL]`, `no-new-privileges`, `env_file` 600), `Caddyfile` (HSTS, `encode zstd gzip`, log rolling), `prisma migrate deploy` one-shot before the API starts (C2).
+13. [x] Postgres: `bannersin48_migrate` (owner) and `bannersin48_app` (DML + sequences only) roles; tuned `postgresql.conf` with lz4 TOAST, zstd WAL and memory settings; lz4 on wide jsonb columns (M12, §7).
+14. [x] VPS: Docker daemon log rotation, journald cap, DOCKER-USER drop rule, nightly `pg_dump` + artwork backup with `restic` off-site, disk-usage alert at 70% (§7, §9).
 
 ## Phase 2 — before go-live (public)
 
