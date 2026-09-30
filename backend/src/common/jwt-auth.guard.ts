@@ -1,11 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
+import { IS_PUBLIC_KEY } from "./public.decorator";
 
 export interface JwtPayload {
   sub: string;
-  email: string;
-  role: string;
 }
 
 /** The user object attached to `request.user` after the guard passes. */
@@ -16,18 +16,26 @@ export interface AuthedUser {
 }
 
 /**
- * Minimal Bearer-token guard (no passport dependency).
- * Verifies the access JWT and loads the user so suspended accounts are
- * rejected even with a still-valid token.
+ * Global Bearer-token guard (registered as APP_GUARD; no passport dependency).
+ * Routes are authenticated unless marked @Public(). It verifies the access JWT
+ * (HS256, issuer and audience pinned in AuthModule) and loads the user so role
+ * changes and suspensions apply even to a still-valid token.
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
+
     const request = context.switchToHttp().getRequest();
     const header: string | undefined = request.headers["authorization"];
     // Query-param fallback so browser-native requests (<img src>) can pass the
@@ -42,8 +50,11 @@ export class JwtAuthGuard implements CanActivate {
 
     let payload: JwtPayload;
     try {
-      payload = await this.jwt.verifyAsync(rawToken);
+      payload = await this.jwt.verifyAsync<JwtPayload>(rawToken);
     } catch {
+      throw new UnauthorizedException("Invalid or expired token.");
+    }
+    if (typeof payload.sub !== "string" || payload.sub.length === 0) {
       throw new UnauthorizedException("Invalid or expired token.");
     }
 

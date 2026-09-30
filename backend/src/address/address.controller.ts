@@ -1,10 +1,8 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "../common/jwt-auth.guard";
+import { Body, Controller, Post } from "@nestjs/common";
 import { AddressService } from "./address.service";
 import { ValidateAddressDto } from "./address.dto";
 
 @Controller("address")
-@UseGuards(JwtAuthGuard)
 export class AddressController {
   constructor(private readonly addresses: AddressService) {}
 

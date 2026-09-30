@@ -21,6 +21,14 @@ function round2(n: number): number {
 
 const dec = (n: number) => n.toFixed(2);
 
+/** Who changed the order, as customers may see it. Staff user ids are never exposed. */
+export type OrderEventActor = "customer" | "staff" | "system";
+
+export function eventActor(actorId: string | null, orderUserId: string): OrderEventActor {
+  if (actorId === null) return "system";
+  return actorId === orderUserId ? "customer" : "staff";
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -522,7 +530,7 @@ export class OrdersService {
         id: e.id,
         fromStatus: e.fromStatus,
         toStatus: e.toStatus,
-        actorId: e.actorId,
+        actor: eventActor(e.actorId, o.userId),
         note: e.note,
         createdAt: e.createdAt.toISOString(),
       })),
@@ -618,7 +626,7 @@ export interface OrderDetail {
     id: string;
     fromStatus: string | null;
     toStatus: string;
-    actorId: string | null;
+    actor: OrderEventActor;
     note: string | null;
     createdAt: string;
   }>;

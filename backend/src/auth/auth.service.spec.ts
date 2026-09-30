@@ -1,9 +1,15 @@
 import { Test } from "@nestjs/testing";
 import { JwtService } from "@nestjs/jwt";
-import { BadRequestException, ConflictException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ConflictException, HttpException, UnauthorizedException } from "@nestjs/common";
 import { createHash } from "crypto";
+import * as password from "./password";
 import { AuthService } from "./auth.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { EmailService } from "../notifications/email.service";
+import { jwtOptions } from "./auth.module";
+import { FREE_FAILURES } from "./login-backoff";
+
+const TEST_SECRET = "0123456789abcdef".repeat(4);
 
 /**
  * Unit tests with an in-memory fake for Prisma. Focus: the auth contract
@@ -13,6 +19,7 @@ describe("AuthService", () => {
   let service: AuthService;
   const users = new Map<string, any>();
   const refreshTokens: any[] = [];
+  const emailMock = { send: jest.fn() };
 
   beforeEach(async () => {
     users.clear();
@@ -60,7 +67,8 @@ describe("AuthService", () => {
       providers: [
         AuthService,
         { provide: PrismaService, useValue: prismaMock },
-        { provide: JwtService, useValue: new JwtService({ secret: "test-secret" }) },
+        { provide: JwtService, useValue: new JwtService(jwtOptions(TEST_SECRET)) },
+        { provide: EmailService, useValue: emailMock },
       ],
     }).compile();
 
@@ -105,17 +113,57 @@ describe("AuthService", () => {
     expect(result.token).toContain(".");
   });
 
-  it("login fails cleanly with wrong credentials and locks after 5 failures", async () => {
+  it("access tokens carry only sub, pinned to HS256 + issuer + audience", async () => {
+    const { token } = await service.register({ email: "t@test.com", password: "password123", fullName: "Tia Lo" });
+    const [header, payload] = token.split(".").slice(0, 2).map((p) => JSON.parse(Buffer.from(p, "base64url").toString()));
+    expect(header.alg).toBe("HS256");
+    expect(Object.keys(payload).sort()).toEqual(["aud", "exp", "iat", "iss", "sub"]);
+    expect(payload).toMatchObject({ iss: "bannersin48-api", aud: "bannersin48-web" });
+  });
+
+  it("login fails cleanly with wrong credentials", async () => {
     await service.register({ email: "c@test.com", password: "password123", fullName: "Cara Fox" });
-    for (let i = 0; i < 5; i++) {
-      await expect(service.login({ email: "c@test.com", password: "wrong" })).rejects.toThrow(
+    await expect(service.login({ email: "c@test.com", password: "wrong" }, "1.1.1.1")).rejects.toThrow(
+      UnauthorizedException,
+    );
+    await expect(service.login({ email: "c@test.com", password: "password123" }, "1.1.1.1")).resolves.toHaveProperty(
+      "token",
+    );
+  });
+
+  it("backs off an IP+email after repeated failures without locking the account for other IPs", async () => {
+    await service.register({ email: "d@test.com", password: "password123", fullName: "Dee Kay" });
+    for (let i = 0; i < FREE_FAILURES; i++) {
+      await expect(service.login({ email: "d@test.com", password: "wrong" }, "6.6.6.6")).rejects.toThrow(
         UnauthorizedException,
       );
     }
-    // Even the correct password is now locked out.
-    await expect(service.login({ email: "c@test.com", password: "password123" })).rejects.toThrow(
-      /Too many login attempts/,
+    // The attacker's IP now has to wait, even with the right password…
+    const blocked = await service.login({ email: "d@test.com", password: "password123" }, "6.6.6.6").catch((e) => e);
+    expect(blocked).toBeInstanceOf(HttpException);
+    expect((blocked as HttpException).getStatus()).toBe(429);
+    expect((blocked as HttpException).getResponse()).toMatchObject({ code: "LOGIN_BACKOFF" });
+    // …but the real owner on another IP signs in normally.
+    await expect(service.login({ email: "d@test.com", password: "password123" }, "7.7.7.7")).resolves.toHaveProperty(
+      "token",
     );
+  });
+
+  it("runs the (dummy) password check even when the email is unknown", async () => {
+    const verify = jest.spyOn(password, "verifyPassword");
+    await expect(service.login({ email: "ghost@test.com", password: "whatever1" }, "1.1.1.1")).rejects.toThrow(
+      UnauthorizedException,
+    );
+    expect(verify).toHaveBeenCalledWith("whatever1", undefined);
+    verify.mockRestore();
+  });
+
+  it("rejects a suspended account with the same error as a wrong password", async () => {
+    await service.register({ email: "s@test.com", password: "password123", fullName: "Sus Pended" });
+    users.get("s@test.com").status = "SUSPENDED";
+    await expect(service.login({ email: "s@test.com", password: "password123" }, "1.1.1.1")).rejects.toMatchObject({
+      response: { code: "INVALID_CREDENTIALS" },
+    });
   });
 });
 
@@ -124,10 +172,12 @@ describe("AuthService password reset", () => {
   let users: Map<string, any>;
   let passwordResets: any[];
   let prismaMock: any;
+  const emailMock = { send: jest.fn() };
 
   beforeEach(async () => {
     users = new Map();
     passwordResets = [];
+    emailMock.send.mockClear();
 
     prismaMock = {
       user: {
@@ -185,7 +235,8 @@ describe("AuthService password reset", () => {
       providers: [
         AuthService,
         { provide: PrismaService, useValue: prismaMock },
-        { provide: JwtService, useValue: new JwtService({ secret: "test-secret" }) },
+        { provide: JwtService, useValue: new JwtService(jwtOptions(TEST_SECRET)) },
+        { provide: EmailService, useValue: emailMock },
       ],
     }).compile();
 
@@ -204,9 +255,19 @@ describe("AuthService password reset", () => {
     expect(passwordResets[0].tokenHash).toMatch(/^[a-f0-9]{64}$/);
     expect(passwordResets[0].expiresAt.getTime()).toBeGreaterThan(Date.now());
 
+    // The raw token goes only to the email transport, which redacts it before logging.
+    expect(emailMock.send).toHaveBeenCalledWith({
+      to: "reset@test.com",
+      template: "password_reset",
+      payload: { resetToken: expect.stringMatching(/^[a-f0-9]{64}$/) },
+    });
+    const sentToken = emailMock.send.mock.calls[0][0].payload.resetToken;
+    expect(passwordResets[0].tokenHash).toBe(createHash("sha256").update(sentToken).digest("hex"));
+
     // No account enumeration: an unknown email yields the identical response.
     expect(await service.forgotPassword("nobody@test.com")).toEqual({ ok: true });
     expect(passwordResets).toHaveLength(1);
+    expect(emailMock.send).toHaveBeenCalledTimes(1);
   });
 
   it("resetPassword rejects unknown and expired tokens", async () => {

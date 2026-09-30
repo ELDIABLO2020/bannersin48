@@ -1,11 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
-import type { Request } from "express";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { IsBoolean, IsIn, IsObject, IsOptional, IsString, MaxLength } from "class-validator";
-import { JwtAuthGuard } from "../common/jwt-auth.guard";
-import { RolesGuard } from "../common/roles.guard";
 import { Roles } from "../common/roles.decorator";
 import { CurrentUser } from "../common/current-user.decorator";
-import { ipOf } from "../common/client-ip";
+import { ClientIp } from "../common/client-ip.decorator";
+import { Public } from "../common/public.decorator";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { ContentService, AdminContentService } from "./content-admin.service";
 import { AdminCustomersService } from "./customers-admin.service";
@@ -31,7 +29,6 @@ export class UpsertContentDto {
  * Public reads live on /content (no auth).
  */
 @Controller("admin")
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles("STAFF", "ADMIN", "CONTENT_EDITOR")
 export class AdminContentCustomersController {
   constructor(
@@ -54,14 +51,14 @@ export class AdminContentCustomersController {
 
   @Roles("CONTENT_EDITOR", "ADMIN")
   @Put("content/:key")
-  upsertContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @Body() dto: UpsertContentDto, @Req() req: Request) {
-    return this.content.upsert(user.id, { ...dto, key }, ipOf(req));
+  upsertContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @Body() dto: UpsertContentDto, @ClientIp() ip?: string) {
+    return this.content.upsert(user.id, { ...dto, key }, ip);
   }
 
   @Roles("CONTENT_EDITOR", "ADMIN")
   @Delete("content/:key")
-  deleteContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @Req() req: Request) {
-    return this.content.delete(user.id, key, ipOf(req));
+  deleteContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @ClientIp() ip?: string) {
+    return this.content.delete(user.id, key, ip);
   }
 
   // --- Customers ---
@@ -79,8 +76,8 @@ export class AdminContentCustomersController {
 
   @Roles("STAFF", "ADMIN")
   @Post("customers/:id/reset-password")
-  resetPassword(@CurrentUser() user: AuthedUser, @Param("id") id: string, @Req() req: Request) {
-    return this.customers.adminResetPassword(user.id, id, ipOf(req));
+  resetPassword(@CurrentUser() user: AuthedUser, @Param("id") id: string, @ClientIp() ip?: string) {
+    return this.customers.adminResetPassword(user, id, ip);
   }
 }
 
@@ -89,6 +86,7 @@ export class AdminContentCustomersController {
  * GET /content/:key → one published block.
  */
 @Controller("content")
+@Public()
 export class PublicContentController {
   constructor(private readonly content: ContentService) {}
 

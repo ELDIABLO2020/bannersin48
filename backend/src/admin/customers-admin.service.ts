@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { createHash, randomBytes } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../audit/audit.service";
 import { EmailService } from "../notifications/email.service";
 import { serializeAddress, serializeUser } from "../common/user.serializer";
+import type { AuthedUser } from "../common/jwt-auth.guard";
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
 
@@ -97,15 +98,17 @@ export class AdminCustomersService {
 
   /**
    * Admin-initiated password reset: creates a password_resets row with
-   * requestedBy set to the admin, revokes sessions and emails the customer.
-   * Returns the raw token in local dev only (SES delivery replaces it).
+   * requestedBy set to the actor, revokes sessions and emails the account owner.
+   * The token only ever goes to the email transport; it is never returned.
+   *
+   * STAFF may reset CUSTOMER accounts only. ADMIN may also reset STAFF and
+   * CONTENT_EDITOR accounts. Another ADMIN's password can't be reset here
+   * (use the admin:reset-password CLI on the server).
    */
-  async adminResetPassword(actorId: string, customerId: string, ip?: string) {
+  async adminResetPassword(actor: Pick<AuthedUser, "id" | "role">, customerId: string, ip?: string): Promise<{ ok: true }> {
     const user = await this.prisma.user.findUnique({ where: { id: customerId } });
     if (!user) throw new NotFoundException({ code: "NOT_FOUND", message: "Customer not found." });
-    if (user.role === "ADMIN" && actorId !== user.id) {
-      throw new BadRequestException({ code: "FORBIDDEN", message: "Use a different admin to reset another admin." });
-    }
+    assertMayReset(actor, user);
 
     const rawToken = randomBytes(32).toString("hex");
     await this.prisma.$transaction([
@@ -114,7 +117,7 @@ export class AdminCustomersService {
           userId: user.id,
           tokenHash: sha256(rawToken),
           expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-          requestedBy: actorId,
+          requestedBy: actor.id,
         },
       }),
       // Force re-login everywhere.
@@ -127,17 +130,30 @@ export class AdminCustomersService {
     await this.email.send({
       to: user.email,
       template: "admin_password_reset",
-      payload: { note: "An administrator initiated a password reset for your account." },
+      payload: { note: "An administrator initiated a password reset for your account.", resetToken: rawToken },
     });
     await this.audit.record({
-      actorId,
+      actorId: actor.id,
       action: "customer.admin_password_reset",
       entityType: "user",
       entityId: user.id,
-      diff: { requestedBy: { from: null, to: actorId } },
+      diff: { requestedBy: { from: null, to: actor.id }, targetRole: user.role },
       ip,
     });
 
-    return { ok: true as const, devResetToken: rawToken }; // dev token removed when SES lands
+    return { ok: true };
   }
+}
+
+export function assertMayReset(actor: Pick<AuthedUser, "id" | "role">, target: { id: string; role: string }): void {
+  if (target.role === "CUSTOMER" && (actor.role === "STAFF" || actor.role === "ADMIN")) return;
+  if (actor.role === "ADMIN" && (target.role === "STAFF" || target.role === "CONTENT_EDITOR")) return;
+  if (actor.role === "ADMIN" && target.role === "ADMIN" && target.id === actor.id) return;
+  throw new ForbiddenException({
+    code: "FORBIDDEN_TARGET",
+    message:
+      target.role === "ADMIN"
+        ? "Admin passwords can't be reset from the dashboard. Use the server reset-password script."
+        : "Only an admin can reset the password of a staff account.",
+  });
 }

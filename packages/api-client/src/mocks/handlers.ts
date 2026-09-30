@@ -406,7 +406,7 @@ export const handlers = [
       placedAt: now,
       createdAt: now,
       updatedAt: now,
-      events: [{ id: `evt_${uuid()}`, fromStatus: null, toStatus: "RECEIVED", actorId: auth, note: "Order placed.", createdAt: now }],
+      events: [{ id: `evt_${uuid()}`, fromStatus: null, toStatus: "RECEIVED", actor: "customer", note: "Order placed.", createdAt: now }],
     };
     store.orders.set(id, { order });
     return HttpResponse.json(order, { status: 201 });
@@ -425,7 +425,7 @@ export const handlers = [
       ...rec.order,
       status: "CANCELLED",
       updatedAt: now,
-      events: [...rec.order.events, { id: `evt_${uuid()}`, fromStatus: rec.order.status, toStatus: "CANCELLED", actorId: auth, note: "Cancelled by customer.", createdAt: now }],
+      events: [...rec.order.events, { id: `evt_${uuid()}`, fromStatus: rec.order.status, toStatus: "CANCELLED", actor: "customer", note: "Cancelled by customer.", createdAt: now }],
     };
     rec.order = order;
     return HttpResponse.json(order);

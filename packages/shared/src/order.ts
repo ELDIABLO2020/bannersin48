@@ -32,7 +32,8 @@ export const orderEventSchema = z
     id: z.string(),
     fromStatus: orderStatusSchema.nullable(),
     toStatus: orderStatusSchema,
-    actorId: z.string().nullable(),
+    /** Who made the change. Staff user ids are never sent to customers. */
+    actor: z.enum(["customer", "staff", "system"]),
     note: z.string().nullable(),
     createdAt: z.string(),
   })

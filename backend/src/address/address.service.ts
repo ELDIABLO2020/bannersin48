@@ -64,8 +64,7 @@ export class AddressService {
   }
 
   private sign(address: Address): string {
-    const secret = this.config.get<string>("JWT_SECRET");
-    if (!secret) throw new Error("JWT_SECRET is required for address validation tokens.");
+    const secret = this.config.getOrThrow<string>("ADDRESS_TOKEN_SECRET");
     const payload = Buffer.from(
       JSON.stringify({ version: ADDRESS_VALIDATION_VERSION, address }),
     ).toString("base64url");

@@ -44,7 +44,7 @@ export interface AdminOrderDetail extends Record<string, unknown> {
     shippedAt: string | null;
     deliveredAt: string | null;
   } | null;
-  events: Array<{ id: string; fromStatus: string | null; toStatus: string; note: string | null; createdAt: string }>;
+  events: Array<{ id: string; fromStatus: string | null; toStatus: string; actor: "customer" | "staff" | "system"; note: string | null; createdAt: string }>;
 }
 
 export interface AdminProductRow {

@@ -383,3 +383,33 @@ describe("delivery commitment persistence (D6)", () => {
     );
   });
 });
+
+describe("order event timeline (C3 / L1)", () => {
+  it("labels actors by role and never exposes staff or admin user ids to the customer", async () => {
+    const { service } = await makeService();
+    const order = {
+      id: "ord_test1",
+      userId: "cust_1",
+      number: "BI48-000007",
+      status: "IN_PROCESSING",
+      paymentStatus: "MARKED_PAID",
+      subtotal: "85.50",
+      shippingAmount: "10.00",
+      taxAmount: "0",
+      total: "95.50",
+      currency: "USD",
+      shipAddress: {},
+      placedAt: new Date("2026-01-05T12:00:00Z"),
+      createdAt: new Date("2026-01-05T12:00:00Z"),
+      updatedAt: new Date("2026-01-05T12:00:00Z"),
+    } as never;
+    const event = (id: string, actorId: string | null) =>
+      ({ id, orderId: "ord_test1", fromStatus: null, toStatus: "RECEIVED", actorId, note: null, emailed: false, createdAt: new Date() }) as never;
+
+    const detail = service.assembleDetail(order, [], [event("e1", "cust_1"), event("e2", "admin_secret_id"), event("e3", null)]);
+
+    expect(detail.events.map((e) => e.actor)).toEqual(["customer", "staff", "system"]);
+    expect(JSON.stringify(detail.events)).not.toContain("admin_secret_id");
+    expect(detail.events.every((e) => !("actorId" in e))).toBe(true);
+  });
+});

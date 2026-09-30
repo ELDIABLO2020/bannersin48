@@ -3,8 +3,7 @@ import { Reflector } from "@nestjs/core";
 import { ROLES_KEY } from "./roles.decorator";
 
 /**
- * Role gate for internal routes. Use AFTER JwtAuthGuard so request.user exists:
- *   @UseGuards(JwtAuthGuard, RolesGuard)
+ * Role gate, registered globally after JwtAuthGuard so request.user exists:
  *   @Roles("STAFF", "ADMIN")
  *
  * ADMIN passes every guarded route; otherwise the user's role must be listed.

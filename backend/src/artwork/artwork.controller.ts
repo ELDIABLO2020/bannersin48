@@ -1,8 +1,8 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
-import { JwtAuthGuard } from "../common/jwt-auth.guard";
 import { CurrentUser } from "../common/current-user.decorator";
+import { RateLimit } from "../common/throttling";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { ArtworkService } from "./artwork.service";
 import { FolderNameDto } from "./artwork.dto";
@@ -12,11 +12,11 @@ import { FolderNameDto } from "./artwork.dto";
  * field; the server sniffs magic bytes and ignores the declared Content-Type.
  */
 @Controller("artwork")
-@UseGuards(JwtAuthGuard)
 export class ArtworkController {
   constructor(private readonly artwork: ArtworkService) {}
 
   @Post("upload")
+  @RateLimit("upload")
   @UseInterceptors(
     FileInterceptor("file", {
       limits: { fileSize: 50 * 1024 * 1024 },

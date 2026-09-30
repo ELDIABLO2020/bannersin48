@@ -52,7 +52,8 @@ export class HttpClient {
       method,
       headers,
       body: bodyPayload,
-      credentials: "include",
+      // Bearer header only; the API sets no cookies and CORS has credentials disabled.
+      credentials: "omit",
       ...init,
     });
 

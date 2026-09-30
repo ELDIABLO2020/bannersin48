@@ -45,9 +45,15 @@ Customers may cancel only before payment is marked (`RECEIVED`, `AWAITING_PAYMEN
 | `CONTENT_EDITOR` | CMS content blocks only |
 | `ADMIN` | Everything |
 
-`JwtAuthGuard` + `RolesGuard` on every Nest route are authoritative. The admin UI only hides
-sections the user can't access. The access JWT lives in `localStorage`, so the admin gate
-is client-side and every API call is still enforced by the server.
+`JwtAuthGuard` and `RolesGuard` are global (`APP_GUARD`), so every Nest route needs a valid
+access token unless it is marked `@Public()`; `backend/src/app.security.spec.ts` pins the public
+list and checks every other route returns 401 anonymously. The guard re-reads the user row on each
+request, so role changes and suspensions apply at once. The admin UI only hides sections the user
+can't access. The access JWT lives in `localStorage`, so the admin gate is client-side and every
+API call is still enforced by the server.
+
+Password resets from the admin dashboard: STAFF may reset CUSTOMER accounts only; ADMIN may also
+reset STAFF and CONTENT_EDITOR accounts. No one can reset another ADMIN from the dashboard.
 
 ## Conventions
 
@@ -73,8 +79,8 @@ These are local stand-ins. Each sits behind an interface, so a real implementati
 | Concern | Today | Planned |
 |---|---|---|
 | Artwork storage | `LocalStorageDriver` (`STORAGE_DRIVER=local`) | S3/R2 driver + CDN, 6-month lifecycle expiry (after go-live) |
-| Email | `EmailService` logs to console + `email_log`; reset tokens logged | Real transport (SES or similar), before go-live |
-| Login throttle | In-memory (5 failures → 15-min lock) | `@nestjs/throttler` + IP+email backoff; Redis store when multi-instance |
+| Email | `EmailService` logs to console + `email_log`, with tokens and passwords replaced by a sha256 fingerprint. Nothing is delivered | Real transport (SES or similar), before go-live |
+| Rate limits | In-memory `@nestjs/throttler` per IP, and an in-memory IP+email login backoff (see [api.md](api.md)) | Redis store when multi-instance |
 | Malware scan | Artwork rows stay `scanStatus = PENDING` | Scanner |
 | Tracking | Tracking number, label PDF and a FedEx deep link | FedEx Tracking API for automatic shipped/delivered |
 | Payments, tax | None (see operating model) | Provider integrations |
@@ -82,9 +88,37 @@ These are local stand-ins. Each sits behind an interface, so a real implementati
 
 Auth stays custom and is hardened rather than replaced with a hosted provider. The work is sequenced in
 [backend-plan.md](backend-plan.md), from the findings in [backend-security-review.md](backend-security-review.md).
-`devResetToken` is removed before the first deploy, not when real email lands.
+The API never returns reset tokens. Until email exists, nobody receives a reset link, so an operator
+resets passwords over SSH with the CLI below.
 
 ## Local accounts
 
 `npm run seed -w backend` upserts `admin@bannersin48.local` / `ChangeMe123!`. Override
 them with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Re-running the seed never overwrites an existing password.
+
+With `NODE_ENV=production` the seed (`npm run seed:prod -w backend`, i.e. `node dist/prisma/seed.js`)
+refuses to run unless `ADMIN_EMAIL` and `ADMIN_PASSWORD` are both set and the password is at least
+16 characters and not a placeholder.
+
+## Operator password reset
+
+```
+npm run admin:reset-password -w backend -- someone@example.com   # local (ts-node)
+node dist/src/cli/reset-password.js someone@example.com          # production container
+```
+
+The new password (12–128 characters) comes from a hidden, confirmed TTY prompt, or from the
+`NEW_PASSWORD` env var when that is set (non-interactive use), or from stdin with
+`--password-stdin`. It is never accepted as an argument. The script revokes the user's refresh tokens and
+unused reset links and writes an `audit_log` row with `actorId` null and `diff.actor = "system:cli"`.
+Access tokens already issued stay valid until they expire (15 minutes).
+
+## Required environment
+
+The API validates its environment on every boot, whatever `NODE_ENV` is:
+`DATABASE_URL`; `JWT_SECRET`, `ADDRESS_TOKEN_SECRET`, `DOWNLOAD_URL_SECRET` (each 64+ hex or 43+
+base64url characters, all different, no placeholders; generate with `openssl rand -hex 32`);
+`CORS_ORIGINS` (required, https only, when `NODE_ENV=production`). Optional: `JWT_ISSUER`
+(default `bannersin48-api`), `JWT_AUDIENCE` (default `bannersin48-web`), `ALLOW_PREVIEW_ORIGINS`
+(`1` to allow Vercel previews). Unknown variables are ignored. On SIGTERM the API stops accepting
+requests and force-closes anything still open after 25 s, inside Docker's 30 s stop window.

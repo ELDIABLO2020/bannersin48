@@ -2,26 +2,27 @@
  * Database seed — idempotent (safe to re-run).
  *
  * Creates:
- *  - super-admin user (ADMIN_EMAIL / ADMIN_PASSWORD env, with local defaults)
+ *  - super-admin user (ADMIN_EMAIL / ADMIN_PASSWORD env; local defaults outside
+ *    production, required and ≥16 chars when NODE_ENV=production)
  *  - full product catalog matching @bannersin48/shared configs & rates
  *  - finishing options, a sample volume tier
  *  - sample site_content blocks
  */
 import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcryptjs";
 import {
   PRODUCTS,
   BANNER_HUB_ORDER,
   ADDON_RATES,
   WEBBING_PER_WIDTH_FT_PER_EDGE_USD,
 } from "@bannersin48/shared";
+import { resolveSeedAdmin } from "../src/config/seed-admin";
+import { hashPassword } from "../src/auth/password";
 
 const prisma = new PrismaClient();
 
 async function seedAdmin(): Promise<void> {
-  const email = (process.env.ADMIN_EMAIL ?? "admin@bannersin48.local").toLowerCase();
-  const password = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
-  const passwordHash = await bcrypt.hash(password, 10);
+  const { email, password } = resolveSeedAdmin(process.env);
+  const passwordHash = await hashPassword(password);
 
   await prisma.user.upsert({
     where: { email },

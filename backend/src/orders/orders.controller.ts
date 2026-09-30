@@ -1,21 +1,17 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
-import type { Request } from "express";
-import { JwtAuthGuard } from "../common/jwt-auth.guard";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { CurrentUser } from "../common/current-user.decorator";
-import { ipOf } from "../common/client-ip";
+import { ClientIp } from "../common/client-ip.decorator";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderDetail, OrderListItem } from "./orders.service";
 import { CreateOrderDto } from "./orders.dto";
 
-@Controller("orders")
-@UseGuards(JwtAuthGuard) // no guest checkout
+@Controller("orders") // authenticated: no guest checkout
 export class OrdersController {
   constructor(private readonly orders: OrdersService) {}
 
   @Post()
-  create(@CurrentUser() user: AuthedUser, @Body() dto: CreateOrderDto, @Req() req: Request): Promise<OrderDetail> {
-    const ip = ipOf(req);
+  create(@CurrentUser() user: AuthedUser, @Body() dto: CreateOrderDto, @ClientIp() ip?: string): Promise<OrderDetail> {
     return this.orders.create(user.id, dto, ip);
   }
 

@@ -52,6 +52,13 @@ set -a
 source "${REPO_ROOT}/backend/.env"
 set +a
 
+# Throwaway secrets for this run only: the API refuses missing or placeholder
+# values, and nothing signed during an e2e run needs to outlive it.
+export JWT_SECRET="$(openssl rand -hex 32)"
+export ADDRESS_TOKEN_SECRET="$(openssl rand -hex 32)"
+export DOWNLOAD_URL_SECRET="$(openssl rand -hex 32)"
+export CORS_ORIGINS="${FRONTEND_URL}"
+
 # 2. Infra.
 echo "Starting Postgres…"
 docker compose -f "${REPO_ROOT}/backend/docker-compose.yml" up -d
@@ -74,11 +81,9 @@ done
 # workspace dependency are consumed from TypeScript source, so the compiled
 # `node dist` path cannot resolve the shared package. `start:dev` (ts-node) is
 # the documented local run mode (see backend/scripts/smoke.sh).
-(
-  cd "${REPO_ROOT}/backend"
-  PORT="${API_PORT}" npm run start:dev &
-  PIDS+=("$!")
-)
+# Started from the main shell (not a subshell) so its PID reaches cleanup().
+(cd "${REPO_ROOT}/backend" && PORT="${API_PORT}" exec npm run start:dev) &
+PIDS+=("$!")
 for i in $(seq 1 60); do
   if curl -sf "${API_URL}/health" >/dev/null 2>&1; then break; fi
   sleep 1

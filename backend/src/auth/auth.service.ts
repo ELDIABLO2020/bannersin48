@@ -1,22 +1,21 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { createHash, randomBytes } from "crypto";
-import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
+import { EmailService } from "../notifications/email.service";
 import { serializeAddress, serializeUser, type SerializedUser } from "../common/user.serializer";
+import { hashPassword, verifyPassword } from "./password";
+import { LoginBackoff } from "./login-backoff";
 import type { RegisterDto, LoginDto } from "./auth.dto";
 
 const REFRESH_TOKEN_TTL_DAYS = 30;
-const BCRYPT_ROUNDS = 10;
-
-// Login throttling: lock an email for 15 minutes after 5 failed attempts.
-const MAX_LOGIN_FAILURES = 5;
-const LOGIN_LOCK_MS = 15 * 60 * 1000;
-
-interface LoginAttempt {
-  failures: number;
-  lockedUntil: number | null;
-}
 
 export interface TokenPair {
   token: string; // access token — field name matches the MSW contract
@@ -29,11 +28,12 @@ function sha256(value: string): string {
 
 @Injectable()
 export class AuthService {
-  private loginAttempts = new Map<string, LoginAttempt>();
+  private readonly backoff = new LoginBackoff();
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly email: EmailService,
   ) {}
 
   // --- Registration & login -------------------------------------------------
@@ -49,7 +49,7 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         email,
-        passwordHash: await bcrypt.hash(dto.password, BCRYPT_ROUNDS),
+        passwordHash: await hashPassword(dto.password),
         firstName,
         lastName,
       },
@@ -58,23 +58,35 @@ export class AuthService {
     return { user: await this.serialize(user.id), ...(await this.issueTokens(user)) };
   }
 
-  async login(dto: LoginDto): Promise<{ user: SerializedUser } & TokenPair> {
+  async login(dto: LoginDto, ip?: string): Promise<{ user: SerializedUser } & TokenPair> {
     const email = dto.email.toLowerCase().trim();
-    this.assertNotLocked(email);
+    const key = LoginBackoff.key(ip, email);
+    const waitMs = this.backoff.retryAfterMs(key);
+    if (waitMs > 0) {
+      const seconds = Math.ceil(waitMs / 1000);
+      throw new HttpException(
+        {
+          code: "LOGIN_BACKOFF",
+          message: `Too many failed sign-in attempts. Try again in ${seconds} second${seconds === 1 ? "" : "s"}.`,
+          retryAfterSeconds: seconds,
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
 
     const user = await this.prisma.user.findUnique({ where: { email } });
-    const passwordOk =
-      user && user.status === "ACTIVE" ? await bcrypt.compare(dto.password, user.passwordHash) : false;
+    // Always run bcrypt, even with no user, so response time doesn't reveal which emails exist.
+    const passwordOk = await verifyPassword(dto.password, user?.passwordHash);
 
-    if (!user || !passwordOk) {
-      this.recordFailure(email);
+    if (!user || !passwordOk || user.status !== "ACTIVE") {
+      this.backoff.recordFailure(key);
       throw new UnauthorizedException({
         code: "INVALID_CREDENTIALS",
         message: "Email or password is incorrect.",
       });
     }
 
-    this.loginAttempts.delete(email);
+    this.backoff.recordSuccess(key);
     return { user: await this.serialize(user.id), ...(await this.issueTokens(user)) };
   }
 
@@ -121,8 +133,9 @@ export class AuthService {
   // --- Password reset ---------------------------------------------------------
 
   /**
-   * Always succeeds (no account enumeration). There is no email transport yet,
-   * so the reset token is logged to the server console.
+   * Always succeeds (no account enumeration). The token goes to EmailService,
+   * which only logs a redacted fingerprint; until a real transport exists,
+   * operators reset passwords with the `admin:reset-password` CLI.
    */
   async forgotPassword(email: string): Promise<{ ok: true }> {
     const normalized = email.toLowerCase().trim();
@@ -137,7 +150,7 @@ export class AuthService {
         expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
       },
     });
-    console.log(`[auth] Password reset requested for ${normalized}. Reset token (dev only): ${rawToken}`);
+    await this.email.send({ to: user.email, template: "password_reset", payload: { resetToken: rawToken } });
     return { ok: true };
   }
 
@@ -150,7 +163,7 @@ export class AuthService {
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: record.userId },
-        data: { passwordHash: await bcrypt.hash(newPassword, BCRYPT_ROUNDS) },
+        data: { passwordHash: await hashPassword(newPassword) },
       }),
       this.prisma.passwordReset.update({
         where: { id: record.id },
@@ -178,12 +191,9 @@ export class AuthService {
     );
   }
 
-  private async issueTokens(user: {
-    id: string;
-    email: string;
-    role: string;
-  }): Promise<TokenPair> {
-    const token = this.jwt.sign({ sub: user.id, email: user.email, role: user.role });
+  private async issueTokens(user: { id: string }): Promise<TokenPair> {
+    // `sub` only: JwtAuthGuard re-reads role and status from the database on every request.
+    const token = this.jwt.sign({ sub: user.id });
 
     const refreshToken = randomBytes(48).toString("hex");
     await this.prisma.refreshToken.create({
@@ -195,25 +205,6 @@ export class AuthService {
     });
 
     return { token, refreshToken };
-  }
-
-  // --- Login throttling ---------------------------------------------------
-
-  private assertNotLocked(email: string): void {
-    const attempt = this.loginAttempts.get(email);
-    if (attempt?.lockedUntil && attempt.lockedUntil > Date.now()) {
-      throw new UnauthorizedException("Too many login attempts. Try again in 15 minutes.");
-    }
-  }
-
-  private recordFailure(email: string): void {
-    const attempt = this.loginAttempts.get(email) ?? { failures: 0, lockedUntil: null };
-    attempt.failures += 1;
-    if (attempt.failures >= MAX_LOGIN_FAILURES) {
-      attempt.lockedUntil = Date.now() + LOGIN_LOCK_MS;
-      attempt.failures = 0;
-    }
-    this.loginAttempts.set(email, attempt);
   }
 }
 

@@ -20,13 +20,13 @@ Tick items off as PRs land. Each numbered item is one PR.
 ## Phase 1 — before the first VPS deploy (test environment)
 
 Security:
-1. [ ] Remove `devResetToken`; STAFF can only reset CUSTOMER accounts; add `admin:reset-password` CLI script (C1).
-2. [ ] `JWT_SECRET` validated on every boot: reject placeholders, require 256-bit random; separate `ADDRESS_TOKEN_SECRET`; pin JWT `HS256` + `iss` + `aud`, payload `sub` only; hide staff `actorId` from customers (C3, M7, L1).
-3. [ ] `JwtAuthGuard` as global `APP_GUARD` with explicit `@Public()` routes (M2).
-4. [ ] `helmet`, env-driven `CORS_ORIGINS` (+ opt-in Vercel preview regex), `credentials:false`, `trust proxy` + `req.ip` (delete `ipOf`), shutdown hooks, server timeouts (H3, H5, M10).
-5. [ ] `@nestjs/throttler` global + stricter auth/quote/upload limits; replace per-email hard lockout with IP+email backoff (H2).
+1. [x] Remove `devResetToken`; STAFF can only reset CUSTOMER accounts; add `admin:reset-password` CLI script (C1).
+2. [x] `JWT_SECRET` validated on every boot: reject placeholders, require 256-bit random; separate `ADDRESS_TOKEN_SECRET`; pin JWT `HS256` + `iss` + `aud`, payload `sub` only; hide staff `actorId` from customers (C3, M7, L1).
+3. [x] `JwtAuthGuard` as global `APP_GUARD` with explicit `@Public()` routes (M2).
+4. [x] `helmet`, env-driven `CORS_ORIGINS` (+ opt-in Vercel preview regex), `credentials:false`, `trust proxy` + `req.ip` (delete `ipOf`), shutdown hooks, server timeouts (H3, H5, M10).
+5. [x] `@nestjs/throttler` global + stricter auth/quote/upload limits; replace per-email hard lockout with IP+email backoff (H2).
 6. [ ] Quote DTO bounds (`grommetPoints`, string lengths); stop persisting anonymous quotes or purge expired ones (H1).
-7. [ ] Seed refuses to run in production without a strong `ADMIN_PASSWORD` (H6).
+7. [x] Seed refuses to run in production without a strong `ADMIN_PASSWORD` (H6).
 8. [ ] Mark-paid: validate the transition first, single conditional transaction, no double credit (H8).
 9. [ ] Remove `?access_token=`; short-lived HMAC-signed artwork/label download URLs; PDFs served with `nosniff` + `CSP: sandbox` (H4, M11).
 10. [ ] Stream uploads to disk and downloads from disk; streaming sha256; upload concurrency cap; per-user quota (H9).

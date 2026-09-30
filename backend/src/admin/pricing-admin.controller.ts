@@ -1,10 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Req, UseGuards } from "@nestjs/common";
-import type { Request } from "express";
-import { JwtAuthGuard } from "../common/jwt-auth.guard";
-import { RolesGuard } from "../common/roles.guard";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from "@nestjs/common";
 import { Roles } from "../common/roles.decorator";
 import { CurrentUser } from "../common/current-user.decorator";
-import { ipOf } from "../common/client-ip";
+import { ClientIp } from "../common/client-ip.decorator";
 import type { AuthedUser } from "../common/jwt-auth.guard";
 import { PricingAdminService } from "./pricing-admin.service";
 import {
@@ -22,7 +19,6 @@ import {
  * Effective immediately for new quotes/orders; existing orders keep snapshots.
  */
 @Controller("admin")
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles("STAFF", "ADMIN")
 export class PricingAdminController {
   constructor(private readonly pricing: PricingAdminService) {}
@@ -35,8 +31,8 @@ export class PricingAdminController {
 
   @Roles("ADMIN")
   @Post("products")
-  createProduct(@CurrentUser() user: AuthedUser, @Body() dto: CreateProductDto, @Req() req: Request) {
-    return this.pricing.createProduct(user.id, dto, ipOf(req));
+  createProduct(@CurrentUser() user: AuthedUser, @Body() dto: CreateProductDto, @ClientIp() ip?: string) {
+    return this.pricing.createProduct(user.id, dto, ip);
   }
 
   @Roles("ADMIN")
@@ -45,15 +41,15 @@ export class PricingAdminController {
     @CurrentUser() user: AuthedUser,
     @Param("id") id: string,
     @Body() dto: UpdateProductDto,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.updateProduct(user.id, id, dto, ipOf(req));
+    return this.pricing.updateProduct(user.id, id, dto, ip);
   }
 
   @Roles("ADMIN")
   @Delete("products/:id")
-  deleteProduct(@CurrentUser() user: AuthedUser, @Param("id") id: string, @Req() req: Request) {
-    return this.pricing.deleteProduct(user.id, id, ipOf(req));
+  deleteProduct(@CurrentUser() user: AuthedUser, @Param("id") id: string, @ClientIp() ip?: string) {
+    return this.pricing.deleteProduct(user.id, id, ip);
   }
 
   @Roles("ADMIN")
@@ -62,9 +58,9 @@ export class PricingAdminController {
     @CurrentUser() user: AuthedUser,
     @Param("id") id: string,
     @Body() dto: CreateMaterialDto,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.createMaterial(user.id, id, dto, ipOf(req));
+    return this.pricing.createMaterial(user.id, id, dto, ip);
   }
 
   @Roles("ADMIN")
@@ -73,9 +69,9 @@ export class PricingAdminController {
     @CurrentUser() user: AuthedUser,
     @Param("materialId") materialId: string,
     @Body() dto: UpdateMaterialDto,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.updateMaterial(user.id, materialId, dto, ipOf(req));
+    return this.pricing.updateMaterial(user.id, materialId, dto, ip);
   }
 
   @Roles("ADMIN")
@@ -83,9 +79,9 @@ export class PricingAdminController {
   deleteMaterial(
     @CurrentUser() user: AuthedUser,
     @Param("materialId") materialId: string,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.deleteMaterial(user.id, materialId, ipOf(req));
+    return this.pricing.deleteMaterial(user.id, materialId, ip);
   }
 
   // --- Finishing options ---
@@ -99,9 +95,9 @@ export class PricingAdminController {
   createFinishingOption(
     @CurrentUser() user: AuthedUser,
     @Body() dto: CreateFinishingOptionDto,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.createFinishingOption(user.id, dto, ipOf(req));
+    return this.pricing.createFinishingOption(user.id, dto, ip);
   }
 
   @Roles("ADMIN")
@@ -110,9 +106,9 @@ export class PricingAdminController {
     @CurrentUser() user: AuthedUser,
     @Param("id") id: string,
     @Body() dto: UpsertFinishingOptionDto,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.updateFinishingOption(user.id, id, dto, ipOf(req));
+    return this.pricing.updateFinishingOption(user.id, id, dto, ip);
   }
 
   @Roles("ADMIN")
@@ -120,9 +116,9 @@ export class PricingAdminController {
   deleteFinishingOption(
     @CurrentUser() user: AuthedUser,
     @Param("id") id: string,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.deleteFinishingOption(user.id, id, ipOf(req));
+    return this.pricing.deleteFinishingOption(user.id, id, ip);
   }
 
   // --- Volume tiers ---
@@ -136,9 +132,9 @@ export class PricingAdminController {
   createVolumeTier(
     @CurrentUser() user: AuthedUser,
     @Body() dto: UpsertVolumeTierDto,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.upsertVolumeTier(user.id, undefined, dto, ipOf(req));
+    return this.pricing.upsertVolumeTier(user.id, undefined, dto, ip);
   }
 
   @Roles("ADMIN")
@@ -147,9 +143,9 @@ export class PricingAdminController {
     @CurrentUser() user: AuthedUser,
     @Param("id") id: string,
     @Body() dto: UpsertVolumeTierDto,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.upsertVolumeTier(user.id, id, dto, ipOf(req));
+    return this.pricing.upsertVolumeTier(user.id, id, dto, ip);
   }
 
   @Roles("ADMIN")
@@ -157,8 +153,8 @@ export class PricingAdminController {
   deleteVolumeTier(
     @CurrentUser() user: AuthedUser,
     @Param("id") id: string,
-    @Req() req: Request,
+    @ClientIp() ip?: string,
   ) {
-    return this.pricing.deleteVolumeTier(user.id, id, ipOf(req));
+    return this.pricing.deleteVolumeTier(user.id, id, ip);
   }
 }

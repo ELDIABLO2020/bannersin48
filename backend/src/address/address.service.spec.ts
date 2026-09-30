@@ -11,10 +11,17 @@ const input = {
   country: "US" as const,
 };
 
+function configWith(env: Record<string, string>): ConfigService {
+  return {
+    getOrThrow: (key: string) => {
+      if (!(key in env)) throw new Error(`missing ${key}`);
+      return env[key];
+    },
+  } as unknown as ConfigService;
+}
+
 describe("AddressService", () => {
-  const service = new AddressService(
-    { get: () => "test-address-signing-secret" } as unknown as ConfigService,
-  );
+  const service = new AddressService(configWith({ ADDRESS_TOKEN_SECRET: "a".repeat(32) + "b".repeat(32) }));
 
   it("normalizes US syntax but reports the result as unverified", () => {
     const result = service.validate(input);
@@ -36,5 +43,14 @@ describe("AddressService", () => {
     expect(() =>
       service.assertToken({ ...input, street1: "999 Other St" }, result.validationToken),
     ).toThrow(BadRequestException);
+  });
+
+  it("signs with ADDRESS_TOKEN_SECRET, never JWT_SECRET", () => {
+    const jwtOnly = new AddressService(configWith({ JWT_SECRET: "a".repeat(32) + "b".repeat(32) }));
+    expect(() => jwtOnly.validate(input)).toThrow(/ADDRESS_TOKEN_SECRET/);
+
+    const other = new AddressService(configWith({ ADDRESS_TOKEN_SECRET: "c".repeat(64) }));
+    const token = service.validate(input).validationToken;
+    expect(() => other.assertToken(input, token)).toThrow(BadRequestException);
   });
 });
