@@ -92,9 +92,9 @@ describe("JwtAuthGuard", () => {
     await expect(guard.canActivate(contextFor(undefined, "open").context)).resolves.toBe(true);
   });
 
-  it("still accepts ?access_token= (image previews) until signed download URLs land", async () => {
+  it("ignores ?access_token= (tokens never travel in URLs; file links are signed instead)", async () => {
     const { context, request } = contextFor(undefined, "guarded", { access_token: sign({ sub: "u1" }) });
-    await expect(guard.canActivate(context)).resolves.toBe(true);
-    expect(request.user).toMatchObject({ id: "u1" });
+    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    expect(request.user).toBeUndefined();
   });
 });

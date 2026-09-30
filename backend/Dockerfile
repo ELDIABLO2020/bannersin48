@@ -93,7 +93,8 @@ FROM manifests AS prod-deps
 # --ignore-scripts: nothing in the production tree needs an install script
 # (the Prisma client is generated in `build` and copied below).
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci -w backend --omit=dev --ignore-scripts
+    npm ci -w backend --omit=dev --ignore-scripts \
+ && mkdir -p backend/node_modules
 # `npm ci --omit=dev -w` still leaves some dev-only packages of other workspaces
 # (e.g. typescript). Remove every top-level package that is not in the backend's
 # production tree, then prove each declared dependency still resolves.
@@ -142,6 +143,9 @@ ENV NODE_ENV=production \
 WORKDIR /app
 COPY --from=prod-deps /app/package.json ./package.json
 COPY --from=prod-deps /app/node_modules/ ./node_modules/
+# Dependencies npm could not hoist (version conflicts with other workspaces) live
+# here; the prod-deps check above accepts them, so the runtime must have them too.
+COPY --from=prod-deps /app/backend/node_modules/ ./backend/node_modules/
 COPY --from=build /tmp/shared-package.json ./packages/shared/package.json
 COPY --from=build /app/packages/shared/dist/ ./packages/shared/dist/
 COPY --from=build /app/backend/package.json ./backend/package.json

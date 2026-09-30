@@ -46,4 +46,14 @@ describe("artwork library + upload meta", () => {
     const file = new File([new Uint8Array([1])], "x.gif", { type: "image/gif" });
     await expect(client().uploadArtwork(file)).rejects.toMatchObject({ status: 400 });
   });
+
+  it("mints a short-lived link for the owner's artwork only", async () => {
+    const link = await client().artworkDownloadUrl("art_sample_1", "preview");
+    expect(link.url).toBe("/mock-artwork-portrait.svg");
+    expect(new Date(link.expiresAt).getTime()).toBeGreaterThan(Date.now());
+
+    const other = createApiClient({ baseUrl: "http://localhost:3001", getToken: () => null });
+    await expect(other.artworkDownloadUrl("art_sample_1")).rejects.toMatchObject({ status: 401 });
+    await expect(client().artworkDownloadUrl("art_missing")).rejects.toMatchObject({ status: 404 });
+  });
 });

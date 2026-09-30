@@ -72,10 +72,40 @@ describe("validateEnv", () => {
     expect(() => validateEnv(env({ CORS_ORIGINS: "https://shop.example.com/" }))).toThrow(/invalid origins/);
     expect(() => validateEnv(env({ CORS_ORIGINS: "*" }))).toThrow(/invalid origins/);
     const ok = validateEnv(
-      env({ NODE_ENV: "production", CORS_ORIGINS: "https://www.bannersin48.com, https://bannersin48.com", ALLOW_PREVIEW_ORIGINS: "1" }),
+      env({
+        NODE_ENV: "production",
+        CORS_ORIGINS: "https://www.bannersin48.com, https://bannersin48.com",
+        ALLOW_PREVIEW_ORIGINS: "1",
+        API_DOMAIN: "api.bannersin48.com",
+      }),
     );
     expect(ok.CORS_ORIGINS).toEqual(["https://www.bannersin48.com", "https://bannersin48.com"]);
     expect(ok.ALLOW_PREVIEW_ORIGINS).toBe(true);
+  });
+
+  it("derives the public API origin for signed links: PUBLIC_API_URL, then API_DOMAIN, then localhost", () => {
+    expect(validateEnv(env({ PORT: "4000" })).PUBLIC_API_URL).toBe("http://localhost:4000");
+    expect(validateEnv(env({ API_DOMAIN: "179-236-230-7.sslip.io" })).PUBLIC_API_URL).toBe("https://179-236-230-7.sslip.io");
+    expect(validateEnv(env({ API_DOMAIN: "x.io", PUBLIC_API_URL: "https://api.example.com" })).PUBLIC_API_URL).toBe(
+      "https://api.example.com",
+    );
+    const prod = { NODE_ENV: "production", CORS_ORIGINS: "https://www.bannersin48.com" };
+    expect(() => validateEnv(env(prod))).toThrow(/API_DOMAIN or PUBLIC_API_URL/);
+    expect(() => validateEnv(env({ ...prod, PUBLIC_API_URL: "http://api.example.com" }))).toThrow(/https/);
+    expect(() => validateEnv(env({ PUBLIC_API_URL: "https://api.example.com/v1" }))).toThrow(/PUBLIC_API_URL/);
+    expect(() => validateEnv(env({ API_DOMAIN: "https://api.example.com" }))).toThrow(/API_DOMAIN/);
+  });
+
+  it("applies upload defaults (4 in flight, 2 GiB and 500 files per user) and validates overrides", () => {
+    const defaults = validateEnv(env());
+    expect(defaults.UPLOAD_MAX_CONCURRENCY).toBe(4);
+    expect(defaults.ARTWORK_QUOTA_BYTES).toBe(2 * 1024 ** 3);
+    expect(defaults.ARTWORK_QUOTA_FILES).toBe(500);
+    const custom = validateEnv(env({ UPLOAD_MAX_CONCURRENCY: "2", ARTWORK_QUOTA_BYTES: "104857600", ARTWORK_QUOTA_FILES: "50" }));
+    expect(custom).toMatchObject({ UPLOAD_MAX_CONCURRENCY: 2, ARTWORK_QUOTA_BYTES: 104857600, ARTWORK_QUOTA_FILES: 50 });
+    expect(() => validateEnv(env({ UPLOAD_MAX_CONCURRENCY: "0" }))).toThrow(/UPLOAD_MAX_CONCURRENCY/);
+    expect(() => validateEnv(env({ ARTWORK_QUOTA_FILES: "lots" }))).toThrow(/ARTWORK_QUOTA_FILES/);
+    expect(() => validateEnv(env({ ARTWORK_QUOTA_BYTES: "1.5" }))).toThrow(/ARTWORK_QUOTA_BYTES/);
   });
 
   it("rejects an unknown NODE_ENV", () => {

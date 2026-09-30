@@ -1,5 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { singleFileUpload } from "../storage/upload-slots";
+import type { UploadedTempFile } from "../storage/upload-storage";
 import { Roles } from "../common/roles.decorator";
 import { CurrentUser } from "../common/current-user.decorator";
 import { ClientIp } from "../common/client-ip.decorator";
@@ -70,14 +71,14 @@ export class AdminOrdersController {
     return this.admin.recordDropship(id, user.id, dto, ip);
   }
 
-  /** multipart/form-data: trackingNumber (field) + label (optional PDF file). */
+  /** multipart/form-data: trackingNumber (field) + label (optional PDF file, streamed to disk). */
   @Post(":id/tracking")
-  @UseInterceptors(FileInterceptor("label", { limits: { fileSize: 20 * 1024 * 1024 } }))
+  @UseInterceptors(...singleFileUpload("label", 20 * 1024 * 1024))
   async tracking(
     @CurrentUser() user: AuthedUser,
     @Param("id") id: string,
     @Body() body: { trackingNumber?: string },
-    @UploadedFile() label?: Express.Multer.File,
+    @UploadedFile() label?: UploadedTempFile,
     @ClientIp() ip?: string,
   ) {
     if (!body?.trackingNumber || body.trackingNumber.trim().length < 6) {
@@ -87,7 +88,7 @@ export class AdminOrdersController {
       id,
       user.id,
       { trackingNumber: body.trackingNumber.trim() },
-      label ? { originalname: label.originalname, buffer: label.buffer, size: label.size } : undefined,
+      label,
       ip,
     );
     return this.admin.detail(id);

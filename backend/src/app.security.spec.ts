@@ -36,6 +36,7 @@ const { ClientIp } = require("./common/client-ip.decorator") as typeof import(".
 
 /** The deliberate public surface. Adding a public route means adding it here too. */
 const EXPECTED_PUBLIC = [
+  "GET /artwork/:id/file",
   "GET /auth/me",
   "GET /catalog/banner",
   "GET /catalog/banner/:slug",

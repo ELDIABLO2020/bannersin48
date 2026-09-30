@@ -195,3 +195,46 @@ describe("PricingService.quote — known cases", () => {
     ).rejects.toThrow(BadRequestException);
   });
 });
+
+describe("PricingService.quote — persistence (H1, L2)", () => {
+  it("stores only the canonical, validated request and the caller's user id", async () => {
+    const create = jest.fn(async ({ data }: any) => ({ id: "quote_2", ...data }));
+    const service = await makeService(create);
+    const dto = {
+      // Key order and extra keys as a client might send them.
+      quantity: 1,
+      dimensions: { heightIn: 0, heightFt: 6, widthIn: 0, widthFt: 3, extra: "x" },
+      material: "VINYL_15OZ_SINGLE",
+      finishing: { grommets: true, grommetPoints: [{ yIn: 1, xIn: 2, junk: true }], unknownOption: "y".repeat(1000) },
+      rawBodyField: "should never be stored",
+    } as unknown as QuoteRequestDto;
+
+    await service.quote(dto, "user_7");
+
+    const data = create.mock.calls[0][0].data;
+    expect(data.userId).toBe("user_7");
+    expect(data.request).toEqual({
+      productId: "HD_BANNER",
+      material: "VINYL_15OZ_SINGLE",
+      dimensions: { widthFt: 3, widthIn: 0, heightFt: 6, heightIn: 0 },
+      finishing: {
+        welding: false,
+        grommets: true,
+        windSlits: false,
+        polePockets: false,
+        rope: false,
+        webbing: false,
+        grommetPoints: [{ xIn: 2, yIn: 1 }],
+      },
+      quantity: 1,
+    });
+    expect(JSON.stringify(data.request)).not.toMatch(/rawBodyField|unknownOption|junk|extra/);
+  });
+
+  it("leaves anonymous quotes unowned", async () => {
+    const create = jest.fn(async ({ data }: any) => ({ id: "quote_3", ...data }));
+    const service = await makeService(create);
+    await service.quote({ productId: "HD_BANNER", material: "VINYL_13OZ_SINGLE", dimensions: dims(4, 0, 8, 0), quantity: 1 });
+    expect(create.mock.calls[0][0].data.userId).toBeNull();
+  });
+});

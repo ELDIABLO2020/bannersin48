@@ -50,7 +50,7 @@ Host layout:
 |---|---|---|
 | `/srv/bannersin48/app` | deploy 755 | This repository (git checkout) |
 | `/srv/bannersin48/secrets` | deploy 700, files 600 | `*.env` (never in git) |
-| `/srv/bannersin48/storage` | 1000:1000 750 | Artwork files |
+| `/srv/bannersin48/storage` | 1000:1000 750 | Artwork files; `.incoming/` holds in-flight uploads (the API sweeps leftovers older than 1 h at boot) |
 | `/srv/bannersin48/pgdata` | 999:999 700 | Postgres data directory |
 | `/srv/bannersin48/backups/db` | root:deploy 750 | Nightly dumps, 14 days |
 
@@ -256,7 +256,10 @@ Files in `/srv/bannersin48/secrets` (all mode 600, created by `gen-secrets.sh`).
 | `CORS_ORIGINS` | `api.env` → api | `https://bannersin48.com,https://www.bannersin48.com` | Comma-separated exact origins |
 | `ALLOW_PREVIEW_ORIGINS` | `api.env` → api | `0` | `1` also allows this project's Vercel preview URLs |
 | `STORAGE_DRIVER` | `api.env` → api | `local` | |
-| `LOCAL_STORAGE_DIR` | `api.env` → api | `/data/storage` | Container path of the artwork bind mount |
+| `LOCAL_STORAGE_DIR` | `api.env` → api | `/data/storage` | Container path of the artwork bind mount. Uploads stream into `.incoming/` here, never into the 64 MiB `/tmp` |
+| `PUBLIC_API_URL` | `api.env` → api (optional) | `https://$API_DOMAIN` | Origin used in signed artwork/label links |
+| `UPLOAD_MAX_CONCURRENCY` | `api.env` → api (optional) | `4` | Uploads in flight; beyond it `503` + `Retry-After` |
+| `ARTWORK_QUOTA_BYTES` / `ARTWORK_QUOTA_FILES` | `api.env` → api (optional) | `2147483648` / `500` | Per-user artwork quota |
 | `DATABASE_URL` | `migrate.env` → migrate | `postgresql://bannersin48_migrate:…@postgres:5432/bannersin48?schema=public` | Schema owner; migrations only |
 | `POSTGRES_USER` | `postgres.env` → postgres | `postgres` | Superuser; socket (peer) or in-container loopback only |
 | `POSTGRES_PASSWORD` | `postgres.env` → postgres | 64 hex chars | Superuser password (first boot) |
@@ -303,8 +306,9 @@ The systemd units hardcode `/srv/bannersin48/app`.
 - **HSTS is set by Caddy only.** The API's `helmet()` must use `hsts: false`.
 - **Client IP:** Caddy has no `trusted_proxies`, so it overwrites any client-sent
   `X-Forwarded-For`. The API must `set("trust proxy", 1)` and use `req.ip`.
-- **Access logs** redact `Authorization` / `Cookie` (Caddy default) and the
-  `access_token` query parameter.
+- **Access logs** redact `Authorization` / `Cookie` (Caddy default) and any
+  `access_token` query parameter (the API no longer accepts one). Signed file links
+  carry a `sig` that is only valid for 5 minutes, so it is left in the log.
 - **Images are pinned** by version and digest (`node`, `caddy`, `postgres`). To
   update: `docker buildx imagetools inspect <image>:<tag>`, bump both parts, deploy.
   Docker Engine itself comes from Docker's apt repo, which unattended-upgrades

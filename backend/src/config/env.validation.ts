@@ -15,7 +15,18 @@ export interface Env {
   NODE_ENV: "development" | "test" | "production";
   STORAGE_DRIVER: string;
   LOCAL_STORAGE_DIR: string;
+  /** Public origin of this API; signed download URLs are absolute so <img> on the storefront can use them. */
+  PUBLIC_API_URL: string;
+  UPLOAD_MAX_CONCURRENCY: number;
+  ARTWORK_QUOTA_BYTES: number;
+  ARTWORK_QUOTA_FILES: number;
 }
+
+export const UPLOAD_DEFAULTS = {
+  UPLOAD_MAX_CONCURRENCY: 4,
+  ARTWORK_QUOTA_BYTES: 2 * 1024 ** 3, // 2 GiB
+  ARTWORK_QUOTA_FILES: 500,
+} as const;
 
 export const SECRET_VARS = ["JWT_SECRET", "ADDRESS_TOKEN_SECRET", "DOWNLOAD_URL_SECRET"] as const;
 
@@ -101,6 +112,37 @@ export function validateEnv(config: Record<string, unknown>): Env {
   const port = Number(config.PORT ?? 3001);
   if (!Number.isInteger(port) || port <= 0 || port > 65535) errors.push("PORT must be a valid port number.");
 
+  // PUBLIC_API_URL wins; otherwise the Caddy site address (API_DOMAIN, always https);
+  // otherwise, outside production, the local dev server.
+  let publicApiUrl = `http://localhost:${port}`;
+  const rawPublic = str("PUBLIC_API_URL");
+  const apiDomain = str("API_DOMAIN");
+  if (rawPublic) {
+    const { origins, invalid } = parseOrigins(rawPublic);
+    if (invalid.length > 0 || origins.length !== 1) errors.push("PUBLIC_API_URL must be one origin, e.g. https://api.example.com");
+    else if (production && origins[0]!.startsWith("http:")) errors.push("PUBLIC_API_URL must use https:// in production.");
+    else publicApiUrl = origins[0]!;
+  } else if (apiDomain) {
+    if (!/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?(:\d{1,5})?$/i.test(apiDomain)) errors.push("API_DOMAIN must be a bare host name.");
+    else publicApiUrl = `https://${apiDomain.toLowerCase()}`;
+  } else if (production) {
+    errors.push("Missing required environment variable: API_DOMAIN or PUBLIC_API_URL (public origin of this API)");
+  }
+
+  const intSetting = (key: keyof typeof UPLOAD_DEFAULTS, min: number, max: number): number => {
+    const raw = str(key);
+    if (raw === undefined) return UPLOAD_DEFAULTS[key];
+    const value = Number(raw);
+    if (!/^\d+$/.test(raw) || value < min || value > max) {
+      errors.push(`${key} must be a whole number between ${min} and ${max}.`);
+      return UPLOAD_DEFAULTS[key];
+    }
+    return value;
+  };
+  const uploadMaxConcurrency = intSetting("UPLOAD_MAX_CONCURRENCY", 1, 64);
+  const artworkQuotaBytes = intSetting("ARTWORK_QUOTA_BYTES", 50 * 1024 ** 2, 1024 ** 4);
+  const artworkQuotaFiles = intSetting("ARTWORK_QUOTA_FILES", 1, 100_000);
+
   if (errors.length > 0) {
     throw new Error(`Invalid environment configuration:\n  - ${errors.join("\n  - ")}`);
   }
@@ -118,5 +160,9 @@ export function validateEnv(config: Record<string, unknown>): Env {
     NODE_ENV: nodeEnv as Env["NODE_ENV"],
     STORAGE_DRIVER: str("STORAGE_DRIVER") ?? "local",
     LOCAL_STORAGE_DIR: str("LOCAL_STORAGE_DIR") ?? "./storage",
+    PUBLIC_API_URL: publicApiUrl,
+    UPLOAD_MAX_CONCURRENCY: uploadMaxConcurrency,
+    ARTWORK_QUOTA_BYTES: artworkQuotaBytes,
+    ARTWORK_QUOTA_FILES: artworkQuotaFiles,
   };
 }

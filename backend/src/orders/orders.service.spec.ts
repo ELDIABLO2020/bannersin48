@@ -92,6 +92,7 @@ function makePrismaMock() {
       findUnique: jest.fn(),
       findMany: jest.fn(async () => []),
       update: jest.fn(async ({ data, where }: any) => ({ id: where.id, status: data.status })),
+      updateMany: jest.fn(async () => ({ count: 1 })),
     },
     orderItem: {
       create: jest.fn(async ({ data }: any) => ({
@@ -350,8 +351,9 @@ describe("delivery commitment persistence (D6)", () => {
 
     await service.transition("ord_test1", "IN_PROCESSING", { actorId: "staff_1", note: "paid" });
 
-    expect(prisma.order.update).toHaveBeenCalledWith(
+    expect(prisma.order.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        where: expect.objectContaining({ id: "ord_test1", status: "RECEIVED" }),
         data: expect.objectContaining({
           status: "IN_PROCESSING",
           paymentConfirmedAt: expect.any(Date),
@@ -373,7 +375,7 @@ describe("delivery commitment persistence (D6)", () => {
 
     await service.transition("ord_test1", "ACCEPTED", { actorId: "staff_1" });
 
-    expect(prisma.order.update).toHaveBeenCalledWith(
+    expect(prisma.order.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.not.objectContaining({
           paymentConfirmedAt: expect.anything(),
@@ -411,5 +413,66 @@ describe("order event timeline (C3 / L1)", () => {
     expect(detail.events.map((e) => e.actor)).toEqual(["customer", "staff", "system"]);
     expect(JSON.stringify(detail.events)).not.toContain("admin_secret_id");
     expect(detail.events.every((e) => !("actorId" in e))).toBe(true);
+  });
+});
+
+describe("quote matching is canonical (H1)", () => {
+  it("matches regardless of key order, explicit false flags or jsonb re-ordering", async () => {
+    const { service, prisma } = await makeService();
+    // Stored the way jsonb returns it: keys sorted by length, then bytewise.
+    prisma.quote.findUnique.mockResolvedValueOnce({
+      id: "quote_ok",
+      userId: "user_1",
+      request: {
+        material: "VINYL_15OZ_SINGLE",
+        quantity: 1,
+        finishing: { rope: false, webbing: false, welding: true, grommets: true, windSlits: false, polePockets: false },
+        productId: "HD_BANNER",
+        dimensions: { widthFt: 3, widthIn: 0, heightFt: 6, heightIn: 0 },
+      },
+      breakdown: { lines: [{ totalBeforeTax: 95.5 }] },
+      validUntil: new Date(Date.now() + 60_000),
+    });
+    const dto = validDto();
+    dto.lines[0].dimensions = { heightIn: 0, heightFt: 6, widthIn: 0, widthFt: 3 } as never;
+    dto.lines[0].finishing = { grommets: true, welding: true, rope: false } as never;
+    await expect(service.create("user_1", dto)).resolves.toMatchObject({ total: 95.5 });
+  });
+
+  it("still rejects a changed finishing option", async () => {
+    const { service } = await makeService();
+    const dto = validDto();
+    dto.lines[0].finishing = { welding: true, grommets: true, windSlits: true };
+    await expect(service.create("user_1", dto)).rejects.toMatchObject({ response: { code: "QUOTE_MISMATCH" } });
+  });
+
+  it("rejects another user's quote but accepts an anonymous one", async () => {
+    const { service, prisma } = await makeService();
+    prisma.quote.findUnique.mockResolvedValueOnce({ id: "quote_ok", userId: "someone_else", request: {}, breakdown: {}, validUntil: new Date(Date.now() + 60_000) });
+    await expect(service.create("user_1", validDto())).rejects.toMatchObject({ response: { code: "QUOTE_INVALID" } });
+    await expect(service.create("user_1", validDto())).resolves.toBeTruthy(); // default mock: userId null
+  });
+});
+
+describe("customer cancel is a compare-and-set", () => {
+  it("only cancels while payment is still pending, and answers 409 if mark-paid won the race", async () => {
+    const { service, prisma } = await makeService();
+    prisma.order.findUnique.mockResolvedValue({
+      id: "ord_test1",
+      userId: "user_1",
+      status: "RECEIVED",
+      paymentStatus: "PENDING_PAYMENT",
+      paymentConfirmedAt: null,
+    });
+    prisma.order.updateMany.mockResolvedValueOnce({ count: 0 }); // staff marked it paid in between
+
+    await expect(service.cancel("user_1", "ord_test1")).rejects.toMatchObject({ status: 409, response: { code: "CONFLICT" } });
+    expect(prisma.order.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { paymentStatus: "PENDING_PAYMENT", id: "ord_test1", status: "RECEIVED" },
+        data: expect.objectContaining({ status: "CANCELLED" }),
+      }),
+    );
+    expect(prisma.orderEvent.create).not.toHaveBeenCalled();
   });
 });

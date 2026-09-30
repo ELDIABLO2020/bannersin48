@@ -5,6 +5,7 @@ import { useConfigurator } from "@/lib/stores/configurator";
 import {
   GROMMET_PRESET_OPTIONS,
   GROMMET_SPACING_OPTIONS,
+  MAX_GROMMET_POINTS,
   dimensionsToInches,
   clampGrommetPoint,
   generateGrommetPoints,
@@ -44,8 +45,9 @@ export function GrommetEditor() {
     const rect = el.getBoundingClientRect();
     const xIn = ((e.clientX - rect.left) / rect.width) * widthIn;
     const yIn = ((e.clientY - rect.top) / rect.height) * heightIn;
-    const next = [...(draft ?? points), clampGrommetPoint({ xIn, yIn }, widthIn, heightIn)];
-    setDraft(next);
+    const current = draft ?? points;
+    if (current.length >= MAX_GROMMET_POINTS) return; // the API rejects more
+    setDraft([...current, clampGrommetPoint({ xIn, yIn }, widthIn, heightIn)]);
   }
 
   function removePoint(index: number) {

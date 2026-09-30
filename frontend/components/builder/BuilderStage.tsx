@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useConfigurator } from "@/lib/stores/configurator";
+import { useArtworkPreviewUrl } from "@/lib/hooks/useArtworkPreviewUrl";
 import {
   dimensionsToInches,
   generateGrommetPoints,
@@ -22,7 +23,10 @@ export function BuilderStage() {
   const size = useConfigurator((s) => s.size);
   const productId = useConfigurator((s) => s.productId);
   const finishing = useConfigurator((s) => s.finishing);
-  const artworkPreviewUrl = useConfigurator((s) => s.artworkPreviewUrl);
+  const artworkId = useConfigurator((s) => s.artworkId);
+  const storedPreviewUrl = useConfigurator((s) => s.artworkPreviewUrl);
+  // Signed preview links expire after 5 minutes; this re-mints one when needed.
+  const artworkPreviewUrl = useArtworkPreviewUrl(artworkId, storedPreviewUrl);
   const setPickerOpen = useConfigurator((s) => s.setPickerOpen);
 
   const pasteboardRef = useRef<HTMLDivElement>(null);
@@ -202,7 +206,7 @@ export function BuilderStage() {
                 }
               />
 
-              {!artworkPreviewUrl && (
+              {!storedPreviewUrl && (
                 <button
                   type="button"
                   data-testid="stage-empty-upload"

@@ -1,12 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import type { Order, OrderStatus } from "@prisma/client";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, type Order, type OrderStatus } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { OrdersService } from "../orders/orders.service";
 import { StorageService } from "../storage/storage.service";
 import { EmailService } from "../notifications/email.service";
 import { AuditService } from "../audit/audit.service";
 import { isSlaBreached } from "../common/business-hours";
-import { sniffMime } from "../artwork/artwork-inspect";
+import { ArtworkService } from "../artwork/artwork.service";
+import type { UploadedTempFile } from "../storage/upload-storage";
+import { assertTransition } from "../orders/status-machine";
 
 const KANBAN_STATUSES: OrderStatus[] = [
   "RECEIVED",
@@ -41,6 +43,7 @@ export class AdminOrdersService {
     private readonly storage: StorageService,
     private readonly email: EmailService,
     private readonly audit: AuditService,
+    private readonly artwork: ArtworkService,
   ) {}
 
   // --- Kanban + lists -------------------------------------------------------
@@ -140,7 +143,8 @@ export class AdminOrdersService {
               sizeBytes: item.artwork.bytes,
               widthPx: item.artwork.widthPx,
               heightPx: item.artwork.heightPx,
-              downloadUrl: `/artwork/${item.artwork.id}/download`,
+              // Signed, 5 minutes: for the inline preview. Downloads mint their own link.
+              previewUrl: this.artwork.previewUrl(item.artwork.id),
             }
           : null,
       })),
@@ -157,7 +161,6 @@ export class AdminOrdersService {
             carrier: row.shipments[0].carrier,
             trackingNumber: row.shipments[0].trackingNumber,
             labelFileId: row.shipments[0].labelFileId,
-            labelDownloadUrl: row.shipments[0].labelFileId ? `/artwork/${row.shipments[0].labelFileId}/download` : null,
             shippedAt: row.shipments[0].shippedAt?.toISOString() ?? null,
             deliveredAt: row.shipments[0].deliveredAt?.toISOString() ?? null,
           }
@@ -167,23 +170,38 @@ export class AdminOrdersService {
 
   // --- Checklist flow ---------------------------------------------------------
 
+  /**
+   * Records manual payment: → IN_PROCESSING, rewards credited, audited. Everything
+   * is validated before any write, and every write commits together. The status
+   * change is a compare-and-set on (status, PENDING_PAYMENT), so of two concurrent
+   * calls exactly one credits rewards and the other gets 409.
+   */
   async markPaid(orderId: string, actorId: string, ip?: string): Promise<void> {
     const order = await this.getOrder(orderId);
     if (order.paymentStatus !== "PENDING_PAYMENT") {
-      throw new BadRequestException({
+      throw new ConflictException({
         code: "ALREADY_PAID",
         message: `Payment was already recorded (${order.paymentStatus}).`,
       });
     }
+    assertTransition(order.status, "IN_PROCESSING");
+
     // Locked reward rule: 1% of paid spend, stored as integer dollar-cents.
     // $95.50 earns 95 cents (fractional cents are floored).
     const totalCents = Math.round(Number(order.total) * 100);
     const rewardCents = Math.floor(totalCents / 100);
+
     await this.prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: orderId },
-        data: { paymentStatus: "MARKED_PAID", rewardPointsEarned: rewardCents },
-      });
+      await this.orders.applyTransition(
+        tx,
+        order,
+        "IN_PROCESSING",
+        { actorId, note: "Payment received — released to production.", emailed: true },
+        {
+          where: { paymentStatus: "PENDING_PAYMENT" },
+          data: { paymentStatus: "MARKED_PAID", rewardPointsEarned: rewardCents },
+        },
+      );
       if (rewardCents > 0) {
         await tx.rewardLedger.create({
           data: { userId: order.userId, deltaCents: rewardCents, reason: "ORDER_EARN", orderId },
@@ -193,22 +211,20 @@ export class AdminOrdersService {
           data: { rewardPointsBalance: { increment: rewardCents } },
         });
       }
-    });
-    await this.orders.transition(orderId, "IN_PROCESSING", {
-      actorId,
-      note: "Payment received — released to production.",
-      emailed: true,
-    });
-    await this.audit.record({
-      actorId,
-      action: "order.mark_paid",
-      entityType: "order",
-      entityId: orderId,
-      diff: AuditService.diffOf(
-        { paymentStatus: order.paymentStatus, rewardPointsEarned: order.rewardPointsEarned },
-        { paymentStatus: "MARKED_PAID", rewardPointsEarned: rewardCents },
-      ),
-      ip,
+      await this.audit.record(
+        {
+          actorId,
+          action: "order.mark_paid",
+          entityType: "order",
+          entityId: orderId,
+          diff: AuditService.diffOf(
+            { status: order.status, paymentStatus: order.paymentStatus, rewardPointsEarned: order.rewardPointsEarned },
+            { status: "IN_PROCESSING", paymentStatus: "MARKED_PAID", rewardPointsEarned: rewardCents },
+          ),
+          ip,
+        },
+        tx,
+      );
     });
     await this.notifyCustomer(order, "order_paid", "Payment received for your order.");
   }
@@ -227,99 +243,127 @@ export class AdminOrdersService {
       });
     }
     const existing = await this.prisma.dropshipSubmission.findUnique({ where: { orderId } });
-    if (existing) {
-      throw new BadRequestException({
-        code: "DROPSHIP_EXISTS",
-        message: `A drop-ship submission (${existing.externalRef}) already exists for this order.`,
+    if (existing) throw dropshipExists(existing.externalRef);
+
+    const externalRef = input.externalRef.trim();
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.dropshipSubmission.create({
+          data: { orderId, externalRef, submittedBy: actorId, submittedAt: new Date(), notes: input.notes?.trim() || null },
+        });
+        await this.orders.logActivity(orderId, actorId, `Submitted to drop shipper (ref ${externalRef}).`, {}, tx);
+        await this.audit.record(
+          {
+            actorId,
+            action: "order.dropship_submit",
+            entityType: "order",
+            entityId: orderId,
+            diff: { externalRef: { from: null, to: externalRef }, notes: { from: null, to: input.notes ?? null } },
+            ip,
+          },
+          tx,
+        );
       });
+    } catch (err) {
+      // Lost the race with a concurrent submission (unique orderId).
+      if (isUniqueViolation(err)) throw dropshipExists();
+      throw err;
     }
-    await this.prisma.dropshipSubmission.create({
-      data: {
-        orderId,
-        externalRef: input.externalRef.trim(),
-        submittedBy: actorId,
-        submittedAt: new Date(),
-        notes: input.notes?.trim() || null,
-      },
-    });
-    await this.orders.logActivity(orderId, actorId, `Submitted to drop shipper (ref ${input.externalRef}).`);
-    await this.audit.record({
-      actorId,
-      action: "order.dropship_submit",
-      entityType: "order",
-      entityId: orderId,
-      diff: { externalRef: { from: null, to: input.externalRef }, notes: { from: null, to: input.notes ?? null } },
-      ip,
-    });
     await this.notifyCustomer(order, "order_submitted_to_dropshipper", "Your order was submitted to production.");
   }
 
+  /**
+   * Records the tracking number and (optionally) the label PDF, which multer has
+   * already streamed to a temp file. IN_PROCESSING / ON_HOLD orders move to ACCEPTED.
+   */
   async attachTracking(
     orderId: string,
     actorId: string,
     input: { trackingNumber: string },
-    label?: { originalname: string; buffer: Buffer; size: number },
+    label?: UploadedTempFile,
+    ip?: string,
+  ): Promise<void> {
+    try {
+      await this.saveTracking(orderId, actorId, input, label, ip);
+    } finally {
+      await this.storage.discard(label?.path);
+    }
+  }
+
+  private async saveTracking(
+    orderId: string,
+    actorId: string,
+    input: { trackingNumber: string },
+    label: UploadedTempFile | undefined,
     ip?: string,
   ): Promise<void> {
     const order = await this.getOrder(orderId);
     if (order.paymentStatus === "PENDING_PAYMENT") {
       throw new BadRequestException({ code: "PAYMENT_REQUIRED", message: "Record payment before attaching tracking." });
     }
-
-    let labelFileId: string | undefined;
-    if (label && label.size > 0) {
-      if (sniffMime(label.buffer) !== "application/pdf") {
-        throw new BadRequestException({ code: "LABEL_NOT_PDF", message: "Shipment labels must be valid PDF files." });
-      }
-      const stored = await this.storage.put(
-        StorageService.buildKey(actorId, label.originalname),
-        label.buffer,
-        "application/pdf",
-      );
-      const row = await this.prisma.artworkFile.create({
-        data: {
-          userId: actorId,
-          s3Key: stored.key,
-          s3Bucket: stored.bucket,
-          originalFilename: `label-${order.number}.pdf`,
-          mime: "application/pdf",
-          bytes: label.size,
-          scanStatus: "CLEAN",
-          dpiReport: { source: "shipment_label" },
-        },
-      });
-      labelFileId = row.id;
+    const hasLabel = Boolean(label && label.size > 0);
+    if (label && hasLabel && label.detectedMime !== "application/pdf") {
+      throw new BadRequestException({ code: "LABEL_NOT_PDF", message: "Shipment labels must be valid PDF files." });
     }
+    // Labels are keyed by order + content, outside every customer's library prefix.
+    const storedLabel =
+      label && hasLabel
+        ? await this.storage.commit(label.path, StorageService.contentKey(`labels/${orderId}`, label.sha256, "application/pdf"))
+        : null;
 
-    const existing = await this.prisma.shipment.findUnique({ where: { orderId } });
-    const shipment = existing
-      ? await this.prisma.shipment.update({
-          where: { orderId },
-          data: { trackingNumber: input.trackingNumber, ...(labelFileId ? { labelFileId } : {}) },
-        })
-      : await this.prisma.shipment.create({
-          data: { orderId, trackingNumber: input.trackingNumber, ...(labelFileId ? { labelFileId } : {}) },
+    const accept = order.status === "IN_PROCESSING" || order.status === "ON_HOLD";
+    const existing = await this.prisma.$transaction(async (tx) => {
+      let labelFileId: string | undefined;
+      if (label && storedLabel) {
+        const row = await tx.artworkFile.create({
+          data: {
+            // The uploading staff member; the order's customer can still download it (M4).
+            userId: actorId,
+            s3Key: storedLabel.key,
+            s3Bucket: storedLabel.bucket,
+            originalFilename: `label-${order.number}.pdf`,
+            mime: "application/pdf",
+            bytes: label.size,
+            sha256: label.sha256,
+            scanStatus: "CLEAN",
+            dpiReport: { source: "shipment_label" },
+          },
         });
+        labelFileId = row.id;
+      }
 
-    if (order.status === "IN_PROCESSING" || order.status === "ON_HOLD") {
-      await this.orders.transition(orderId, "ACCEPTED", {
-        actorId,
-        note: `Accepted — FedEx tracking ${input.trackingNumber}.`,
-        emailed: true,
+      const before = await tx.shipment.findUnique({ where: { orderId } });
+      const shipment = await tx.shipment.upsert({
+        where: { orderId },
+        update: { trackingNumber: input.trackingNumber, ...(labelFileId ? { labelFileId } : {}) },
+        create: { orderId, trackingNumber: input.trackingNumber, ...(labelFileId ? { labelFileId } : {}) },
       });
-    } else {
-      await this.orders.logActivity(orderId, actorId, `Tracking updated: ${input.trackingNumber}.`, { emailed: true });
-    }
-    await this.audit.record({
-      actorId,
-      action: existing ? "order.tracking_update" : "order.tracking_attach",
-      entityType: "shipment",
-      entityId: shipment.id,
-      diff: { trackingNumber: { from: existing?.trackingNumber ?? null, to: input.trackingNumber } },
-      ip,
+
+      if (accept) {
+        await this.orders.applyTransition(tx, order, "ACCEPTED", {
+          actorId,
+          note: `Accepted — FedEx tracking ${input.trackingNumber}.`,
+          emailed: true,
+        });
+      } else {
+        await this.orders.logActivity(orderId, actorId, `Tracking updated: ${input.trackingNumber}.`, { emailed: true }, tx);
+      }
+      await this.audit.record(
+        {
+          actorId,
+          action: before ? "order.tracking_update" : "order.tracking_attach",
+          entityType: "shipment",
+          entityId: shipment.id,
+          diff: { trackingNumber: { from: before?.trackingNumber ?? null, to: input.trackingNumber } },
+          ip,
+        },
+        tx,
+      );
+      return before;
     });
+
     await this.notifyCustomer(order, "order_accepted_with_tracking", {
-      note: "Your banner order is accepted and in motion.",
+      note: existing ? "Your tracking details were updated." : "Your banner order is accepted and in motion.",
       trackingUrl: `https://www.fedex.com/fedextrack/?trknbr=${input.trackingNumber}`,
     });
   }
@@ -334,36 +378,35 @@ export class AdminOrdersService {
     const order = await this.getOrder(orderId);
 
     let note = reason ?? `Status changed to ${to}.`;
-    if (to === "SHIPPED") {
-      await this.prisma.shipment.upsert({
-        where: { orderId },
-        update: { shippedAt: new Date() },
-        create: { orderId, shippedAt: new Date() },
-      });
-      note = reason ?? "Package handed to FedEx.";
-    }
-    if (to === "DELIVERED") {
-      await this.prisma.shipment.upsert({
-        where: { orderId },
-        update: { deliveredAt: new Date() },
-        create: { orderId, deliveredAt: new Date() },
-      });
-      note = reason ?? "FedEx reports delivered.";
-    }
+    if (to === "SHIPPED") note = reason ?? "Package handed to FedEx.";
+    if (to === "DELIVERED") note = reason ?? "FedEx reports delivered.";
 
+    // Shipment timestamps and the audit row commit with the status change, or not at all (L5).
     await this.orders.transition(orderId, to, {
       actorId,
       note,
       cancelledReason: to === "CANCELLED" ? reason : undefined,
       emailed: to === "SHIPPED" || to === "DELIVERED",
-    });
-    await this.audit.record({
-      actorId,
-      action: `order.${to.toLowerCase()}`,
-      entityType: "order",
-      entityId: orderId,
-      diff: { status: { from: order.status, to } },
-      ip,
+      inTx: async (tx, from) => {
+        const now = new Date();
+        if (to === "SHIPPED") {
+          await tx.shipment.upsert({ where: { orderId }, update: { shippedAt: now }, create: { orderId, shippedAt: now } });
+        }
+        if (to === "DELIVERED") {
+          await tx.shipment.upsert({ where: { orderId }, update: { deliveredAt: now }, create: { orderId, deliveredAt: now } });
+        }
+        await this.audit.record(
+          {
+            actorId,
+            action: `order.${to.toLowerCase()}`,
+            entityType: "order",
+            entityId: orderId,
+            diff: { status: { from, to } },
+            ip,
+          },
+          tx,
+        );
+      },
     });
     if (to === "SHIPPED") await this.notifyShipped(orderId);
     if (to === "DELIVERED") await this.notifyCustomer(order, "order_delivered", "Your banners were delivered.");
@@ -403,4 +446,17 @@ export class AdminOrdersService {
         : null,
     });
   }
+}
+
+function dropshipExists(externalRef?: string): ConflictException {
+  return new ConflictException({
+    code: "DROPSHIP_EXISTS",
+    message: externalRef
+      ? `A drop-ship submission (${externalRef}) already exists for this order.`
+      : "A drop-ship submission already exists for this order.",
+  });
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
 }

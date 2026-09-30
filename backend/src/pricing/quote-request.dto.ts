@@ -1,5 +1,30 @@
 import { Type } from "class-transformer";
-import { IsBoolean, IsInt, IsOptional, IsString, Max, Min, ValidateNested } from "class-validator";
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  ValidateNested,
+} from "class-validator";
+import {
+  MAX_GROMMET_POINTS,
+  grommetPresetSchema,
+  grommetSpacingSchema,
+  polePocketPlacementSchema,
+  ropePlacementSchema,
+} from "@bannersin48/shared";
+
+/** Product and material codes are admin-defined (CreateProductDto / CreateMaterialDto allow 60). */
+const CODE_MAX_LENGTH = 60;
+/** 11 ft 11 in: the largest dimension DimensionsDto can express. */
+const MAX_EDGE_IN = 143;
 
 export class DimensionsDto {
   @IsInt() @Min(0) @Max(11)
@@ -15,6 +40,14 @@ export class DimensionsDto {
   heightIn!: number;
 }
 
+export class GrommetPointDto {
+  @IsNumber({ allowNaN: false, allowInfinity: false }) @Min(0) @Max(MAX_EDGE_IN)
+  xIn!: number;
+
+  @IsNumber({ allowNaN: false, allowInfinity: false }) @Min(0) @Max(MAX_EDGE_IN)
+  yIn!: number;
+}
+
 export class FinishingDto {
   @IsOptional() @IsBoolean()
   welding?: boolean;
@@ -28,7 +61,7 @@ export class FinishingDto {
   @IsOptional() @IsBoolean()
   polePockets?: boolean;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsIn(polePocketPlacementSchema.options)
   polePocketPlacement?: string;
 
   @IsOptional() @IsInt() @Min(1) @Max(4)
@@ -37,27 +70,31 @@ export class FinishingDto {
   @IsOptional() @IsBoolean()
   rope?: boolean;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsIn(ropePlacementSchema.options)
   ropePlacement?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsIn(grommetPresetSchema.options)
   grommetPreset?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsIn(grommetSpacingSchema.options)
   grommetSpacing?: string;
 
   @IsOptional()
-  grommetPoints?: Array<{ xIn: number; yIn: number }>;
+  @IsArray()
+  @ArrayMaxSize(MAX_GROMMET_POINTS)
+  @ValidateNested({ each: true })
+  @Type(() => GrommetPointDto)
+  grommetPoints?: GrommetPointDto[];
 
   @IsOptional() @IsBoolean()
   webbing?: boolean;
 }
 
 export class QuoteRequestDto {
-  @IsOptional() @IsString()
+  @IsOptional() @IsString() @MaxLength(CODE_MAX_LENGTH)
   productId?: string;
 
-  @IsString()
+  @IsString() @MaxLength(CODE_MAX_LENGTH)
   material!: string;
 
   @ValidateNested()

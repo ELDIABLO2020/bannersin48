@@ -256,6 +256,22 @@ export const handlers = [
     });
   }),
 
+  // --- Signed file links (mirrors POST /artwork/:id/download-url) ---
+  // Mock previews are static assets or blob: URLs, so the "signed" URL is the preview itself.
+  http.post(`${API}/artwork/:id/download-url`, ({ params, request }) => {
+    const auth = requireUser(request);
+    if (typeof auth !== "string") return auth;
+    const art = store.artwork.get(String(params.id));
+    if (!art) return HttpResponse.json({ code: "NOT_FOUND", message: "Artwork not found." }, { status: 404 });
+    if (art.userId !== auth) {
+      return HttpResponse.json({ code: "FORBIDDEN", message: "This file belongs to another account." }, { status: 403 });
+    }
+    return HttpResponse.json(
+      { url: art.previewUrl, expiresAt: new Date(Date.now() + 5 * 60_000).toISOString() },
+      { status: 201 },
+    );
+  }),
+
   // --- Address validation (deterministic mock) ---
   http.post(`${API}/address/validate`, async ({ request }) => {
     const auth = requireUser(request);

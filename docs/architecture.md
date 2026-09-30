@@ -17,6 +17,8 @@ can't explain on its own, and what is deliberately not built yet.
 5. **Sales tax is deferred.** Tax is always 0 and shown as such. The business is registered in Michigan.
 6. **Rewards:** $1 per $100 spent. The credit is applied once, at mark-paid, as
    `floor(totalCents / 100)` cents on `reward_ledger`, and is denormalized onto `users`.
+   Mark-paid is one transaction whose status update only matches a still-unpaid order in the
+   status that was read, so a double click or two staff members can't credit twice.
 7. **Proof:** the customer self-confirms at checkout with five acknowledgements. The server stores the
    timestamp, IP and consent version. There is no proof-versioning workflow.
 8. **SLA:** `placedAt + 48 business hours`, counted Monday to Friday. Holidays are not modelled.
@@ -26,7 +28,8 @@ can't explain on its own, and what is deliberately not built yet.
 ## Order status machine
 
 `backend/src/orders/status-machine.ts` is authoritative. Every transition writes an
-`order_events` row. Activity that doesn't change status, such as recording a drop-ship
+`order_events` row, in the same transaction as the status update, which is a compare-and-set on
+the status that was read (`409 CONFLICT` if someone else changed the order first). Activity that doesn't change status, such as recording a drop-ship
 reference, writes a same-status event.
 
 ```
@@ -41,8 +44,8 @@ Customers may cancel only before payment is marked (`RECEIVED`, `AWAITING_PAYMEN
 | Role | Access |
 |---|---|
 | `CUSTOMER` | Own account, artwork, and orders. No `/admin/*` |
-| `STAFF` | Fulfillment, customer management, read-only pricing |
-| `CONTENT_EDITOR` | CMS content blocks only |
+| `STAFF` | Fulfillment, customer management, read-only pricing, every customer's artwork |
+| `CONTENT_EDITOR` | CMS content blocks only (no artwork) |
 | `ADMIN` | Everything |
 
 `JwtAuthGuard` and `RolesGuard` are global (`APP_GUARD`), so every Nest route needs a valid
@@ -78,7 +81,7 @@ These are local stand-ins. Each sits behind an interface, so a real implementati
 
 | Concern | Today | Planned |
 |---|---|---|
-| Artwork storage | `LocalStorageDriver` (`STORAGE_DRIVER=local`) | S3/R2 driver + CDN, 6-month lifecycle expiry (after go-live) |
+| Artwork storage | `LocalStorageDriver` (`STORAGE_DRIVER=local`): uploads stream to `$LOCAL_STORAGE_DIR/.incoming` and are renamed to `<userId>/<sha256>.<ext>` (labels: `labels/<orderId>/…`); per-user quota; files are served only through 5-minute HMAC-signed links | S3/R2 driver + CDN, 6-month lifecycle expiry (after go-live) |
 | Email | `EmailService` logs to console + `email_log`, with tokens and passwords replaced by a sha256 fingerprint. Nothing is delivered | Real transport (SES or similar), before go-live |
 | Rate limits | In-memory `@nestjs/throttler` per IP, and an in-memory IP+email login backoff (see [api.md](api.md)) | Redis store when multi-instance |
 | Malware scan | Artwork rows stay `scanStatus = PENDING` | Scanner |
@@ -120,5 +123,9 @@ The API validates its environment on every boot, whatever `NODE_ENV` is:
 base64url characters, all different, no placeholders; generate with `openssl rand -hex 32`);
 `CORS_ORIGINS` (required, https only, when `NODE_ENV=production`). Optional: `JWT_ISSUER`
 (default `bannersin48-api`), `JWT_AUDIENCE` (default `bannersin48-web`), `ALLOW_PREVIEW_ORIGINS`
-(`1` to allow Vercel previews). Unknown variables are ignored. On SIGTERM the API stops accepting
+(`1` to allow Vercel previews); `PUBLIC_API_URL` (origin used in signed file links; defaults to
+`https://$API_DOMAIN`, else `http://localhost:$PORT`, and one of the two is required when
+`NODE_ENV=production`); `UPLOAD_MAX_CONCURRENCY` (default 4), `ARTWORK_QUOTA_BYTES` (default 2 GiB)
+and `ARTWORK_QUOTA_FILES` (default 500). At boot the API checks that `$LOCAL_STORAGE_DIR/.incoming`
+is writable and deletes temp files there older than an hour. Unknown variables are ignored. On SIGTERM the API stops accepting
 requests and force-closes anything still open after 25 s, inside Docker's 30 s stop window.

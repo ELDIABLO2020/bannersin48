@@ -1,6 +1,7 @@
 "use client";
 
 import { useConfigurator } from "@/lib/stores/configurator";
+import { useArtworkPreviewUrl } from "@/lib/hooks/useArtworkPreviewUrl";
 import { materialLabel } from "./builderRules";
 import { Plus, Trash2, Palette, Check } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -45,14 +46,7 @@ export function ItemRail() {
                   </span>
                 )}
               </div>
-              <div
-                className="mt-xs aspect-[4/3] rounded-sm border border-line bg-surface-tint bg-center bg-contain bg-no-repeat"
-                style={
-                  sign.artworkPreviewUrl
-                    ? { backgroundImage: `url(${sign.artworkPreviewUrl})` }
-                    : undefined
-                }
-              />
+              <SignThumbnail artworkId={sign.artworkId} previewUrl={sign.artworkPreviewUrl} />
               <p className="mt-xs text-xs text-ink truncate">
                 {PRODUCTS[sign.productId]?.sizeMode === "fixed" &&
                 PRODUCTS[sign.productId]?.fixedSizeIn
@@ -106,5 +100,15 @@ export function ItemRail() {
         <span className="text-xs">{colorMatching ? "PMS notes saved" : "Optional PMS"}</span>
       </button>
     </div>
+  );
+}
+
+function SignThumbnail({ artworkId, previewUrl }: { artworkId: string | null; previewUrl: string | null }) {
+  const url = useArtworkPreviewUrl(artworkId, previewUrl);
+  return (
+    <div
+      className="mt-xs aspect-[4/3] rounded-sm border border-line bg-surface-tint bg-center bg-contain bg-no-repeat"
+      style={url ? { backgroundImage: `url(${url})` } : undefined}
+    />
   );
 }

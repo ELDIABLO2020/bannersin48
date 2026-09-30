@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import type { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
 export interface AuditEntry {
@@ -21,8 +22,9 @@ const IGNORED_KEYS = new Set(["createdAt", "updatedAt"]);
 export class AuditService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async record(entry: AuditEntry): Promise<void> {
-    await this.prisma.auditLog.create({
+  /** Pass `tx` to make the audit row part of the caller's transaction. */
+  async record(entry: AuditEntry, tx: Prisma.TransactionClient = this.prisma): Promise<void> {
+    await tx.auditLog.create({
       data: {
         actorId: entry.actorId ?? null,
         action: entry.action,

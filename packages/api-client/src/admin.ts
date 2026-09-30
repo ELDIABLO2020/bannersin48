@@ -1,7 +1,7 @@
 /**
  * Admin API client — staff-facing endpoints (/admin/*). Same conventions as
  * apiClient.ts: bearer token from config, JSON bodies, ApiClientError on !ok.
- * Artwork/label uploads send FormData.
+ * Artwork/label uploads send FormData; file links come from `artworkDownloadUrl`.
  */
 
 import { HttpClient } from "./http";
@@ -35,12 +35,14 @@ export interface AdminOrderDetail extends Record<string, unknown> {
   shipTo: Record<string, unknown>;
   customer: { email: string; firstName?: string | null; lastName?: string | null; phone?: string | null };
   slaBreached: boolean;
+  /** Each item's `artwork` (if any) carries a signed 5-minute `previewUrl`. */
   items: Array<Record<string, unknown>>;
   dropship: { externalRef: string; submittedAt: string; notes?: string | null } | null;
   shipment: {
     carrier: string;
     trackingNumber: string | null;
-    labelDownloadUrl: string | null;
+    /** Mint a link with `artworkDownloadUrl(labelFileId)`. */
+    labelFileId: string | null;
     shippedAt: string | null;
     deliveredAt: string | null;
   } | null;

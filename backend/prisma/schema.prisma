@@ -342,7 +342,7 @@ model RewardLedger {
 model Quote {
   id         String    @id @default(cuid())
   userId     String? // null = anonymous quote from the public builder
-  request    Json // full quote request payload
+  request    Json // validated, normalised request (canonicalQuoteRequest)
   breakdown  Json // engine result (lines, billable dims, notes)
   subtotal   Decimal   @db.Decimal(12, 2)
   discount   Decimal   @default(0) @db.Decimal(12, 2)
@@ -356,6 +356,7 @@ model Quote {
 
   @@index([userId])
   @@index([createdAt])
+  @@index([validUntil])
   @@map("quote")
 }
 

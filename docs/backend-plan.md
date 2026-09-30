@@ -25,11 +25,11 @@ Security:
 3. [x] `JwtAuthGuard` as global `APP_GUARD` with explicit `@Public()` routes (M2).
 4. [x] `helmet`, env-driven `CORS_ORIGINS` (+ opt-in Vercel preview regex), `credentials:false`, `trust proxy` + `req.ip` (delete `ipOf`), shutdown hooks, server timeouts (H3, H5, M10).
 5. [x] `@nestjs/throttler` global + stricter auth/quote/upload limits; replace per-email hard lockout with IP+email backoff (H2).
-6. [ ] Quote DTO bounds (`grommetPoints`, string lengths); stop persisting anonymous quotes or purge expired ones (H1).
+6. [x] Quote DTO bounds (`grommetPoints`, string lengths); stop persisting anonymous quotes or purge expired ones (H1).
 7. [x] Seed refuses to run in production without a strong `ADMIN_PASSWORD` (H6).
-8. [ ] Mark-paid: validate the transition first, single conditional transaction, no double credit (H8).
-9. [ ] Remove `?access_token=`; short-lived HMAC-signed artwork/label download URLs; PDFs served with `nosniff` + `CSP: sandbox` (H4, M11).
-10. [ ] Stream uploads to disk and downloads from disk; streaming sha256; upload concurrency cap; per-user quota (H9).
+8. [x] Mark-paid: validate the transition first, single conditional transaction, no double credit (H8).
+9. [x] Remove `?access_token=`; short-lived HMAC-signed artwork/label download URLs; PDFs served with `nosniff` + `CSP: sandbox` (H4, M11).
+10. [x] Stream uploads to disk and downloads from disk; streaming sha256; upload concurrency cap; per-user quota (H9).
 
 Platform:
 11. [ ] Node 24, NestJS 11.1.18+, multer ≥2.4; CI on Node 24; `npm audit --omit=dev --audit-level=high` gate; Dependabot (H7, M13).
@@ -43,7 +43,7 @@ Platform:
 16. [ ] Session redesign: access token in memory, refresh token in an `httpOnly; Secure; SameSite=None; Path=/auth` cookie, Origin allowlist + custom-header CSRF check, refresh-family reuse detection, nightly token purge (M1).
 17. [ ] argon2id + breached-password (HIBP) check; change-password endpoint that revokes sessions; email verification; neutral register/login responses (M14, M6, M5).
 18. [ ] TOTP MFA with recovery codes for STAFF / ADMIN / CONTENT_EDITOR (H6).
-19. [ ] Admin suspend/role endpoints (audited); CONTENT_EDITOR can't read artwork; shipment labels owned by the order, not the staff actor (M6, M3, M4).
+19. [ ] Admin suspend/role endpoints (audited) (M6). CONTENT_EDITOR artwork access (M3) and customer label downloads (M4) were fixed with item 9.
 20. [ ] Query DTOs, `TrackingDto`, slug regex, P2002→409 and Prisma error filter, `nestjs-pino` with redaction (M8, M9, L4, L6).
 21. [ ] Index migration and retention/purge jobs via `@nestjs/schedule` (§6, M15).
 22. [ ] CI: CodeQL or Semgrep, gitleaks, Trivy image scan; IDOR regression tests against real Postgres (M13).

@@ -1,13 +1,11 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { productIdForMaterial } from "@bannersin48/shared";
 import { PricingEngineService } from "./pricing-engine.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CatalogService } from "../catalog/catalog.service";
 import { DeliveryService } from "../delivery/delivery.service";
-import type { QuoteRequestDto } from "./quote-request.dto";
-import { assertMaterialOffered, assertSizeAllowed, normalizeFinishing } from "./catalog-rules";
+import { assertMaterialOffered, assertSizeAllowed, canonicalQuoteRequest, type QuoteRequestInput } from "./catalog-rules";
 
-const QUOTE_VALIDITY_DAYS = 14;
+export const QUOTE_VALIDITY_DAYS = 14;
 
 export interface QuoteResponse {
   quoteId: string;
@@ -40,8 +38,15 @@ export class PricingService {
     private readonly engine: PricingEngineService,
   ) {}
 
-  async quote(dto: QuoteRequestDto): Promise<QuoteResponse> {
-    const productCode = dto.productId ?? productIdForMaterial(dto.material as never);
+  /**
+   * `userId` is set when the caller is signed in (optional auth on POST /pricing/quote,
+   * and always for order-flow re-quotes); anonymous builder quotes stay unowned so a
+   * cart built before sign-in can still be checked out.
+   */
+  async quote(dto: QuoteRequestInput, userId?: string | null): Promise<QuoteResponse> {
+    // Only the validated, normalised request is priced and persisted; never the raw body.
+    const request = canonicalQuoteRequest(dto);
+    const productCode = request.productId;
 
     const product = await this.catalog.getProductWithMaterials(productCode);
     if (!product || !product.active) {
@@ -50,19 +55,17 @@ export class PricingService {
 
     // The material must be offered on this product and the size must be in
     // range (DB-driven rules).
-    assertMaterialOffered(product, dto.material);
-    assertSizeAllowed(product, dto.dimensions);
-    const dims = dto.dimensions;
+    assertMaterialOffered(product, request.material);
+    assertSizeAllowed(product, request.dimensions);
 
     // Recompute through the shared engine using admin-editable DB rates.
-    const finishing = normalizeFinishing(dto.finishing);
     const result = await this.engine.priceLines([
       {
         productId: productCode as never,
-        material: dto.material as never,
-        dimensions: dims,
-        finishing: finishing as never,
-        quantity: dto.quantity,
+        material: request.material as never,
+        dimensions: request.dimensions,
+        finishing: request.finishing as never,
+        quantity: request.quantity,
       },
     ]);
 
@@ -75,10 +78,12 @@ export class PricingService {
       });
     }
 
-    // Persist the quote snapshot (quotes table).
+    // Persisted because orders reference quotes by id (QUOTE_INVALID / QUOTE_EXPIRED /
+    // QUOTE_MISMATCH checks). Expired rows are purged daily (QuotePurgeService).
     const quote = await this.prisma.quote.create({
       data: {
-        request: dto as object,
+        userId: userId ?? null,
+        request: request as object,
         breakdown: result as object,
         subtotal: result.subtotal.toFixed(2),
         total: result.total.toFixed(2),

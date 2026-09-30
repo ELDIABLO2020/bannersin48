@@ -37,12 +37,10 @@ export class JwtAuthGuard implements CanActivate {
     if (isPublic) return true;
 
     const request = context.switchToHttp().getRequest();
+    // Header only. Tokens never travel in URLs (logs, history, Referer); file links
+    // for <img> and downloads are HMAC-signed instead (DownloadUrlService).
     const header: string | undefined = request.headers["authorization"];
-    // Query-param fallback so browser-native requests (<img src>) can pass the
-    // same access token they would otherwise send as a header.
-    const queryToken: unknown =
-      typeof request.query?.access_token === "string" ? request.query.access_token : undefined;
-    const rawToken = queryToken ? String(queryToken) : header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
+    const rawToken = header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
 
     if (!rawToken) {
       throw new UnauthorizedException("Missing or malformed Authorization header.");

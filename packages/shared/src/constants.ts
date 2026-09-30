@@ -9,6 +9,8 @@ export const TIMEZONE_ET = "America/New_York";
 export const MAX_BILLABLE_FT = 10;
 export const MIN_BILLABLE_FT = 1;
 export const MAX_QUANTITY_PER_LINE = 10;
+/** Custom grommet points per banner; the API rejects more (QuoteRequestDto). */
+export const MAX_GROMMET_POINTS = 64;
 export const SHIPPING_FLAT_PER_UNIT_USD = 10;
 
 export const RETRACTABLE = {

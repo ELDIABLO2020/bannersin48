@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api/client";
+import { downloadSignedFile } from "@/lib/api/signedUrls";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/stores/cart";
@@ -24,6 +25,11 @@ export default function OrderDetailPage() {
       loadFromReorder(response);
       router.push("/cart");
     },
+  });
+
+  // The label link is minted on click: signed links only last 5 minutes.
+  const labelDownload = useMutation({
+    mutationFn: (fileId: string) => downloadSignedFile(() => getApiClient().artworkDownloadUrl(fileId)),
   });
 
   const { data: order, isLoading } = useQuery({
@@ -72,6 +78,21 @@ export default function OrderDetailPage() {
                   <p className="text-body-sm text-ink-muted mt-xs">
                     {order.fedexTracking.service} · {order.fedexTracking.status}
                   </p>
+                  {order.fedexTracking.labelFileId && (
+                    <button
+                      type="button"
+                      className="mt-sm text-body-sm text-link"
+                      disabled={labelDownload.isPending}
+                      onClick={() => labelDownload.mutate(order.fedexTracking!.labelFileId!)}
+                    >
+                      Download shipping label (PDF)
+                    </button>
+                  )}
+                  {labelDownload.isError && (
+                    <p role="alert" className="mt-xs text-body-sm text-danger">
+                      {(labelDownload.error as Error).message}
+                    </p>
+                  )}
                 </div>
               ) : (
                 <p className="text-body-sm text-ink-muted">

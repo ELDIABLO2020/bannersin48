@@ -3,12 +3,19 @@ import { productIdForMaterial, type PricingInput, type PricingLine } from "@bann
 import { PricingEngineService } from "../pricing/pricing-engine.service";
 import { PricingService } from "../pricing/pricing.service";
 import { ADDRESS_VALIDATION_VERSION, AddressService } from "../address/address.service";
-import type { Order, OrderItem, OrderEvent, Quote } from "@prisma/client";
+import type { Order, OrderItem, OrderEvent, OrderStatus, Prisma, Quote } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { CatalogService } from "../catalog/catalog.service";
 import { DeliveryService } from "../delivery/delivery.service";
 import { ArtworkService } from "../artwork/artwork.service";
-import { assertMaterialOffered, assertSizeAllowed, normalizeFinishing, type ProductWithMaterials } from "../pricing/catalog-rules";
+import {
+  assertMaterialOffered,
+  assertSizeAllowed,
+  canonicalQuoteRequest,
+  normalizeFinishing,
+  type ProductWithMaterials,
+  type QuoteRequestInput,
+} from "../pricing/catalog-rules";
 import { CUSTOMER_CANCELLABLE_STATUSES, assertTransition } from "./status-machine";
 import type { CreateOrderDto, OrderLineDto } from "./orders.dto";
 
@@ -20,6 +27,17 @@ function round2(n: number): number {
 }
 
 const dec = (n: number) => n.toFixed(2);
+
+export interface TransitionOptions {
+  actorId?: string | null;
+  note?: string;
+  emailed?: boolean;
+  cancelledReason?: string;
+  /** Extra compare-and-set condition, e.g. `{ paymentStatus: "PENDING_PAYMENT" }`. */
+  where?: Prisma.OrderWhereInput;
+  /** More writes that must commit or roll back with the status change. */
+  inTx?: (tx: Prisma.TransactionClient, from: OrderStatus) => Promise<void>;
+}
 
 /** Who changed the order, as customers may see it. Staff user ids are never exposed. */
 export type OrderEventActor = "customer" | "staff" | "system";
@@ -101,13 +119,16 @@ export class OrdersService {
     if (changedQuoteIndexes.length > 0) {
       const replacementQuotes = await Promise.all(
         dto.lines.map((line) =>
-          this.pricing.quote({
-            productId: line.productId,
-            material: line.material,
-            dimensions: line.dimensions,
-            finishing: line.finishing,
-            quantity: line.quantity,
-          }),
+          this.pricing.quote(
+            {
+              productId: line.productId,
+              material: line.material,
+              dimensions: line.dimensions,
+              finishing: line.finishing,
+              quantity: line.quantity,
+            },
+            userId,
+          ),
         ),
       );
       throw new ConflictException({
@@ -227,21 +248,14 @@ export class OrdersService {
           throw new ConflictException({ code: "QUOTE_EXPIRED", message: "The selected quote expired. Request a new quote before submitting." });
         }
 
-        const request = quote.request as {
-          productId?: string;
-          material?: string;
-          dimensions?: OrderLineDto["dimensions"];
-          finishing?: OrderLineDto["finishing"];
-          quantity?: number;
-        };
-        const productId = line.productId ?? productIdForMaterial(line.material as never);
-        const quotedProductId = request.productId ?? (request.material ? productIdForMaterial(request.material as never) : undefined);
+        // Both sides are canonicalised, so legacy rows (raw request bodies) and key
+        // order (client or jsonb) cannot cause false mismatches.
+        const quoted = quote.request as Partial<QuoteRequestInput> | null;
         const requestMatches =
-          quotedProductId === productId &&
-          request.material === line.material &&
-          JSON.stringify(request.dimensions) === JSON.stringify(line.dimensions) &&
-          JSON.stringify(normalizeFinishing(request.finishing)) === JSON.stringify(normalizeFinishing(line.finishing)) &&
-          request.quantity === line.quantity;
+          quoted?.material !== undefined &&
+          quoted.dimensions !== undefined &&
+          quoted.quantity !== undefined &&
+          JSON.stringify(canonicalQuoteRequest(quoted as QuoteRequestInput)) === JSON.stringify(canonicalQuoteRequest(line));
         if (!requestMatches) {
           throw new BadRequestException({ code: "QUOTE_MISMATCH", message: "The quote does not match the submitted configuration." });
         }
@@ -321,7 +335,8 @@ export class OrdersService {
             service: "FedEx",
             status: row.status,
             lastUpdate: shipment.updatedAt.toISOString(),
-            labelDownloadUrl: shipment.labelFileId ? `/artwork/${shipment.labelFileId}/download` : null,
+            // Mint a signed link with POST /artwork/:labelFileId/download-url (the customer may).
+            labelFileId: shipment.labelFileId ?? null,
           }
         : undefined,
     };
@@ -361,13 +376,16 @@ export class OrdersService {
             message: "This historical configuration cannot be reordered online.",
           });
         }
-        const quote = await this.pricing.quote({
-          productId: request.productId,
-          material: request.material,
-          dimensions: request.dimensions,
-          finishing: request.finishing,
-          quantity: request.quantity ?? item.qty,
-        });
+        const quote = await this.pricing.quote(
+          {
+            productId: request.productId,
+            material: request.material,
+            dimensions: request.dimensions,
+            finishing: request.finishing,
+            quantity: request.quantity ?? item.qty,
+          },
+          userId,
+        );
         return {
           sourceOrderLineId: item.id,
           productId: request.productId ?? productIdForMaterial(request.material as never),
@@ -402,57 +420,87 @@ export class OrdersService {
         message: "This order can no longer be cancelled online. Contact support.",
       });
     }
-    await this.transition(orderId, "CANCELLED", { actorId: userId, note: reason, cancelledReason: reason });
+    // Only while payment is still pending: a concurrent mark-paid wins, and this answers 409.
+    await this.transition(orderId, "CANCELLED", {
+      actorId: userId,
+      note: reason,
+      cancelledReason: reason,
+      where: { paymentStatus: "PENDING_PAYMENT" },
+    });
     return this.getMineDetail(userId, orderId);
   }
 
   // --- Status machine -------------------------------------------------------
 
   /**
-   * Single funnel for every status change: validates the transition, updates
-   * the order, writes an order_event. actorId null = system.
+   * Single funnel for every status change: validates the transition, then runs
+   * `applyTransition` (compare-and-set on the status the caller read) and any
+   * extra writes from `inTx` in one transaction. actorId null = system.
+   * Returns the status the order moved from.
    */
-  async transition(
-    orderId: string,
-    to: Order["status"],
-    opts: { actorId?: string | null; note?: string; emailed?: boolean; cancelledReason?: string } = {},
-  ): Promise<void> {
+  async transition(orderId: string, to: OrderStatus, opts: TransitionOptions = {}): Promise<OrderStatus> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException({ code: "NOT_FOUND", message: "Order not found." });
+    assertTransition(order.status, to);
+
+    await this.prisma.$transaction(async (tx) => {
+      await this.applyTransition(tx, order, to, opts);
+      await opts.inTx?.(tx, order.status);
+    });
+    return order.status;
+  }
+
+  /**
+   * The status change itself, inside the caller's transaction. The update only
+   * matches while the order is still in the status the caller read (plus any
+   * `guard.where` condition), so concurrent changes surface as 409 CONFLICT
+   * instead of silently overwriting each other.
+   */
+  async applyTransition(
+    tx: Prisma.TransactionClient,
+    order: Pick<Order, "id" | "status" | "paymentConfirmedAt">,
+    to: OrderStatus,
+    opts: Omit<TransitionOptions, "inTx"> = {},
+    guard: { where?: Prisma.OrderWhereInput; data?: Prisma.OrderUpdateManyMutationInput } = {},
+  ): Promise<void> {
     assertTransition(order.status, to);
 
     // Persist the committed delivery date when the manual payment is confirmed
     // (D6: the effective SLA start is paymentConfirmedAt). The first transition
     // into IN_PROCESSING marks that moment; the date is never recomputed later.
     const now = new Date();
-    const commitDelivery = to === "IN_PROCESSING" && !order.paymentConfirmedAt;
-    const commitment = commitDelivery ? this.delivery.estimate(now) : null;
+    const commitment = to === "IN_PROCESSING" && !order.paymentConfirmedAt ? this.delivery.estimate(now) : null;
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: to,
-          ...(to === "CANCELLED" ? { cancelledAt: new Date(), cancelReason: opts.cancelledReason ?? opts.note ?? null } : {}),
-          ...(commitment
-            ? {
-                paymentConfirmedAt: now,
-                committedDeliveryDate: commitment.guaranteedDeliveryDate,
-                committedDeliveryDow: commitment.guaranteedDeliveryDow,
-              }
-            : {}),
-        },
+    const { count } = await tx.order.updateMany({
+      where: { ...opts.where, ...guard.where, id: order.id, status: order.status },
+      data: {
+        ...guard.data,
+        status: to,
+        ...(to === "CANCELLED" ? { cancelledAt: now, cancelReason: opts.cancelledReason ?? opts.note ?? null } : {}),
+        ...(commitment
+          ? {
+              paymentConfirmedAt: now,
+              committedDeliveryDate: commitment.guaranteedDeliveryDate,
+              committedDeliveryDow: commitment.guaranteedDeliveryDow,
+            }
+          : {}),
+      },
+    });
+    if (count !== 1) {
+      throw new ConflictException({
+        code: "CONFLICT",
+        message: "This order was changed while you were working on it. Reload it and try again.",
       });
-      await tx.orderEvent.create({
-        data: {
-          orderId,
-          fromStatus: order.status,
-          toStatus: to,
-          actorId: opts.actorId ?? null,
-          note: opts.note ?? null,
-          emailed: opts.emailed ?? false,
-        },
-      });
+    }
+    await tx.orderEvent.create({
+      data: {
+        orderId: order.id,
+        fromStatus: order.status,
+        toStatus: to,
+        actorId: opts.actorId ?? null,
+        note: opts.note ?? null,
+        emailed: opts.emailed ?? false,
+      },
     });
   }
 
@@ -462,9 +510,10 @@ export class OrdersService {
     actorId: string | null,
     note: string,
     opts: { emailed?: boolean } = {},
+    tx: Prisma.TransactionClient = this.prisma,
   ): Promise<void> {
-    const order = await this.prisma.order.findUniqueOrThrow({ where: { id: orderId }, select: { status: true } });
-    await this.prisma.orderEvent.create({
+    const order = await tx.order.findUniqueOrThrow({ where: { id: orderId }, select: { status: true } });
+    await tx.orderEvent.create({
       data: {
         orderId,
         fromStatus: order.status,
@@ -635,6 +684,6 @@ export interface OrderDetail {
     service: string;
     status: string;
     lastUpdate: string;
-    labelDownloadUrl: string | null;
+    labelFileId: string | null;
   };
 }

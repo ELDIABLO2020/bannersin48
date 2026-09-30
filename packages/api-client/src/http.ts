@@ -1,4 +1,4 @@
-import type { ApiClientConfig, ApiError } from "./types";
+import type { ApiClientConfig, ApiError, DownloadPurpose, SignedDownloadUrl } from "./types";
 
 export class ApiClientError extends Error {
   status: number;
@@ -73,5 +73,13 @@ export class HttpClient {
 
     if (res.status === 204) return undefined as T;
     return (await res.json()) as T;
+  }
+
+  /**
+   * Mints a 5-minute signed URL for an artwork file or shipment label (owner, staff,
+   * or the customer of the label's order). Use it directly as a link or <img src>.
+   */
+  artworkDownloadUrl(id: string, purpose: DownloadPurpose = "download"): Promise<SignedDownloadUrl> {
+    return this.request<SignedDownloadUrl>("POST", `/artwork/${encodeURIComponent(id)}/download-url`, { purpose });
   }
 }

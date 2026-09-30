@@ -69,8 +69,18 @@ export interface BannerCatalogInfo {
 
 export interface ArtworkUploadResponse {
   artworkId: string;
+  /** Signed, absolute and short-lived (5 min); mint a new one with `artworkDownloadUrl(id, "preview")`. */
   previewUrl: string;
   meta: ArtworkUploadMeta;
+}
+
+/** `preview`: raster images render inline (<img>); `download`: always a file download. */
+export type DownloadPurpose = "preview" | "download";
+
+/** Short-lived signed link to an artwork file or shipment label. No token needed to fetch it. */
+export interface SignedDownloadUrl {
+  url: string;
+  expiresAt: string;
 }
 
 export interface OrderListItem {

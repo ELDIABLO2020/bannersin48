@@ -93,7 +93,8 @@ export const orderSchema = z
         service: z.string(),
         status: z.string(),
         lastUpdate: z.string(),
-        labelDownloadUrl: z.string().nullable(),
+        /** Mint a signed link with POST /artwork/:labelFileId/download-url. */
+        labelFileId: z.string().nullable(),
       })
       .optional(),
   })

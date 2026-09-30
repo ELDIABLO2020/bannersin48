@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import { Equals } from "class-validator";
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsDefined,
   IsEmail,
@@ -18,10 +19,10 @@ import {
 import { DimensionsDto, FinishingDto } from "../pricing/quote-request.dto";
 
 export class OrderLineDto {
-  @IsOptional() @IsString()
+  @IsOptional() @IsString() @MaxLength(60)
   productId?: string;
 
-  @IsString()
+  @IsString() @MaxLength(60)
   material!: string;
 
   @ValidateNested() @Type(() => DimensionsDto)
@@ -33,10 +34,10 @@ export class OrderLineDto {
   @IsInt() @Min(1) @Max(10, { message: "Quantity must be between 1 and 10." })
   quantity!: number;
 
-  @IsString() @MinLength(1)
+  @IsString() @MinLength(1) @MaxLength(64)
   artworkId!: string;
 
-  @IsString() @MinLength(1)
+  @IsString() @MinLength(1) @MaxLength(64)
   quoteId!: string;
 }
 
@@ -100,6 +101,7 @@ export class CreateOrderDto {
   idempotencyKey?: string;
 
   @ArrayMinSize(1)
+  @ArrayMaxSize(20)
   @ValidateNested({ each: true })
   @Type(() => OrderLineDto)
   lines!: OrderLineDto[];
@@ -107,7 +109,7 @@ export class CreateOrderDto {
   @IsDefined() @ValidateNested() @Type(() => ShipToDto)
   shipTo!: ShipToDto;
 
-  @IsString() @MinLength(1)
+  @IsString() @MinLength(1) @MaxLength(4096)
   addressValidationToken!: string;
 
   @Equals(true, { message: "Unverified-address risk acknowledgement is required." })

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminApiClient } from "@/lib/api/adminClient";
+import { downloadSignedFile } from "@/lib/api/signedUrls";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,11 @@ export default function AdminOrderWorkspacePage() {
     onSuccess: async () => { setMessage("Saved."); await refresh(); },
     onError: (error) => setMessage((error as Error).message),
   });
+  // Files are fetched through a freshly minted 5-minute signed link (never a token in the URL).
+  const download = (fileId: string) => {
+    setMessage(null);
+    downloadSignedFile(() => getAdminApiClient().artworkDownloadUrl(fileId)).catch((error: Error) => setMessage(error.message));
+  };
 
   if (detail.isLoading) return <p className="text-ink-muted" role="status">Loading order…</p>;
   if (detail.isError || !detail.data) return <ErrorBox text={(detail.error as Error | undefined)?.message ?? "Order not found."} />;
@@ -90,12 +96,12 @@ export default function AdminOrderWorkspacePage() {
                     </dl>
                     {artwork && (
                       <div className="mt-md flex items-center gap-md rounded-feature bg-surface-tint p-md">
-                        {String(artwork.mimeType).startsWith("image/") && (
-                          // Authenticated local artwork is intentionally not routed through Next's public image optimizer.
+                        {String(artwork.mimeType).startsWith("image/") && typeof artwork.previewUrl === "string" && (
+                          // Signed 5-minute link from the order detail; not routed through Next's public image optimizer.
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={authorizedUrl(String(artwork.downloadUrl))} alt="Artwork preview" className="h-20 w-28 object-contain bg-surface border border-line-subtle" />
+                          <img src={artwork.previewUrl} alt="Artwork preview" className="h-20 w-28 object-contain bg-surface border border-line-subtle" />
                         )}
-                        <div className="min-w-0"><p className="font-bold text-ink truncate">{String(artwork.filename)}</p><p className="text-xs text-ink-muted">{String(artwork.mimeType)} · {formatBytes(Number(artwork.sizeBytes))}</p><a href={authorizedUrl(String(artwork.downloadUrl))} className="text-body-sm text-link" target="_blank" rel="noreferrer">Download original</a></div>
+                        <div className="min-w-0"><p className="font-bold text-ink truncate">{String(artwork.filename)}</p><p className="text-xs text-ink-muted">{String(artwork.mimeType)} · {formatBytes(Number(artwork.sizeBytes))}</p><button type="button" onClick={() => download(String(artwork.id))} className="text-body-sm text-link">Download original</button></div>
                       </div>
                     )}
                     <details className="mt-md"><summary className="text-xs text-link cursor-pointer">Raw snapshot</summary><pre className="mt-sm text-xs whitespace-pre-wrap overflow-auto bg-surface-tint p-sm rounded-feature">{JSON.stringify(snapshot, null, 2)}</pre></details>
@@ -152,7 +158,7 @@ export default function AdminOrderWorkspacePage() {
                 {order.shipment?.trackingNumber ? (
                   <div className="text-body-sm text-ink-muted">
                     <p>{order.shipment.trackingNumber}</p>
-                    {order.shipment.labelDownloadUrl && <a href={authorizedUrl(order.shipment.labelDownloadUrl)} className="text-link" target="_blank" rel="noreferrer">Download label</a>}
+                    {order.shipment.labelFileId && <button type="button" onClick={() => download(order.shipment!.labelFileId!)} className="text-link">Download label</button>}
                   </div>
                 ) : (
                   <div className="space-y-sm">
@@ -234,5 +240,4 @@ function Readout({ label, value }: { label: string; value: string }) { return <d
 function formatBillable(value: unknown): string { const v = value as { widthFt?: number; heightFt?: number } | null; return v ? `${v.widthFt ?? "—"}' × ${v.heightFt ?? "—"}'` : "—"; }
 function formatFinishing(value: unknown): string { const obj = (value ?? {}) as Record<string, unknown>; const enabled = Object.entries(obj).filter(([, v]) => v === true).map(([k]) => k); return enabled.length ? enabled.join(", ") : "None"; }
 function formatBytes(bytes: number): string { return bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`; }
-function authorizedUrl(path: string): string { const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001"; const token = typeof window !== "undefined" ? window.localStorage.getItem("bi48.token") : null; return `${base}${path}${token ? `?access_token=${encodeURIComponent(token)}` : ""}`; }
 function ErrorBox({ text }: { text: string }) { return <div role="alert" className="rounded-feature bg-badge-error-bg text-danger p-md">{text}</div>; }
