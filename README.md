@@ -15,7 +15,7 @@ Speed-first custom banner ordering platform — npm workspaces monorepo.
 
 ## Local development
 
-Requires Node.js 20+. Copy `.env.example` to `.env` (and `backend/.env.example` to `backend/.env`).
+Requires Node.js 24 (`.nvmrc`). Copy `.env.example` to `.env` (and `backend/.env.example` to `backend/.env`).
 
 ```bash
 npm install
@@ -41,7 +41,7 @@ npm run start:dev -w backend
 | `npm run e2e:real` | Release scenarios against the real Nest + Postgres backend. Needs Docker; exits `2` if Docker is unavailable |
 | `npm run audit:ci` | Production content scan, broken link/image crawl, metadata snapshot, console/network errors |
 
-CI: `.github/workflows/ci.yml` runs `ci` + `audit:ci` on every push and PR.
+CI: `.github/workflows/ci.yml` runs a production `npm audit` gate, `ci` and `audit:ci` on every push and PR.
 `release-gate.yml` also runs `e2e:real`, on `v*` tags or manually.
 
 ## Design tokens
@@ -53,9 +53,9 @@ The brand palette is magenta `#CB1079` (actions), green `#3EAF2C` (money/confirm
 ## Deployment (Vercel)
 
 The frontend deploys to Vercel through the GitHub integration, with **Root Directory** `frontend` and
-**Node.js** 20.x. [`frontend/vercel.json`](frontend/vercel.json) installs and builds from the
-monorepo root so the workspace packages are available. Production domain: `https://bannersin48.com`
-(project `bannersin48-frontend`).
+**Node.js** 24.x (pinned by `engines` in `frontend/package.json`). [`frontend/vercel.json`](frontend/vercel.json)
+installs and builds from the monorepo root so the workspace packages are available. Production domain:
+`https://bannersin48.com` (project `bannersin48-frontend`).
 
 | Variable | Example |
 |---|---|

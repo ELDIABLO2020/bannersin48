@@ -22,7 +22,25 @@
   "devDependencies": {
     "typescript": "~5.4.5"
   },
+  "overrides": {
+    "browserslist": "^4.29.3",
+    "next": {
+      "postcss": "^8.5.28"
+    }
+  },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24"
+  },
+  "prisma": {
+    "schema": "backend/prisma/schema.prisma"
+  },
+  "allowScripts": {
+    "@prisma/client": true,
+    "@prisma/engines": true,
+    "prisma": true,
+    "esbuild": true,
+    "msw": false,
+    "fsevents": false,
+    "unrs-resolver": false
   }
 }
