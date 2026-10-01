@@ -44,11 +44,14 @@ const EXPECTED_PUBLIC = [
   "GET /content/:key",
   "GET /delivery/next-cutoff",
   "GET /health",
+  "POST /auth/accept-invite",
+  "POST /auth/confirm-email-change",
   "POST /auth/forgot-password",
   "POST /auth/login",
   "POST /auth/refresh",
   "POST /auth/register",
   "POST /auth/reset-password",
+  "POST /auth/verify-email",
   "POST /pricing/quote",
 ];
 
@@ -88,6 +91,10 @@ function baseUrl(app: INestApplication): string {
 
 const prismaStub = {
   user: { findUnique: jest.fn(async () => null) },
+  // RbacService.onModuleInit syncs the permission catalog: an empty store that accepts the writes.
+  permission: { findMany: jest.fn(async () => []), upsert: jest.fn() },
+  accessRole: { findUnique: jest.fn(async () => null), create: jest.fn(async ({ data }: { data: { key: string } }) => ({ id: `role_${data.key}` })) },
+  rolePermission: { createMany: jest.fn() },
   $connect: jest.fn(),
   $disconnect: jest.fn(),
 };

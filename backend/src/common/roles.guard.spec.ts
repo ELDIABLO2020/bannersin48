@@ -1,4 +1,4 @@
-import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
+import { ExecutionContext, ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { RolesGuard } from "./roles.guard";
 
@@ -21,12 +21,13 @@ function contextWith(user: { role: string } | undefined): ExecutionContext {
 describe("RolesGuard", () => {
   const guard = makeGuard(["STAFF"]);
 
-  it("allows ADMIN into STAFF routes", () => {
-    expect(guard.canActivate(contextWith({ role: "ADMIN" }))).toBe(true);
-  });
-
   it("allows a listed role", () => {
     expect(guard.canActivate(contextWith({ role: "STAFF" }))).toBe(true);
+    expect(makeGuard(["STAFF", "ADMIN"]).canActivate(contextWith({ role: "ADMIN" }))).toBe(true);
+  });
+
+  it("has no implicit ADMIN bypass (phase 5): an unlisted ADMIN is refused like any other kind", () => {
+    expect(() => guard.canActivate(contextWith({ role: "ADMIN" }))).toThrow(ForbiddenException);
   });
 
   it("forbids unlisted roles (customer on staff route)", () => {

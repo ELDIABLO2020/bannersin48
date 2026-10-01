@@ -26,7 +26,7 @@ export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuth((s) => s.setAuth);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [returnUrl, setReturnUrl] = useState("/dashboard");
+  const [returnUrl, setReturnUrl] = useState("/account");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -42,7 +42,8 @@ export default function LoginPage() {
     try {
       const res = await getApiClient().login(values);
       setAuth(res.user, res.token);
-      router.push(returnUrl);
+      // A temporary password must be replaced before anything else works.
+      router.push(res.user.mustChangePassword ? `/change-password?next=${encodeURIComponent(returnUrl)}` : returnUrl);
     } catch (err) {
       setSubmitError((err as Error).message);
     }
@@ -69,7 +70,7 @@ export default function LoginPage() {
                 Password
               </label>
               <Link
-                href={`/forgot-password${returnUrl !== "/dashboard" ? `?next=${encodeURIComponent(returnUrl)}` : ""}`}
+                href={`/forgot-password${returnUrl !== "/account" ? `?next=${encodeURIComponent(returnUrl)}` : ""}`}
                 className="text-body-sm text-link hover:underline"
               >
                 Forgot password?

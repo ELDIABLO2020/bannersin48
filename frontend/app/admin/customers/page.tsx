@@ -1,24 +1,31 @@
 "use client";
 
 import { PageHeader } from "@/components/ui/page-header";
-import { roleLabel } from "@/lib/admin/labels";
-import { useMemo, useState } from "react";
+import { RequirePermission } from "../_components/require-permission";
+import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminApiClient } from "@/lib/api/adminClient";
+import { Can } from "@/lib/auth/useCan";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const PAGE_SIZE = 25;
-const ROLES = ["CUSTOMER", "STAFF", "CONTENT_EDITOR", "ADMIN"] as const;
 
 export default function AdminCustomersPage() {
+  return (
+    <RequirePermission perm="customers:read">
+      <CustomerSearch />
+    </RequirePermission>
+  );
+}
+
+function CustomerSearch() {
   const [draft, setDraft] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [role, setRole] = useState<string>("");
   const customers = useQuery({
     queryKey: ["admin", "customers", search, page],
     queryFn: () => getAdminApiClient().customers({ search: search || undefined, page }),
@@ -26,14 +33,22 @@ export default function AdminCustomersPage() {
 
   const total = customers.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const visibleItems = useMemo(() => {
-    const items = customers.data?.items ?? [];
-    return role ? items.filter((c) => c.role === role) : items;
-  }, [customers.data?.items, role]);
+  const visibleItems = customers.data?.items ?? [];
 
   return (
     <div className="space-y-xl">
-      <PageHeader title="Customers" className="mb-0" />
+      <PageHeader
+        title="Customers"
+        intro="Storefront accounts only."
+        className="mb-0"
+        actions={
+          <Can perm="users:read">
+            <Link href="/admin/staff" className="text-body-sm text-link no-underline hover:underline">
+              Looking for staff accounts?
+            </Link>
+          </Can>
+        }
+      />
 
       <Card className="bg-surface p-lg">
         <form
@@ -54,27 +69,13 @@ export default function AdminCustomersPage() {
               type="search"
             />
           </label>
-          <label className="block sm:w-56" htmlFor="customer-role">
-            <span className="text-body-sm text-ink-muted block mb-xs">Filter by role</span>
-            <select
-              id="customer-role"
-              className="w-full h-10 rounded-btn border border-line-input px-md bg-surface text-ink text-sm"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="">All roles</option>
-              {ROLES.map((r) => (
-                <option key={r} value={r}>{roleLabel(r)}</option>
-              ))}
-            </select>
-          </label>
           <div className="flex items-end">
             <Button type="submit" variant="secondary">Search</Button>
           </div>
         </form>
       </Card>
 
-      <Card className="bg-surface p-lg overflow-x-auto">
+      <Card className="bg-surface p-lg relative overflow-x-auto">
         {customers.isLoading ? (
           <p className="text-ink-muted py-xl" role="status">Loading customers…</p>
         ) : customers.isError ? (
@@ -83,20 +84,20 @@ export default function AdminCustomersPage() {
           <div className="py-xl text-center">
             <p className="text-ink-muted">No customers found.</p>
             <p className="text-body-sm text-ink-muted mt-xs">
-              {search || role ? "Try clearing your search or role filter." : "Customers appear here after they register."}
+              {search ? "Try clearing your search." : "Customers appear here after they register."}
             </p>
           </div>
         ) : (
           <>
             <p className="text-body-sm text-ink-muted mb-md" aria-live="polite">
-              {role ? `${visibleItems.length} on this page match · ` : ""}{total} customers total
+              {total} customers total
             </p>
             <table className="w-full text-body-sm">
               <caption className="sr-only">Customers, page {page} of {totalPages}</caption>
               <thead>
                 <tr className="text-left text-ink-muted border-b border-line-subtle">
                   <th scope="col" className="py-sm font-bold">Customer</th>
-                  <th scope="col" className="font-bold">Role</th>
+                  <th scope="col" className="font-bold">Status</th>
                   <th scope="col" className="font-bold">Orders</th>
                   <th scope="col" className="font-bold">Rewards</th>
                   <th scope="col" className="font-bold">Joined</th>
@@ -111,7 +112,7 @@ export default function AdminCustomersPage() {
                       </Link>
                       <p className="text-xs text-ink-muted">{customer.email}</p>
                     </td>
-                    <td><Badge variant={customer.role === "CUSTOMER" ? "neutral" : "info"}>{roleLabel(customer.role)}</Badge></td>
+                    <td><Badge variant={customer.status === "ACTIVE" ? "neutral" : "warning"}>{customer.status === "ACTIVE" ? "Active" : "Suspended"}</Badge></td>
                     <td className="text-ink tabular-nums">{customer.orderCount}</td>
                     <td className="text-ink tabular-nums">{customer.rewardsPoints}</td>
                     <td className="text-ink-muted">{new Date(customer.createdAt).toLocaleDateString()}</td>

@@ -1,4 +1,21 @@
-import { IsBoolean, IsOptional, IsString, Length, MaxLength } from "class-validator";
+import { Type } from "class-transformer";
+import { IsBoolean, IsEmail, IsInt, IsOptional, IsString, Length, Max, MaxLength, Min } from "class-validator";
+
+export class ChangePasswordDto {
+  @IsString()
+  @Length(1, 128)
+  currentPassword!: string;
+
+  @IsString()
+  @Length(8, 128, { message: "Password must be at least 8 characters." })
+  newPassword!: string;
+
+  /** The caller's own refresh token, kept alive while every other session is revoked. */
+  @IsOptional()
+  @IsString()
+  @Length(10, 256)
+  keepRefreshToken?: string;
+}
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -15,6 +32,36 @@ export class UpdateProfileDto {
   @IsString()
   @MaxLength(20)
   phone?: string;
+}
+
+/** `PATCH /users/me/settings`: the two V1 notification toggles (plan §4.1). */
+export class UpdateSettingsDto {
+  @IsOptional()
+  @IsBoolean()
+  notifyOrderUpdates?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  notifyMarketing?: boolean;
+}
+
+/** `POST /users/me/email`: the password is checked before anything is revealed about `newEmail`. */
+export class ChangeEmailDto {
+  @IsEmail({}, { message: "Enter a valid email." })
+  newEmail!: string;
+
+  @IsString()
+  @Length(1, 128)
+  currentPassword!: string;
+}
+
+/** `GET /users/me/rewards?page=&pageSize=` */
+export class RewardsQueryDto {
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100000)
+  page?: number;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100)
+  pageSize?: number;
 }
 
 export class AddressDto {
@@ -53,4 +100,3 @@ export class AddressDto {
   @IsBoolean()
   isDefaultShipping?: boolean;
 }
-

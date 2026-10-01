@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { scanA11y, formatViolations } from "./helpers/axe";
-import { seedDemoAuth } from "./helpers/auth";
+import { seedDemoAuth, seedStaffAuth } from "./helpers/auth";
 
 /**
  * Accessibility gate.
@@ -56,7 +56,7 @@ test.describe("accessibility suite", () => {
       { path: "/cart", label: "cart (empty)" },
       { path: "/checkout", label: "checkout (empty)" },
       { path: "/orders", label: "orders (signed out)" },
-      { path: "/dashboard", label: "dashboard (signed out)" },
+      { path: "/account", label: "account (signed out)" },
       { path: "/admin", label: "admin (sign-in)" },
       {
         path: "/order",
@@ -209,28 +209,7 @@ test.describe("accessibility suite", () => {
 
     test("admin mobile menu toggles and closes with Escape", async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== "mobile-webkit", "Mobile admin menu");
-      await page.addInitScript(() => {
-        window.localStorage.setItem(
-          "bi48.auth",
-          JSON.stringify({
-            state: {
-              user: {
-                id: "user_admin",
-                email: "admin@bannersin48.local",
-                fullName: "Site Admin",
-                role: "ADMIN",
-                taxExempt: false,
-                taxExemptApproved: false,
-                rewardsPoints: 0,
-                savedAddresses: [],
-                createdAt: "2026-08-29T00:00:00.000Z",
-              },
-              token: "mock-token-user_admin",
-            },
-            version: 0,
-          }),
-        );
-      });
+      await seedStaffAuth(page);
       await page.goto("/admin");
       await expect(page.getByRole("link", { name: "Banners In 48 staff home" })).toBeVisible();
       const trigger = page.getByRole("button", { name: /open admin menu/i });

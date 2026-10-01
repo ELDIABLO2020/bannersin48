@@ -1,12 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Put } from "@nestjs/common";
 import { IsBoolean, IsIn, IsObject, IsOptional, IsString, MaxLength } from "class-validator";
-import { Roles } from "../common/roles.decorator";
 import { CurrentUser } from "../common/current-user.decorator";
 import { ClientIp } from "../common/client-ip.decorator";
 import { Public } from "../common/public.decorator";
 import type { AuthedUser } from "../common/jwt-auth.guard";
+import { RequirePermissions } from "../rbac/require-permissions.decorator";
+import { assertCan, type PermissionKey } from "../rbac/permissions";
 import { ContentService, AdminContentService } from "./content-admin.service";
-import { AdminCustomersService } from "./customers-admin.service";
 
 export class UpsertContentDto {
   @IsString() @MaxLength(80)
@@ -23,61 +23,42 @@ export class UpsertContentDto {
   published?: boolean;
 }
 
-/**
- * CMS content (CONTENT_EDITOR + ADMIN) and customer management (STAFF + ADMIN).
- * Mutations audited.
- * Public reads live on /content (no auth).
- */
-@Controller("admin")
-@Roles("STAFF", "ADMIN", "CONTENT_EDITOR")
-export class AdminContentCustomersController {
-  constructor(
-    private readonly content: AdminContentService,
-    private readonly customers: AdminCustomersService,
-  ) {}
+/** Editing a block's content is `content:edit`; touching `published` is `content:publish`. */
+export function permissionsForContentUpsert(dto: Pick<UpsertContentDto, "published">): PermissionKey[] {
+  return dto.published === undefined ? ["content:edit"] : ["content:edit", "content:publish"];
+}
 
-  // --- CMS ---
-  @Roles("CONTENT_EDITOR", "ADMIN")
-  @Get("content")
+/**
+ * CMS content (`content:*`). Mutations audited. Public reads live on /content
+ * (no auth).
+ */
+@Controller("admin/content")
+export class AdminContentController {
+  constructor(private readonly content: AdminContentService) {}
+
+  @RequirePermissions("content:read")
+  @Get()
   listContent() {
     return this.content.listAll();
   }
 
-  @Roles("CONTENT_EDITOR", "ADMIN")
-  @Get("content/:key")
+  @RequirePermissions("content:read")
+  @Get(":key")
   getContent(@Param("key") key: string) {
     return this.content.get(key);
   }
 
-  @Roles("CONTENT_EDITOR", "ADMIN")
-  @Put("content/:key")
+  @RequirePermissions("content:edit")
+  @Put(":key")
   upsertContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @Body() dto: UpsertContentDto, @ClientIp() ip?: string) {
+    assertCan(user, permissionsForContentUpsert(dto));
     return this.content.upsert(user.id, { ...dto, key }, ip);
   }
 
-  @Roles("CONTENT_EDITOR", "ADMIN")
-  @Delete("content/:key")
+  @RequirePermissions("content:publish")
+  @Delete(":key")
   deleteContent(@CurrentUser() user: AuthedUser, @Param("key") key: string, @ClientIp() ip?: string) {
     return this.content.delete(user.id, key, ip);
-  }
-
-  // --- Customers ---
-  @Roles("STAFF", "ADMIN")
-  @Get("customers")
-  searchCustomers(@Query("search") search?: string, @Query("page") page?: string, @Query("pageSize") pageSize?: string) {
-    return this.customers.search(search || undefined, page ? Number(page) : 1, pageSize ? Number(pageSize) : 25);
-  }
-
-  @Roles("STAFF", "ADMIN")
-  @Get("customers/:id")
-  customerDetail(@Param("id") id: string) {
-    return this.customers.detail(id);
-  }
-
-  @Roles("STAFF", "ADMIN")
-  @Post("customers/:id/reset-password")
-  resetPassword(@CurrentUser() user: AuthedUser, @Param("id") id: string, @ClientIp() ip?: string) {
-    return this.customers.adminResetPassword(user, id, ip);
   }
 }
 

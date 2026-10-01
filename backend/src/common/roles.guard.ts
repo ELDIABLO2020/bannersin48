@@ -3,10 +3,14 @@ import { Reflector } from "@nestjs/core";
 import { ROLES_KEY } from "./roles.decorator";
 
 /**
- * Role gate, registered globally after JwtAuthGuard so request.user exists:
+ * Coarse role-kind gate, registered globally after JwtAuthGuard so request.user exists:
  *   @Roles("STAFF", "ADMIN")
  *
- * ADMIN passes every guarded route; otherwise the user's role must be listed.
+ * Kept for optional coarse gating of future non-admin routes. Nothing under
+ * `/admin/*` uses it any more (permissions-coverage.spec.ts refuses it there);
+ * every admin route is gated by PermissionsGuard alone. There is no implicit
+ * ADMIN bypass: the user's kind must be listed. An admin passes permission
+ * checks because the `admin` role holds the wildcard, not because of its kind.
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -24,7 +28,7 @@ export class RolesGuard implements CanActivate {
     if (!user) {
       throw new UnauthorizedException("Authentication required.");
     }
-    if (user.role === "ADMIN" || required.includes(user.role)) {
+    if (required.includes(user.role)) {
       return true;
     }
     throw new ForbiddenException({

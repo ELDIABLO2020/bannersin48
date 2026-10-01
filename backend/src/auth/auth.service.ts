@@ -10,16 +10,27 @@ import { JwtService } from "@nestjs/jwt";
 import { createHash, randomBytes } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import { EmailService } from "../notifications/email.service";
+import { AuditService } from "../audit/audit.service";
 import { serializeAddress, serializeUser, type SerializedUser } from "../common/user.serializer";
+import { rbacUserInclude } from "../rbac/rbac.service";
+import { CUSTOMER_ROLE_KEY } from "../rbac/permissions";
 import { hashPassword, verifyPassword } from "./password";
 import { LoginBackoff } from "./login-backoff";
 import type { RegisterDto, LoginDto } from "./auth.dto";
 
 const REFRESH_TOKEN_TTL_DAYS = 30;
+export const EMAIL_CHANGE_TTL_HOURS = 1;
+export const EMAIL_VERIFY_TTL_HOURS = 24;
 
 export interface TokenPair {
   token: string; // access token — field name matches the MSW contract
   refreshToken: string;
+}
+
+/** Where a session was opened from; shown back to the user in `/users/me/sessions`. */
+export interface SessionMeta {
+  ip?: string | null;
+  userAgent?: string | null;
 }
 
 function sha256(value: string): string {
@@ -34,11 +45,12 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly email: EmailService,
+    private readonly audit: AuditService,
   ) {}
 
   // --- Registration & login -------------------------------------------------
 
-  async register(dto: RegisterDto): Promise<{ user: SerializedUser } & TokenPair> {
+  async register(dto: RegisterDto, meta: SessionMeta = {}): Promise<{ user: SerializedUser } & TokenPair> {
     const email = dto.email.toLowerCase().trim();
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -46,19 +58,23 @@ export class AuthService {
     }
 
     const { firstName, lastName } = splitFullName(dto.fullName);
+    // Every account holds exactly one access role (user.roleId is NOT NULL):
+    // storefront sign-ups get the immutable, empty `customer` system role.
     const user = await this.prisma.user.create({
       data: {
         email,
         passwordHash: await hashPassword(dto.password),
         firstName,
         lastName,
+        role: "CUSTOMER",
+        accessRole: { connect: { key: CUSTOMER_ROLE_KEY } },
       },
     });
 
-    return { user: await this.serialize(user.id), ...(await this.issueTokens(user)) };
+    return { user: await this.serialize(user.id), ...(await this.issueTokens(user, meta)) };
   }
 
-  async login(dto: LoginDto, ip?: string): Promise<{ user: SerializedUser } & TokenPair> {
+  async login(dto: LoginDto, ip?: string, userAgent?: string): Promise<{ user: SerializedUser } & TokenPair> {
     const email = dto.email.toLowerCase().trim();
     const key = LoginBackoff.key(ip, email);
     const waitMs = this.backoff.retryAfterMs(key);
@@ -87,7 +103,125 @@ export class AuthService {
     }
 
     this.backoff.recordSuccess(key);
-    return { user: await this.serialize(user.id), ...(await this.issueTokens(user)) };
+    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    // A temporary-password account signs in normally; the guard then limits it to
+    // sign-out and POST /users/me/password until `mustChangePassword` clears.
+    return { user: await this.serialize(user.id), ...(await this.issueTokens(user, { ip, userAgent })) };
+  }
+
+  /**
+   * Public: redeems a STAFF_INVITE action token. Sets the first real password,
+   * activates the account (INVITED → ACTIVE), marks the email verified, burns
+   * the token, revokes any sessions and signs the user in. Neutral errors: a
+   * wrong, used or expired token all read the same.
+   */
+  async acceptInvite(token: string, password: string, ip?: string, userAgent?: string): Promise<{ user: SerializedUser } & TokenPair> {
+    const invite = await this.prisma.actionToken.findUnique({
+      where: { tokenHash: sha256(token) },
+      include: { user: { select: { id: true, status: true } } },
+    });
+    const now = new Date();
+    if (!invite || invite.purpose !== "STAFF_INVITE" || invite.usedAt !== null || invite.expiresAt < now || invite.user.status === "SUSPENDED") {
+      throw new BadRequestException({ code: "INVITE_INVALID", message: "This invite link is invalid or has expired." });
+    }
+
+    const passwordHash = await hashPassword(password);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: invite.userId },
+        data: { passwordHash, status: "ACTIVE", emailVerifiedAt: now, passwordChangedAt: now, mustChangePassword: false, lastLoginAt: now },
+      });
+      await tx.actionToken.update({ where: { id: invite.id }, data: { usedAt: now } });
+      await tx.actionToken.updateMany({ where: { userId: invite.userId, purpose: "STAFF_INVITE", usedAt: null }, data: { usedAt: now } });
+      await tx.refreshToken.updateMany({ where: { userId: invite.userId, revokedAt: null }, data: { revokedAt: now } });
+      await this.audit.record(
+        {
+          actorId: invite.userId,
+          action: "user.accept_invite",
+          entityType: "user",
+          entityId: invite.userId,
+          diff: { status: { from: "INVITED", to: "ACTIVE" }, passwordChanged: true, invitedBy: invite.requestedBy },
+          ip,
+        },
+        tx,
+      );
+    });
+
+    return { user: await this.serialize(invite.userId), ...(await this.issueTokens({ id: invite.userId }, { ip, userAgent })) };
+  }
+
+  // --- Email change & verification (plan §4.2; links only reach EmailService) ---
+
+  /**
+   * Public: redeems an EMAIL_CHANGE token minted by `POST /users/me/email`.
+   * Swaps the address, marks it verified, clears `pendingEmail`, burns the
+   * token, signs every session out and audits. Neutral error for a wrong,
+   * used or expired token; `409 EMAIL_TAKEN` only if the address was claimed
+   * meanwhile (the holder already proved control of it).
+   */
+  async confirmEmailChange(token: string, ip?: string): Promise<{ ok: true; email: string }> {
+    const now = new Date();
+    const record = await this.loadActionToken(token, "EMAIL_CHANGE", now);
+    const newEmail = (record.payload as { newEmail?: unknown } | null)?.newEmail;
+    if (typeof newEmail !== "string" || newEmail.length === 0) throw invalidActionToken();
+
+    const taken = await this.prisma.user.findUnique({ where: { email: newEmail }, select: { id: true } });
+    if (taken && taken.id !== record.userId) {
+      throw new ConflictException({ code: "EMAIL_TAKEN", message: "An account with that email already exists." });
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: record.userId },
+        data: { email: newEmail, emailVerifiedAt: now, pendingEmail: null },
+      });
+      await tx.actionToken.updateMany({ where: { userId: record.userId, purpose: "EMAIL_CHANGE", usedAt: null }, data: { usedAt: now } });
+      await tx.refreshToken.updateMany({ where: { userId: record.userId, revokedAt: null }, data: { revokedAt: now } });
+      await this.audit.record(
+        {
+          actorId: record.userId,
+          action: "user.email_changed",
+          entityType: "user",
+          entityId: record.userId,
+          diff: { email: { from: record.user.email, to: newEmail }, sessionsRevoked: true },
+          ip,
+        },
+        tx,
+      );
+    });
+    // Security notice to the previous address (transactional mail always sends).
+    await this.email.send({ to: record.user.email, template: "email_changed_notice", payload: { newEmail } });
+    return { ok: true, email: newEmail };
+  }
+
+  /** Public: redeems an EMAIL_VERIFY token. Only verifies the address the token was issued for. */
+  async verifyEmail(token: string, ip?: string): Promise<{ ok: true }> {
+    const now = new Date();
+    const record = await this.loadActionToken(token, "EMAIL_VERIFY", now);
+    const forEmail = (record.payload as { email?: unknown } | null)?.email;
+    // The address changed since the link went out: the link proves nothing about the new one.
+    if (typeof forEmail !== "string" || forEmail !== record.user.email) throw invalidActionToken();
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id: record.userId }, data: { emailVerifiedAt: now } });
+      await tx.actionToken.updateMany({ where: { userId: record.userId, purpose: "EMAIL_VERIFY", usedAt: null }, data: { usedAt: now } });
+      await this.audit.record(
+        { actorId: record.userId, action: "user.email_verified", entityType: "user", entityId: record.userId, diff: { email: forEmail }, ip },
+        tx,
+      );
+    });
+    return { ok: true };
+  }
+
+  private async loadActionToken(token: string, purpose: "EMAIL_CHANGE" | "EMAIL_VERIFY", now: Date) {
+    const record = await this.prisma.actionToken.findUnique({
+      where: { tokenHash: sha256(token) },
+      include: { user: { select: { id: true, email: true, status: true } } },
+    });
+    if (!record || record.purpose !== purpose || record.usedAt !== null || record.expiresAt < now || record.user.status === "SUSPENDED") {
+      throw invalidActionToken();
+    }
+    return record;
   }
 
   // --- Session --------------------------------------------------------------
@@ -112,7 +246,7 @@ export class AuthService {
   }
 
   /** Rotate a refresh token: the old one is revoked and cannot be reused. */
-  async refresh(refreshToken: string): Promise<TokenPair> {
+  async refresh(refreshToken: string, meta: SessionMeta = {}): Promise<TokenPair> {
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash: sha256(refreshToken) },
       include: { user: true },
@@ -127,7 +261,8 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    return this.issueTokens(stored.user);
+    // The rotated session keeps its origin unless the request says otherwise.
+    return this.issueTokens(stored.user, { ip: meta.ip ?? stored.ip, userAgent: meta.userAgent ?? stored.userAgent });
   }
 
   // --- Password reset ---------------------------------------------------------
@@ -183,7 +318,7 @@ export class AuthService {
   private async serialize(userId: string): Promise<SerializedUser> {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
-      include: { addresses: { orderBy: { createdAt: "asc" } } },
+      include: { addresses: { orderBy: { createdAt: "asc" } }, ...rbacUserInclude() },
     });
     return serializeUser(
       user,
@@ -191,21 +326,30 @@ export class AuthService {
     );
   }
 
-  private async issueTokens(user: { id: string }): Promise<TokenPair> {
-    // `sub` only: JwtAuthGuard re-reads role and status from the database on every request.
-    const token = this.jwt.sign({ sub: user.id });
-
+  private async issueTokens(user: { id: string }, meta: SessionMeta = {}): Promise<TokenPair> {
     const refreshToken = randomBytes(48).toString("hex");
-    await this.prisma.refreshToken.create({
+    const now = new Date();
+    const session = await this.prisma.refreshToken.create({
       data: {
         userId: user.id,
         tokenHash: sha256(refreshToken),
-        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(now.getTime() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000),
+        ip: meta.ip?.slice(0, 64) ?? null,
+        userAgent: meta.userAgent?.slice(0, 256) ?? null,
+        lastUsedAt: now,
       },
+      select: { id: true },
     });
 
+    // `sub` + the session id only: JwtAuthGuard re-reads role, permissions and
+    // status from the database on every request; `sid` grants nothing.
+    const token = this.jwt.sign({ sub: user.id, sid: session.id });
     return { token, refreshToken };
   }
+}
+
+function invalidActionToken(): BadRequestException {
+  return new BadRequestException({ code: "TOKEN_INVALID", message: "This link is invalid or has expired." });
 }
 
 function splitFullName(fullName: string): { firstName: string; lastName: string } {

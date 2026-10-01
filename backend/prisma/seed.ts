@@ -17,22 +17,32 @@ import {
 } from "@bannersin48/shared";
 import { resolveSeedAdmin } from "../src/config/seed-admin";
 import { hashPassword } from "../src/auth/password";
+import { syncRbacCatalog } from "../src/rbac/catalog-sync";
 
 const prisma = new PrismaClient();
+
+/** Permission catalog + system/template roles (the migration seeds them too; this keeps a re-seed current). */
+async function seedRbac(): Promise<void> {
+  const result = await syncRbacCatalog(prisma);
+  console.log(`✔ rbac catalog synced (${result.newPermissionKeys.length} new permissions, ${result.createdRoles.length} new roles)`);
+}
 
 async function seedAdmin(): Promise<void> {
   const { email, password } = resolveSeedAdmin(process.env);
   const passwordHash = await hashPassword(password);
+  const adminRole = await prisma.accessRole.findUniqueOrThrow({ where: { key: "admin" } });
 
   await prisma.user.upsert({
     where: { email },
-    update: {}, // never clobber an existing admin password on re-seed
+    // Never clobber an existing admin password on re-seed; do make sure it holds the admin role.
+    update: { role: "ADMIN", roleId: adminRole.id },
     create: {
       email,
       passwordHash,
       firstName: "Site",
       lastName: "Admin",
       role: "ADMIN",
+      roleId: adminRole.id,
       status: "ACTIVE",
     },
   });
@@ -247,6 +257,7 @@ async function seedSiteContent(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  await seedRbac();
   await seedAdmin();
   await seedCatalog();
   await seedFinishingOptions();

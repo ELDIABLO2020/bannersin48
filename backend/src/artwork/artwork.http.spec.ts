@@ -74,6 +74,10 @@ const client: any = {
     return [{ files: rows.length, bytes: BigInt(bytes) }];
   }),
   user: { findUnique: async ({ where }: any) => users.find((u) => u.id === where.id) ?? null },
+  // RbacService.onModuleInit syncs the permission catalog: an empty store that accepts the writes.
+  permission: { findMany: async () => [], upsert: jest.fn() },
+  accessRole: { findUnique: async () => null, create: async ({ data }: any) => ({ id: `role_${data.key}` }) },
+  rolePermission: { createMany: jest.fn() },
   artworkFolder: { findUnique: async () => null },
   artworkFile: {
     findFirst: async ({ where }: any) =>

@@ -10,6 +10,9 @@ import type { ThrottlerModuleOptions, ThrottlerOptions } from "@nestjs/throttler
  *   with @RateLimit(bucket), on top of `default`. Each bucket is one counter per IP.
  * - `download`: standalone bucket for signed file links (a library grid loads many
  *   previews at once), counted instead of `default`.
+ * - `sensitive`: staff mutations that mint credentials or move money (create a
+ *   staff account, admin password resets, invite resend, reward adjustments). A
+ *   stolen staff token gets 20 of them a minute, not 120.
  *
  * The tracker is Throttler's default, `req.ip` (IPv6 grouped by /64), which is
  * the Caddy-reported client address because main.ts sets `trust proxy` to 1.
@@ -22,6 +25,7 @@ export const RATE_LIMITS = {
   quote: { limit: 30, ttl: 60_000 },
   upload: { limit: 20, ttl: 60_000 },
   download: { limit: 300, ttl: 60_000 },
+  sensitive: { limit: 20, ttl: 60_000 },
 } as const;
 
 /** Buckets whose routes are not also counted by `default`. */

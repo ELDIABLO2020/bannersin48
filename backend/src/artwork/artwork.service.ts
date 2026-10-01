@@ -16,6 +16,7 @@ import { StorageService } from "../storage/storage.service";
 import type { UploadedTempFile } from "../storage/upload-storage";
 import { UPLOAD_DEFAULTS } from "../config/env.validation";
 import type { AuthedUser } from "../common/jwt-auth.guard";
+import { can } from "../rbac/permissions";
 import { ALLOWED_MIME_TYPES, inspectDimensions } from "./artwork-inspect";
 import { DownloadUrlService, type DownloadPurpose, type SignedDownloadUrl } from "./download-url.service";
 
@@ -33,8 +34,6 @@ export interface ArtworkLibraryItem {
   dpi?: number;
 }
 
-/** Roles that may read any customer's artwork. CONTENT_EDITOR is deliberately absent (M3). */
-const ARTWORK_READER_ROLES = new Set(["STAFF", "ADMIN"]);
 /** Served inline for `preview` links; every other type is always an attachment. */
 export const INLINE_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
@@ -216,15 +215,20 @@ export class ArtworkService {
   }
 
   /**
-   * Mints a short-lived signed URL. Readers: the owner; STAFF and ADMIN; and, for a
-   * shipment label, the customer whose order it belongs to (M4).
+   * Mints a short-lived signed URL. Readers: the owner; holders of
+   * `artwork:read_any` (staff by default; content editors deliberately not, M3);
+   * and, for a shipment label, the customer whose order it belongs to (M4).
    */
-  async createDownloadUrl(user: AuthedUser, artworkId: string, purpose: DownloadPurpose): Promise<SignedDownloadUrl> {
+  async createDownloadUrl(
+    user: Pick<AuthedUser, "id" | "permissions">,
+    artworkId: string,
+    purpose: DownloadPurpose,
+  ): Promise<SignedDownloadUrl> {
     const row = await this.prisma.artworkFile.findUnique({ where: { id: artworkId }, select: { id: true, userId: true, deletedAt: true } });
     if (!row || row.deletedAt) {
       throw new NotFoundException({ code: "NOT_FOUND", message: "Artwork not found." });
     }
-    if (row.userId !== user.id && !ARTWORK_READER_ROLES.has(user.role)) {
+    if (row.userId !== user.id && !can(user, "artwork:read_any")) {
       const ownLabel = await this.prisma.shipment.findFirst({
         where: { labelFileId: row.id, order: { userId: user.id } },
         select: { id: true },

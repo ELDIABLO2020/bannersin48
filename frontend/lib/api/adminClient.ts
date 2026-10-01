@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminApiClient } from "@bannersin48/api-client";
+import { onForbidden } from "./client";
 
 let _admin: AdminApiClient | null = null;
 
@@ -13,6 +14,7 @@ export function getAdminApiClient(): AdminApiClient {
       if (typeof window === "undefined") return null;
       return window.localStorage.getItem("bi48.token");
     },
+    onForbidden,
   });
   return _admin;
 }

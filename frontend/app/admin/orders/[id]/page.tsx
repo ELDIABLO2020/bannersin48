@@ -1,6 +1,8 @@
 "use client";
 
 import { materialName, orderStatusLabel, paymentStatusLabel } from "@/lib/admin/labels";
+import { Can, useCan } from "@/lib/auth/useCan";
+import { RequirePermission } from "../../_components/require-permission";
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -18,13 +20,24 @@ type ConfirmAction =
   | { kind: "transition"; status: string; title: string; description: string; destructive: boolean; reason: string };
 
 export default function AdminOrderWorkspacePage() {
+  return (
+    <RequirePermission perm="orders:read">
+      <OrderWorkspace />
+    </RequirePermission>
+  );
+}
+
+function OrderWorkspace() {
   const id = String(useParams().id);
+  const canHold = useCan("orders:hold");
+  const canCancel = useCan("orders:cancel");
   const qc = useQueryClient();
   const [externalRef, setExternalRef] = useState("");
   const [dropshipNotes, setDropshipNotes] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
   const [label, setLabel] = useState<File | undefined>();
   const [reason, setReason] = useState("");
+  const [note, setNote] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<ConfirmAction | null>(null);
 
@@ -57,7 +70,7 @@ export default function AdminOrderWorkspacePage() {
     <div className="space-y-xl">
       <div className="flex flex-wrap items-start justify-between gap-md">
         <div>
-          <Link href="/admin" className="text-body-sm text-link no-underline hover:underline">← Order board</Link>
+          <Link href="/admin/orders" className="text-body-sm text-link no-underline hover:underline">← Order board</Link>
           <div className="flex flex-wrap items-center gap-sm mt-xs">
             <h1 className="font-display text-[clamp(32px,5vw,48px)] leading-[1.08] text-ink whitespace-nowrap">{order.orderNumber}</h1>
             <Badge variant={order.status === "DELIVERED" ? "success" : order.status === "CANCELLED" ? "error" : "info"}>{orderStatusLabel(order.status)}</Badge>
@@ -101,7 +114,7 @@ export default function AdminOrderWorkspacePage() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={artwork.previewUrl} alt="Artwork preview" className="h-20 w-28 object-contain bg-surface border border-line-subtle" />
                         )}
-                        <div className="min-w-0"><p className="font-bold text-ink truncate">{String(artwork.filename)}</p><p className="text-xs text-ink-muted">{String(artwork.mimeType)} · {formatBytes(Number(artwork.sizeBytes))}</p><button type="button" onClick={() => download(String(artwork.id))} className="text-body-sm text-link">Download original</button></div>
+                        <div className="min-w-0"><p className="font-bold text-ink truncate">{String(artwork.filename)}</p><p className="text-xs text-ink-muted">{String(artwork.mimeType)} · {formatBytes(Number(artwork.sizeBytes))}</p><Can perm="artwork:read_any"><button type="button" onClick={() => download(String(artwork.id))} className="text-body-sm text-link">Download original</button></Can></div>
                       </div>
                     )}
                     <details className="mt-md"><summary className="text-xs text-link cursor-pointer">Raw snapshot</summary><pre className="mt-sm text-xs whitespace-pre-wrap overflow-auto bg-surface-tint p-sm rounded-feature">{JSON.stringify(snapshot, null, 2)}</pre></details>
@@ -116,15 +129,50 @@ export default function AdminOrderWorkspacePage() {
             {order.events.length === 0 ? (
               <p className="text-body-sm text-ink-muted">No status events recorded yet.</p>
             ) : (
-              <ol className="space-y-sm">
+              <ol className="space-y-sm" data-testid="order-events">
                 {order.events.map((event) => (
                   <li key={event.id} className="flex gap-md text-body-sm">
                     <time className="w-40 shrink-0 text-ink-muted">{new Date(event.createdAt).toLocaleString()}</time>
-                    <div><span className="font-bold text-ink">{orderStatusLabel(event.toStatus)}</span>{event.note && <span className="text-ink-muted"> · {event.note}</span>}</div>
+                    <div>
+                      <span className="font-bold text-ink">{event.fromStatus === event.toStatus ? "Note" : orderStatusLabel(event.toStatus)}</span>
+                      {event.note && <span className="text-ink-muted"> · {event.note}</span>}
+                      {event.actor === "staff" && event.fromStatus === event.toStatus && <span className="text-xs text-ink-muted"> (internal)</span>}
+                    </div>
                   </li>
                 ))}
               </ol>
             )}
+            <Can perm="orders:note">
+              <form
+                className="mt-lg border-t border-line-subtle pt-md space-y-sm"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const text = note.trim();
+                  if (!text) return;
+                  mutation.mutate(async () => {
+                    await getAdminApiClient().addOrderNote(id, text);
+                    setNote("");
+                  });
+                }}
+              >
+                <label className="block" htmlFor="order-note">
+                  <span className="text-body-sm font-bold text-ink block mb-xs">Add an internal note</span>
+                  <textarea
+                    id="order-note"
+                    className="w-full rounded-btn border border-line-input px-md py-sm bg-surface text-ink text-sm"
+                    rows={2}
+                    maxLength={1000}
+                    placeholder="Visible to staff only; the customer is not emailed."
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    data-testid="order-note-input"
+                  />
+                </label>
+                <div className="flex justify-end">
+                  <Button type="submit" variant="secondary" size="sm" disabled={!note.trim() || mutation.isPending} data-testid="order-note-submit">Add note</Button>
+                </div>
+              </form>
+            </Can>
           </Card>
         </section>
 
@@ -134,17 +182,20 @@ export default function AdminOrderWorkspacePage() {
             <ol className="space-y-lg">
               <Step number="1" title="Payment received" complete={order.paymentStatus !== "PENDING_PAYMENT"}>
                 {order.paymentStatus === "PENDING_PAYMENT" && (
-                  <Button
-                    disabled={mutation.isPending}
-                    onClick={() => setConfirm({ kind: "markPaid", title: "Mark order as paid?", description: "This records manual payment received and starts the 48-business-hour delivery clock." })}
-                    className="w-full"
-                  >
-                    Mark paid
-                  </Button>
+                  <Can perm="payments:mark_paid" fallback={<p className="text-body-sm text-ink-muted">Waiting for a payments-authorised teammate to mark this paid.</p>}>
+                    <Button
+                      disabled={mutation.isPending}
+                      onClick={() => setConfirm({ kind: "markPaid", title: "Mark order as paid?", description: "This records manual payment received and starts the 48-business-hour delivery clock." })}
+                      className="w-full"
+                    >
+                      Mark paid
+                    </Button>
+                  </Can>
                 )}
               </Step>
               <Step number="2" title="Drop-ship submission" complete={Boolean(order.dropship)}>
                 {order.dropship ? <p className="text-body-sm text-ink-muted">Ref {order.dropship.externalRef}</p> : (
+                  <Can perm="orders:dropship" fallback={<p className="text-body-sm text-ink-muted">Not submitted yet.</p>}>
                   <div className="space-y-sm">
                     <label className="sr-only" htmlFor="dropship-ref">External reference</label>
                     <Input id="dropship-ref" placeholder="External reference" value={externalRef} onChange={(e) => setExternalRef(e.target.value)} />
@@ -152,15 +203,17 @@ export default function AdminOrderWorkspacePage() {
                     <Input id="dropship-notes" placeholder="Notes (optional)" value={dropshipNotes} onChange={(e) => setDropshipNotes(e.target.value)} />
                     <Button variant="secondary" disabled={!externalRef || mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().recordDropship(id, { externalRef, notes: dropshipNotes }))} className="w-full">Record submission</Button>
                   </div>
+                  </Can>
                 )}
               </Step>
               <Step number="3" title="Tracking & label" complete={Boolean(order.shipment?.trackingNumber)}>
                 {order.shipment?.trackingNumber ? (
                   <div className="text-body-sm text-ink-muted">
                     <p>{order.shipment.trackingNumber}</p>
-                    {order.shipment.labelFileId && <button type="button" onClick={() => download(order.shipment!.labelFileId!)} className="text-link">Download label</button>}
+                    {order.shipment.labelFileId && <Can perm="artwork:read_any"><button type="button" onClick={() => download(order.shipment!.labelFileId!)} className="text-link">Download label</button></Can>}
                   </div>
                 ) : (
+                  <Can perm="orders:tracking" fallback={<p className="text-body-sm text-ink-muted">No tracking yet.</p>}>
                   <div className="space-y-sm">
                     <label className="sr-only" htmlFor="tracking-number">FedEx tracking number</label>
                     <Input id="tracking-number" placeholder="FedEx tracking number" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
@@ -168,9 +221,11 @@ export default function AdminOrderWorkspacePage() {
                     <input id="label-pdf" aria-label="Label PDF" type="file" accept="application/pdf" className="block w-full text-body-sm text-ink-muted file:mr-sm file:rounded-btn file:border file:border-line-input file:bg-surface file:px-md file:py-xs file:text-body-sm file:font-semibold file:text-ink hover:file:border-strong-accent" onChange={(e) => setLabel(e.target.files?.[0])} />
                     <Button variant="secondary" disabled={trackingNumber.length < 6 || mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().attachTracking(id, { trackingNumber, label }))} className="w-full">Attach tracking</Button>
                   </div>
+                  </Can>
                 )}
               </Step>
               <Step number="4" title="Ship & deliver" complete={order.status === "DELIVERED"}>
+                <Can perm="orders:update_status">
                 <div className="flex flex-wrap gap-xs">
                   {order.status === "ACCEPTED" && (
                     <Button size="sm" disabled={mutation.isPending} onClick={() => setConfirm({ kind: "transition", status: "SHIPPED", title: "Mark as shipped?", description: "Record that this order has shipped.", destructive: false, reason: "" })}>Mark shipped</Button>
@@ -179,6 +234,7 @@ export default function AdminOrderWorkspacePage() {
                     <Button size="sm" disabled={mutation.isPending} onClick={() => setConfirm({ kind: "transition", status: "DELIVERED", title: "Mark as delivered?", description: "Delivered is a final state and cannot be changed from this workspace.", destructive: false, reason: "" })}>Mark delivered</Button>
                   )}
                 </div>
+                </Can>
               </Step>
             </ol>
           </Card>
@@ -188,14 +244,14 @@ export default function AdminOrderWorkspacePage() {
             <address className="not-italic text-body-sm text-ink-muted leading-relaxed">{String(ship.fullName ?? "")}<br />{String(ship.street1 ?? "")} {String(ship.street2 ?? "")}<br />{String(ship.city ?? "")}, {String(ship.region ?? "")} {String(ship.postalCode ?? "")}<br />{String(ship.country ?? "")}</address>
           </Card>
 
-          {!['DELIVERED', 'CANCELLED'].includes(order.status) && (
+          {!['DELIVERED', 'CANCELLED'].includes(order.status) && (canHold || canCancel) && (
             <Card className="bg-surface p-lg">
               <h2 className="text-ink mb-sm">Exception controls</h2>
               <label className="sr-only" htmlFor="exception-reason">Reason / note</label>
               <Input id="exception-reason" placeholder="Reason / note" value={reason} onChange={(e) => setReason(e.target.value)} />
               <div className="flex gap-sm mt-sm">
-                <Button variant="secondary" size="sm" disabled={mutation.isPending} onClick={() => setConfirm({ kind: "transition", status: "ON_HOLD", title: "Put order on hold?", description: "Holding pauses fulfillment and flags the order for review.", destructive: false, reason: reason || "Placed on hold by staff." })}>Put on hold</Button>
-                <Button variant="secondary" size="sm" className="border-danger text-danger" disabled={!reason || mutation.isPending} onClick={() => setConfirm({ kind: "transition", status: "CANCELLED", title: "Cancel order?", description: "Cancellation stops production and is recorded in the audit trail.", destructive: true, reason })}>Cancel</Button>
+                {canHold && <Button variant="secondary" size="sm" disabled={mutation.isPending} onClick={() => setConfirm({ kind: "transition", status: "ON_HOLD", title: "Put order on hold?", description: "Holding pauses fulfillment and flags the order for review.", destructive: false, reason: reason || "Placed on hold by staff." })}>Put on hold</Button>}
+                {canCancel && <Button variant="secondary" size="sm" className="border-danger text-danger" disabled={!reason || mutation.isPending} onClick={() => setConfirm({ kind: "transition", status: "CANCELLED", title: "Cancel order?", description: "Cancellation stops production and is recorded in the audit trail.", destructive: true, reason })}>Cancel</Button>}
               </div>
             </Card>
           )}

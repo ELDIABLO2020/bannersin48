@@ -1,25 +1,45 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
+import { RbacService, rbacUserInclude } from "../rbac/rbac.service";
+import { roleKeyOf, type EffectivePermissions } from "../rbac/permissions";
 import { IS_PUBLIC_KEY } from "./public.decorator";
+import { ALLOW_PASSWORD_CHANGE_REQUIRED_KEY } from "./password-change.decorator";
 
 export interface JwtPayload {
   sub: string;
+  /** Refresh-token row id of the session that minted this access token (absent on older tokens). */
+  sid?: string;
 }
 
 /** The user object attached to `request.user` after the guard passes. */
 export interface AuthedUser {
   id: string;
   email: string;
+  /** Legacy coarse kind (CUSTOMER | STAFF | ADMIN | CONTENT_EDITOR), derived from the access role. */
   role: string;
+  /** Access role key (`admin`, `staff`, `fulfillment`, …) or null before a role is assigned. */
+  roleKey: string | null;
+  /** Resolved on every request from the database: `"*"` for admin, otherwise the exact set. */
+  permissions: EffectivePermissions;
+  /** Staff created with a temporary password must replace it before doing anything else. */
+  mustChangePassword: boolean;
+  /**
+   * The session (refresh-token row) this access token belongs to, so
+   * `/users/me/sessions` can mark "this device" and "sign out other devices"
+   * can keep it. Null for tokens minted before sessions carried an id; it
+   * grants nothing (access is still resolved from the database).
+   */
+  sessionId: string | null;
 }
 
 /**
  * Global Bearer-token guard (registered as APP_GUARD; no passport dependency).
  * Routes are authenticated unless marked @Public(). It verifies the access JWT
- * (HS256, issuer and audience pinned in AuthModule) and loads the user so role
- * changes and suspensions apply even to a still-valid token.
+ * (HS256, issuer and audience pinned in AuthModule) and loads the user — with
+ * its role and overrides — so role, permission and status changes apply even
+ * to a still-valid token. Nothing about access is read from the JWT.
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -27,6 +47,7 @@ export class JwtAuthGuard implements CanActivate {
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
     private readonly reflector: Reflector,
+    private readonly rbac: RbacService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -56,12 +77,35 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException("Invalid or expired token.");
     }
 
-    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    const now = new Date();
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub }, include: rbacUserInclude(now) });
     if (!user || user.status !== "ACTIVE") {
       throw new UnauthorizedException("Account is not active.");
     }
 
-    request.user = { id: user.id, email: user.email, role: user.role } satisfies AuthedUser;
+    const mustChangePassword = Boolean(user.mustChangePassword);
+    if (mustChangePassword) {
+      const allowed = this.reflector.getAllAndOverride<boolean>(ALLOW_PASSWORD_CHANGE_REQUIRED_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+      if (!allowed) {
+        throw new ForbiddenException({
+          code: "PASSWORD_CHANGE_REQUIRED",
+          message: "Set a new password before continuing.",
+        });
+      }
+    }
+
+    request.user = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      roleKey: roleKeyOf(user),
+      permissions: this.rbac.resolveEffective(user, now),
+      mustChangePassword,
+      sessionId: typeof payload.sid === "string" && payload.sid.length > 0 ? payload.sid : null,
+    } satisfies AuthedUser;
     return true;
   }
 }

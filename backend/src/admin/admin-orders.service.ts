@@ -22,6 +22,36 @@ const KANBAN_STATUSES: OrderStatus[] = [
 ];
 
 const SLA_RELEVANT_STATUSES: OrderStatus[] = ["RECEIVED", "AWAITING_PAYMENT", "IN_PROCESSING"];
+const OPEN_STATUSES: OrderStatus[] = ["RECEIVED", "AWAITING_PAYMENT", "IN_PROCESSING", "ACCEPTED", "ON_HOLD"];
+
+/** "Today" on the dashboard is the shop's day, not the server's. */
+export const DASHBOARD_TIME_ZONE = "America/New_York";
+
+export interface AdminDashboard {
+  buckets: Array<{ status: string; count: number; slaBreachedCount: number }>;
+  /** Counts since local midnight (`since`). `paid` = payment confirmed today; `shipped` = handed to the carrier today. */
+  today: { since: string; placed: number; paid: number; shipped: number };
+  openOrders: number;
+  slaBreachedCount: number;
+  updatedAt: string;
+}
+
+/**
+ * Midnight of the current day in `timeZone`, as an instant. Reads the zone's
+ * wall clock through Intl, so no timezone library is needed; the DST switch
+ * itself happens at 02:00, never at midnight, so the offset at "now" is the
+ * offset at midnight for every day of the year.
+ */
+export function startOfDayInZone(now: Date, timeZone: string): Date {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", { timeZone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
+      .formatToParts(now)
+      .map((p) => [p.type, p.value]),
+  );
+  const wallClockAsUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+  const offsetMs = wallClockAsUtc - Math.floor(now.getTime() / 1000) * 1000;
+  return new Date(Date.UTC(+parts.year, +parts.month - 1, +parts.day) - offsetMs);
+}
 
 export interface AdminOrderListItem {
   id: string;
@@ -72,6 +102,24 @@ export class AdminOrdersService {
         slaBreachedCount: breached.get(status) ?? 0,
       })),
       updatedAt: now.toISOString(),
+    };
+  }
+
+  /** `GET /admin/dashboard`: the buckets plus today's throughput and the SLA picture (plan §5.2). */
+  async dashboard(now: Date = new Date()): Promise<AdminDashboard> {
+    const since = startOfDayInZone(now, DASHBOARD_TIME_ZONE);
+    const [buckets, placed, paid, shipped] = await Promise.all([
+      this.buckets(),
+      this.prisma.order.count({ where: { placedAt: { gte: since } } }),
+      this.prisma.order.count({ where: { paymentConfirmedAt: { gte: since } } }),
+      this.prisma.shipment.count({ where: { shippedAt: { gte: since } } }),
+    ]);
+    return {
+      buckets: buckets.buckets,
+      today: { since: since.toISOString(), placed, paid, shipped },
+      openOrders: buckets.buckets.filter((b) => OPEN_STATUSES.includes(b.status as OrderStatus)).reduce((sum, b) => sum + b.count, 0),
+      slaBreachedCount: buckets.buckets.reduce((sum, b) => sum + b.slaBreachedCount, 0),
+      updatedAt: buckets.updatedAt,
     };
   }
 
@@ -166,6 +214,21 @@ export class AdminOrdersService {
           }
         : null,
     };
+  }
+
+  // --- Notes ------------------------------------------------------------------
+
+  /**
+   * Internal activity note (`orders:note`): a same-status `order_event` the
+   * customer is never emailed about, plus the audit row, in one transaction.
+   */
+  async addNote(orderId: string, actorId: string, note: string, ip?: string): Promise<void> {
+    await this.getOrder(orderId);
+    const text = note.trim();
+    await this.prisma.$transaction(async (tx) => {
+      await this.orders.logActivity(orderId, actorId, text, { emailed: false }, tx);
+      await this.audit.record({ actorId, action: "order.note", entityType: "order", entityId: orderId, diff: { note: text }, ip }, tx);
+    });
   }
 
   // --- Checklist flow ---------------------------------------------------------

@@ -27,7 +27,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const setAuth = useAuth((s) => s.setAuth);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [returnUrl, setReturnUrl] = useState("/dashboard");
+  const [returnUrl, setReturnUrl] = useState("/account");
 
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),

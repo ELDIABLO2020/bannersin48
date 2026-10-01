@@ -39,7 +39,7 @@ export const SITE_NAVIGATION_GROUPS: ReadonlyArray<SiteNavigationGroup> = [
     items: [
       { href: "/login", label: "Log in" },
       { href: "/register", label: "Create an account" },
-      { href: "/dashboard", label: "Reorder" },
+      { href: "/account", label: "Your account" },
     ],
   },
 ];

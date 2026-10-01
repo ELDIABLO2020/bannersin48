@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { startMocks } from "@/lib/mocks/init";
+import { useSessionRevalidation } from "@/lib/auth/useSessionRevalidation";
+
+/** Refreshes the persisted user (role, permissions, status) from /auth/me once per page load. */
+function SessionRevalidation() {
+  useSessionRevalidation();
+  return null;
+}
 
 // Real APIs are the default in local development. Opt into MSW explicitly
 // for isolated frontend/E2E work with NEXT_PUBLIC_ENABLE_MOCKS=1.
@@ -53,5 +60,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SessionRevalidation />
+      {children}
+    </QueryClientProvider>
+  );
 }

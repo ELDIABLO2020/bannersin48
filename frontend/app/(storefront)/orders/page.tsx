@@ -16,7 +16,7 @@ export default function OrdersListPage() {
     <div className="bg-surface-tint min-h-[60vh]">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-2xl">
         <PageHeader
-          trail={[{ href: "/dashboard", label: "Account" }]}
+          trail={[{ href: "/account", label: "Your account" }]}
           title="Your orders"
           intro="Track a delivery, open an order, or send the same banner to print again."
         />

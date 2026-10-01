@@ -8,6 +8,9 @@
 
 import { http, HttpResponse } from "msw";
 import { store } from "./fixtures";
+import { rbacHandlers } from "./rbac-handlers";
+import { accountHandlers } from "./account-handlers";
+import { adminHandlers } from "./admin-handlers";
 import {
   computeNextCutoff,
   priceOrder,
@@ -132,14 +135,26 @@ export const handlers = [
     if (store.users.has(body.email)) {
       return HttpResponse.json({ code: "EMAIL_TAKEN", message: "An account with that email already exists." }, { status: 409 });
     }
+    const [firstName, ...rest] = body.fullName.trim().split(/\s+/);
     const user = {
       id: `user_${store.userIdCounter++}`,
       email: body.email,
       fullName: body.fullName,
+      firstName: firstName ?? null,
+      lastName: rest.join(" ") || null,
+      phone: null,
       taxExempt: false,
       taxExemptApproved: false,
       rewardsPoints: 0,
       savedAddresses: [],
+      role: "CUSTOMER" as const,
+      roleKey: "customer",
+      permissions: [],
+      mustChangePassword: false,
+      emailVerifiedAt: null,
+      pendingEmail: null,
+      notifyOrderUpdates: true,
+      notifyMarketing: false,
       createdAt: new Date().toISOString(),
     };
     store.users.set(body.email, { user, password: body.password });
@@ -180,9 +195,10 @@ export const handlers = [
     const auth = requireUser(request);
     if (typeof auth !== "string") return auth;
     const url = new URL(request.url);
-    const folderId = url.searchParams.get("folderId") ?? "folder_home";
+    // Like the real API: no folder → the whole library; a folder → just its files.
+    const folderId = url.searchParams.get("folderId");
     const items = Array.from(store.artwork.values())
-      .filter((a) => a.userId === auth && a.folderId === folderId)
+      .filter((a) => a.userId === auth && (!folderId || a.folderId === folderId))
       .map((a) => ({
         id: a.id,
         folderId: a.folderId,
@@ -496,4 +512,13 @@ export const handlers = [
       warnings: ["Current catalog rules and prices were applied. Review the cart before submitting."],
     });
   }),
+
+  // --- Staff, roles, overrides, audit, invites, password change (plan §5.2) ---
+  ...rbacHandlers,
+
+  // --- Customer account: profile, addresses, sessions, rewards, designs, email change (plan §4.2) ---
+  ...accountHandlers,
+
+  // --- Admin panel: dashboard, order board + notes, customers, rewards, promo codes (plan §5.2) ---
+  ...adminHandlers,
 ];

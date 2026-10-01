@@ -14,10 +14,13 @@ import { PricingModule } from "./pricing/pricing.module";
 import { ArtworkModule } from "./artwork/artwork.module";
 import { OrdersModule } from "./orders/orders.module";
 import { AddressModule } from "./address/address.module";
+import { DesignsModule } from "./designs/designs.module";
 import { AdminModule } from "./admin/admin.module";
 import { HealthController } from "./health/health.controller";
 import { JwtAuthGuard } from "./common/jwt-auth.guard";
 import { RolesGuard } from "./common/roles.guard";
+import { PermissionsGuard } from "./rbac/permissions.guard";
+import { RbacModule } from "./rbac/rbac.module";
 import { throttlerOptions } from "./common/throttling";
 
 @Module({
@@ -28,6 +31,7 @@ import { throttlerOptions } from "./common/throttling";
     PrismaModule,
     StorageModule,
     AuditModule,
+    RbacModule,
     AuthModule,
     UsersModule,
     CatalogModule,
@@ -35,15 +39,19 @@ import { throttlerOptions } from "./common/throttling";
     ArtworkModule,
     AddressModule,
     OrdersModule,
+    DesignsModule,
     AdminModule,
   ],
   controllers: [HealthController],
   // Global guards run in this order: rate limit (cheap, before any DB work),
-  // then authentication (skipped only for @Public()), then @Roles checks.
+  // then authentication (skipped only for @Public()), then the coarse @Roles
+  // kind check (unused under /admin; no ADMIN bypass), then @RequirePermissions,
+  // which is the only gate on /admin/* (docs/accounts-admin-rbac-plan.md §6.2).
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: PermissionsGuard },
   ],
 })
 export class AppModule {}

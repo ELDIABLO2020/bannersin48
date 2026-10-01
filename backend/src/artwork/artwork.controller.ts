@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from "@nestjs/common";
 import type { Response } from "express";
 import { ARTWORK_MAX_BYTES_DEFAULT } from "@bannersin48/shared";
 import { CurrentUser } from "../common/current-user.decorator";
@@ -48,11 +48,13 @@ export class ArtworkController {
   }
 
   @Patch("folders/:id")
+  @HttpCode(204)
   renameFolder(@CurrentUser() user: AuthedUser, @Param("id") id: string, @Body() body: FolderNameDto) {
     return this.artwork.renameFolder(user.id, id, body.name);
   }
 
   @Delete("folders/:id")
+  @HttpCode(204)
   deleteFolder(@CurrentUser() user: AuthedUser, @Param("id") id: string) {
     return this.artwork.deleteFolder(user.id, id);
   }

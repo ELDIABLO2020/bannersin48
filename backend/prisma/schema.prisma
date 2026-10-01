@@ -28,6 +28,18 @@ enum Role {
 enum UserStatus {
   ACTIVE
   SUSPENDED
+  INVITED // account exists, no usable password yet; cannot sign in
+}
+
+enum PermissionEffect {
+  ALLOW
+  DENY
+}
+
+enum ActionTokenPurpose {
+  STAFF_INVITE
+  EMAIL_CHANGE
+  EMAIL_VERIFY
 }
 
 enum SizeMode {
@@ -104,47 +116,165 @@ enum TaxProvider {
 // ---------------------------------------------------------------------------
 
 model User {
-  id                   String     @id @default(cuid())
-  email                String     @unique
-  passwordHash         String
-  firstName            String?
-  lastName             String?
-  phone                String?
-  role                 Role       @default(CUSTOMER)
-  status               UserStatus @default(ACTIVE)
-  emailVerifiedAt      DateTime?
-  rewardPointsBalance  Int        @default(0) // denormalized; authoritative rows live in RewardLedger
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
+  id                  String     @id @default(cuid())
+  email               String     @unique
+  passwordHash        String
+  firstName           String?
+  lastName            String?
+  phone               String?
+  // Coarse "kind", DERIVED from accessRole.legacyRole: written only by RbacService.assignRole,
+  // registration and the seed. Authorization never reads it (PermissionsGuard resolves the
+  // access role + overrides on every request); it is kept for the wire shape, the target-kind
+  // checks (customers:* vs users:*) and the staff password rules. See docs/accounts-admin-rbac-plan.md §3.1.
+  role                Role       @default(CUSTOMER)
+  status              UserStatus @default(ACTIVE)
+  emailVerifiedAt     DateTime?
+  rewardPointsBalance Int        @default(0) // denormalized; authoritative rows live in RewardLedger
+  // RBAC: primary access role. NOT NULL since phase 5; `customer` for storefront accounts.
+  roleId              String
+  pendingEmail        String? // set while an EMAIL_CHANGE token is outstanding
+  mustChangePassword  Boolean    @default(false) // staff created with a temporary password
+  passwordChangedAt   DateTime?
+  lastLoginAt         DateTime?
+  suspendedAt         DateTime?
+  suspendedReason     String?
+  invitedBy           String?
+  // Customer notification settings (plan §4.1). Transactional security mail always sends.
+  notifyOrderUpdates  Boolean    @default(true)
+  notifyMarketing     Boolean    @default(false)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
-  refreshTokens    RefreshToken[]
-  passwordResets   PasswordReset[]
-  addresses        Address[]
-  auditLogs        AuditLog[]         @relation("AuditActor")
-  quotes           Quote[]
-  carts            Cart[]
-  savedDesigns     SavedDesign[]
-  artworkFolders   ArtworkFolder[]
-  artworkFiles     ArtworkFile[]
-  orders           Order[]
-  rewardLedger     RewardLedger[]     @relation("RewardLedgerUser")
-  rewardAdjustments RewardLedger[]    @relation("RewardLedgerActor")
-  siteContentEdits SiteContent[]
+  accessRole          AccessRole       @relation(fields: [roleId], references: [id])
+  permissionOverrides UserPermission[] @relation("UserPermissionUser")
+  permissionsGranted  UserPermission[] @relation("UserPermissionGrantor")
+  actionTokens        ActionToken[]
+
+  refreshTokens     RefreshToken[]
+  passwordResets    PasswordReset[]
+  addresses         Address[]
+  auditLogs         AuditLog[]      @relation("AuditActor")
+  quotes            Quote[]
+  carts             Cart[]
+  savedDesigns      SavedDesign[]
+  artworkFolders    ArtworkFolder[]
+  artworkFiles      ArtworkFile[]
+  orders            Order[]
+  rewardLedger      RewardLedger[]  @relation("RewardLedgerUser")
+  rewardAdjustments RewardLedger[]  @relation("RewardLedgerActor")
+  siteContentEdits  SiteContent[]
 
   @@index([role])
   @@index([status])
+  @@index([roleId])
   @@map("user")
 }
 
+// ---------------------------------------------------------------------------
+// RBAC (docs/accounts-admin-rbac-plan.md §3.4). The permission catalog lives in
+// code (@bannersin48/shared `PERMISSIONS`) and is upserted into `permission` at
+// boot; these tables record who holds what.
+// ---------------------------------------------------------------------------
+
+model AccessRole {
+  id          String   @id @default(cuid())
+  key         String   @unique // "admin" | "staff" | "content_editor" | "customer" | custom slug
+  name        String
+  description String?
+  legacyRole  Role // enum value written to User.role on assignment
+  isSystem    Boolean  @default(false) // seeded; cannot be deleted; admin/customer also immutable
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions RolePermission[]
+  users       User[]
+  invites     ActionToken[]
+
+  @@map("access_role")
+}
+
+model Permission {
+  key         String  @id // "orders:read"
+  resource    String // "orders"
+  action      String // "read"
+  description String
+  elevated    Boolean @default(false) // only rbac:manage holders may grant
+  sort        Int     @default(0)
+
+  roles      RolePermission[]
+  userGrants UserPermission[]
+
+  @@index([resource])
+  @@map("permission")
+}
+
+model RolePermission {
+  roleId        String
+  permissionKey String
+  createdAt     DateTime @default(now())
+  createdBy     String?
+
+  role       AccessRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+
+  @@id([roleId, permissionKey])
+  @@index([permissionKey])
+  @@map("role_permission")
+}
+
+model UserPermission {
+  id            String           @id @default(cuid())
+  userId        String
+  permissionKey String
+  effect        PermissionEffect
+  reason        String?
+  grantedBy     String?
+  expiresAt     DateTime?
+  createdAt     DateTime         @default(now())
+
+  user       User       @relation("UserPermissionUser", fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+  grantor    User?      @relation("UserPermissionGrantor", fields: [grantedBy], references: [id])
+
+  @@unique([userId, permissionKey])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("user_permission")
+}
+
+/// Single-use hashed tokens for staff invites, email change and email verification.
+/// PasswordReset stays as-is (plan §11 Q6: fold it in later).
+model ActionToken {
+  id          String             @id @default(cuid())
+  userId      String
+  purpose     ActionTokenPurpose
+  tokenHash   String             @unique
+  payload     Json? // EMAIL_CHANGE: { newEmail }; STAFF_INVITE: { roleId }
+  roleId      String?
+  requestedBy String? // null = self; user id = admin-initiated
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime           @default(now())
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role AccessRole? @relation(fields: [roleId], references: [id])
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+  @@map("action_token")
+}
+
 model RefreshToken {
-  id        String    @id @default(cuid())
-  userId    String
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  userAgent String?
-  ip        String?
-  createdAt DateTime  @default(now())
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  userAgent  String?
+  ip         String?
+  lastUsedAt DateTime?
+  label      String?
+  createdAt  DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -205,6 +335,8 @@ model AuditLog {
   @@index([actorId])
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([entityType, entityId, createdAt(sort: Desc)])
+  @@index([actorId, createdAt(sort: Desc)])
   @@map("audit_log")
 }
 
@@ -268,7 +400,7 @@ model FinishingOption {
   id         String     @id @default(cuid())
   code       String     @unique // welding|webbing|rope|grommets|pole_pockets|wind_slits
   name       String
-  products   Json       // array of Product.code this option applies to
+  products   Json // array of Product.code this option applies to
   priceModel PriceModel
   amount     Decimal    @default(0) @db.Decimal(10, 2)
   active     Boolean    @default(true)
@@ -281,14 +413,14 @@ model FinishingOption {
 }
 
 model VolumeTier {
-  id               String   @id @default(cuid())
-  productId        String?
-  materialCode     String?
-  minBillableSqft  Decimal  @db.Decimal(8, 2)
-  rates            Json // { materialCode: discountedRatePerSqft }
-  warningCopy      String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id              String   @id @default(cuid())
+  productId       String?
+  materialCode    String?
+  minBillableSqft Decimal  @db.Decimal(8, 2)
+  rates           Json // { materialCode: discountedRatePerSqft }
+  warningCopy     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   product Product? @relation(fields: [productId], references: [id])
 
@@ -318,16 +450,16 @@ model PromoCode {
 }
 
 model RewardLedger {
-  id        String       @id @default(cuid())
-  userId    String
+  id         String       @id @default(cuid())
+  userId     String
   deltaCents Int // money as integer cents ($1 credit = 100)
-  reason    RewardReason
-  orderId   String?
-  createdBy String? // admin user id for adjustments/redemptions
-  createdAt DateTime     @default(now())
+  reason     RewardReason
+  orderId    String?
+  createdBy  String? // admin user id for adjustments/redemptions
+  createdAt  DateTime     @default(now())
 
-  user User  @relation("RewardLedgerUser", fields: [userId], references: [id], onDelete: Cascade)
-  actor User? @relation("RewardLedgerActor", fields: [createdBy], references: [id])
+  user  User   @relation("RewardLedgerUser", fields: [userId], references: [id], onDelete: Cascade)
+  actor User?  @relation("RewardLedgerActor", fields: [createdBy], references: [id])
   order Order? @relation(fields: [orderId], references: [id])
 
   @@index([userId])
@@ -351,7 +483,7 @@ model Quote {
   validUntil DateTime?
   createdAt  DateTime  @default(now())
 
-  user      User?       @relation(fields: [userId], references: [id])
+  user      User?      @relation(fields: [userId], references: [id])
   cartItems CartItem[]
 
   @@index([userId])
@@ -368,6 +500,7 @@ model Cart {
 
   user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items CartItem[]
+
   @@map("cart")
 }
 
@@ -382,10 +515,10 @@ model CartItem {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  cart    Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product Product       @relation(fields: [productId], references: [id])
-  quote   Quote?        @relation(fields: [quoteId], references: [id])
-  artwork ArtworkFile?  @relation(fields: [artworkFileId], references: [id])
+  cart    Cart         @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id])
+  quote   Quote?       @relation(fields: [quoteId], references: [id])
+  artwork ArtworkFile? @relation(fields: [artworkFileId], references: [id])
 
   @@index([cartId])
   @@index([productId])
@@ -424,7 +557,7 @@ model ArtworkFolder {
 }
 
 model ArtworkFile {
-  id               String      @id @default(cuid())
+  id               String     @id @default(cuid())
   userId           String
   folderId         String?
   s3Key            String
@@ -436,15 +569,15 @@ model ArtworkFile {
   widthPx          Int?
   heightPx         Int?
   dpiReport        Json?
-  scanStatus       ScanStatus  @default(PENDING)
+  scanStatus       ScanStatus @default(PENDING)
   deletedAt        DateTime?
-  createdAt        DateTime    @default(now())
+  createdAt        DateTime   @default(now())
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  folder       ArtworkFolder? @relation(fields: [folderId], references: [id])
-  orderItems   OrderItem[]
-  cartItems    CartItem[]
-  savedDesigns SavedDesign[]
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder         ArtworkFolder? @relation(fields: [folderId], references: [id])
+  orderItems     OrderItem[]
+  cartItems      CartItem[]
+  savedDesigns   SavedDesign[]
   shipmentLabels Shipment[]
 
   @@index([userId])
@@ -480,20 +613,20 @@ model Order {
   cancelledAt             DateTime?
   cancelReason            String?
   paymentConfirmedAt      DateTime? // effective SLA start (D6)
-  committedDeliveryDate   String?   // YYYY-MM-DD, persisted once payment confirmed
-  committedDeliveryDow    String?   // e.g. "Wednesday"
-  idempotencyKey          String?   @unique // client-generated submission key
+  committedDeliveryDate   String? // YYYY-MM-DD, persisted once payment confirmed
+  committedDeliveryDow    String? // e.g. "Wednesday"
+  idempotencyKey          String?       @unique // client-generated submission key
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
-  user       User                 @relation(fields: [userId], references: [id])
-  promoCode  PromoCode?           @relation(fields: [promoCodeId], references: [id])
-  items      OrderItem[]
-  events     OrderEvent[]
-  dropship   DropshipSubmission?
-  shipments  Shipment[]
-  taxRecord  TaxRecord?
-  rewards    RewardLedger[]
+  user      User                @relation(fields: [userId], references: [id])
+  promoCode PromoCode?          @relation(fields: [promoCodeId], references: [id])
+  items     OrderItem[]
+  events    OrderEvent[]
+  dropship  DropshipSubmission?
+  shipments Shipment[]
+  taxRecord TaxRecord?
+  rewards   RewardLedger[]
 
   @@index([userId])
   @@index([status])
@@ -521,9 +654,9 @@ model OrderItem {
   configSnapshot Json
   createdAt      DateTime @default(now())
 
-  order    Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product  Product      @relation(fields: [productId], references: [id])
-  artwork  ArtworkFile? @relation(fields: [artworkFileId], references: [id])
+  order   Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id])
+  artwork ArtworkFile? @relation(fields: [artworkFileId], references: [id])
 
   @@index([orderId])
   @@index([productId])
@@ -562,19 +695,19 @@ model DropshipSubmission {
 }
 
 model Shipment {
-  id             String        @id @default(cuid())
+  id             String    @id @default(cuid())
   orderId        String
-  carrier        Carrier       @default(FEDEX)
+  carrier        Carrier   @default(FEDEX)
   trackingNumber String?
   labelFileId    String?
   shippedAt      DateTime?
   deliveredAt    DateTime?
   trackingEvents Json?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  labelFile ArtworkFile? @relation(fields: [labelFileId], references: [id])
+  order        Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  labelFile    ArtworkFile?  @relation(fields: [labelFileId], references: [id])
   trackingJobs TrackingJob[]
 
   @@unique([orderId])
@@ -593,6 +726,7 @@ model TaxRecord {
   createdAt             DateTime    @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
   @@map("tax_record")
 }
 
@@ -601,13 +735,13 @@ model TaxRecord {
 // ---------------------------------------------------------------------------
 
 model SiteContent {
-  key        String    @id
-  blockType  BlockType
-  payload    Json
-  published  Boolean   @default(true)
-  updatedBy  String?
-  updatedAt  DateTime  @updatedAt
-  createdAt  DateTime  @default(now())
+  key       String    @id
+  blockType BlockType
+  payload   Json
+  published Boolean   @default(true)
+  updatedBy String?
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
 
   updater User? @relation(fields: [updatedBy], references: [id])
 
@@ -634,12 +768,12 @@ model EmailLog {
 }
 
 model TrackingJob {
-  id          String   @id @default(cuid())
-  shipmentId  String
-  nextPollAt  DateTime
-  lastStatus  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  shipmentId String
+  nextPollAt DateTime
+  lastStatus String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
 

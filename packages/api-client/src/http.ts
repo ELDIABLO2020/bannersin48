@@ -16,10 +16,12 @@ export class HttpClient {
   private baseUrl: string;
   private getToken?: () => string | null;
   private fetchImpl: typeof fetch;
+  private onForbidden?: ApiClientConfig["onForbidden"];
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, "");
     this.getToken = config.getToken;
+    this.onForbidden = config.onForbidden;
     // Bind fetch — unbound `fetch` throws "Illegal invocation" in browsers.
     this.fetchImpl = config.fetchImpl ?? globalThis.fetch.bind(globalThis);
   }
@@ -64,11 +66,16 @@ export class HttpClient {
       } catch {
         // ignore parse errors
       }
-      throw new ApiClientError(
+      const error = new ApiClientError(
         payload?.message ?? `${method} ${path} failed with ${res.status}`,
         res.status,
         payload,
       );
+      // Both mean the cached user is stale: permissions shrank, or a temporary password is pending.
+      if (res.status === 403 && (payload?.code === "FORBIDDEN_PERMISSION" || payload?.code === "PASSWORD_CHANGE_REQUIRED")) {
+        this.onForbidden?.(error);
+      }
+      throw error;
     }
 
     if (res.status === 204) return undefined as T;

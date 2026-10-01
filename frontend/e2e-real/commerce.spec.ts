@@ -326,5 +326,107 @@ test.describe("real-backend release suite", () => {
   });
 });
 
+/**
+ * Staff flow (plan §8, phase 2): an admin creates a fulfillment employee with
+ * a temporary password; the employee is held until they change it, can then
+ * attach tracking, is refused mark-paid, and loses access the moment they are
+ * suspended. Uses the seed admin (ADMIN_EMAIL / ADMIN_PASSWORD, local defaults
+ * from backend/src/config/seed-admin.ts).
+ */
+test.describe("real-backend staff flow", () => {
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@bannersin48.local";
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
+
+  async function login(request: APIRequestContext, email: string, password: string) {
+    const res = await request.post(`${API}/auth/login`, { data: { email, password } });
+    expect(res.status(), await res.text()).toBe(201);
+    return (await res.json()) as { user: { id: string; permissions: string[]; mustChangePassword: boolean }; token: string; refreshToken: string };
+  }
+
+  test("temporary-password employee: forced change, tracking allowed, mark-paid refused, suspension immediate", async ({ request }) => {
+    test.setTimeout(120_000);
+    const admin = await login(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+
+    // A paid order for the employee to work on, plus an unpaid one they must not touch.
+    const customerEmail = uniqueEmail();
+    const { token: customerToken } = await register(request, customerEmail);
+    const artworkId = await uploadArtwork(request, customerToken);
+    const [paid, unpaid] = await Promise.all(
+      [1, 1].map(async () => {
+        const q = await quote(request, 1);
+        const created = await createOrder(request, customerToken, { email: customerEmail, artworkId, quoteId: q.quoteId, quantity: 1 });
+        expect(created.status(), await created.text()).toBe(201);
+        return (await created.json()) as { id: string };
+      }),
+    );
+    const markPaid = await request.post(`${API}/admin/orders/${paid!.id}/mark-paid`, { headers: auth(admin.token) });
+    expect(markPaid.status(), await markPaid.text()).toBe(201);
+
+    // 1. Admin creates the employee with a temporary password (never echoed back).
+    const roles = (await (await request.get(`${API}/admin/roles`, { headers: auth(admin.token) })).json()) as Array<{ id: string; key: string }>;
+    const fulfillment = roles.find((r) => r.key === "fulfillment")!;
+    const staffEmail = `e2e-staff-${Date.now()}@example.com`;
+    const tempPassword = "Temp-password-for-e2e-1";
+    const created = await request.post(`${API}/admin/users`, {
+      headers: auth(admin.token),
+      data: { email: staffEmail, firstName: "E2E", lastName: "Picker", roleId: fulfillment.id, mode: "temporary_password", temporaryPassword: tempPassword },
+    });
+    expect(created.status(), await created.text()).toBe(201);
+    const createdBody = (await created.json()) as { user: { id: string; status: string; mustChangePassword: boolean } };
+    expect(createdBody.user).toMatchObject({ status: "ACTIVE", mustChangePassword: true });
+    expect(await created.text()).not.toContain(tempPassword);
+
+    // 2. First sign-in works but everything except the password change is refused.
+    const first = await login(request, staffEmail, tempPassword);
+    expect(first.user.mustChangePassword).toBe(true);
+    const blocked = await request.get(`${API}/admin/orders`, { headers: auth(first.token) });
+    expect(blocked.status()).toBe(403);
+    expect(((await blocked.json()) as { code: string }).code).toBe("PASSWORD_CHANGE_REQUIRED");
+
+    const weak = await request.post(`${API}/users/me/password`, { headers: auth(first.token), data: { currentPassword: tempPassword, newPassword: "short-one" } });
+    expect(weak.status()).toBe(400);
+    const changed = await request.post(`${API}/users/me/password`, {
+      headers: auth(first.token),
+      data: { currentPassword: tempPassword, newPassword: "A-real-staff-password-1", keepRefreshToken: first.refreshToken },
+    });
+    expect(changed.status(), await changed.text()).toBe(201);
+
+    // 3. Fulfillment may attach tracking, but not mark paid.
+    const staff = await login(request, staffEmail, "A-real-staff-password-1");
+    expect(staff.user.mustChangePassword).toBe(false);
+    expect(staff.user.permissions).toContain("orders:tracking");
+    expect(staff.user.permissions).not.toContain("payments:mark_paid");
+
+    const tracking = await request.post(`${API}/admin/orders/${paid!.id}/tracking`, { headers: auth(staff.token), multipart: { trackingNumber: "794644790132" } });
+    expect(tracking.status(), await tracking.text()).toBe(201);
+    expect(((await tracking.json()) as { status: string }).status).toBe("ACCEPTED");
+
+    const refused = await request.post(`${API}/admin/orders/${unpaid!.id}/mark-paid`, { headers: auth(staff.token) });
+    expect(refused.status()).toBe(403);
+    expect((await refused.json()) as object).toMatchObject({ code: "FORBIDDEN_PERMISSION", required: ["payments:mark_paid"] });
+
+    // 4. Staff cannot see the staff directory; the admin can, and the audit log has the trail.
+    const directory = await request.get(`${API}/admin/users`, { headers: auth(staff.token) });
+    expect(directory.status()).toBe(403);
+    const audit = await request.get(`${API}/admin/audit?entityId=${createdBody.user.id}`, { headers: auth(admin.token) });
+    expect(audit.status(), await audit.text()).toBe(200);
+    const actions = ((await audit.json()) as { items: Array<{ action: string }> }).items.map((i) => i.action);
+    expect(actions).toEqual(expect.arrayContaining(["user.create", "user.change_password"]));
+
+    // 5. Suspension takes effect on the very next request, without waiting for the token to expire.
+    const suspended = await request.post(`${API}/admin/users/${createdBody.user.id}/suspend`, { headers: auth(admin.token), data: { reason: "E2E cleanup" } });
+    expect(suspended.status(), await suspended.text()).toBe(201);
+    const afterSuspend = await request.get(`${API}/admin/orders`, { headers: auth(staff.token) });
+    expect(afterSuspend.status()).toBe(401);
+    const refresh = await request.post(`${API}/auth/refresh`, { data: { refreshToken: staff.refreshToken } });
+    expect(refresh.status()).toBe(401);
+
+    // An admin can never demote or suspend themselves, and the last admin is locked.
+    const self = await request.post(`${API}/admin/users/${admin.user.id}/suspend`, { headers: auth(admin.token), data: { reason: "nope" } });
+    expect(self.status()).toBe(403);
+  });
+});
+
 // Re-exported for any future helper reuse.
 export type { Page };

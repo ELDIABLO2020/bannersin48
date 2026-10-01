@@ -4,7 +4,31 @@
  * Artwork/label uploads send FormData; file links come from `artworkDownloadUrl`.
  */
 
+import type { SavedAddress, User } from "@bannersin48/shared";
 import { HttpClient } from "./http";
+import type { RewardLedgerEntry } from "./account";
+import type {
+  AdminRole,
+  AuditEntry,
+  AuditQuery,
+  CreateRoleInput,
+  CreateStaffInput,
+  CreateStaffResponse,
+  Paginated,
+  PermissionCatalogEntry,
+  SetOverrideInput,
+  StaffUser,
+  StaffUserDetail,
+  UserPermissionBreakdown,
+} from "./rbac";
+
+function queryString(params: Record<string, string | number | undefined>): string {
+  const q = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") q.set(key, String(value));
+  }
+  return q.size ? `?${q}` : "";
+}
 
 export interface AdminOrderBucket {
   status: string;
@@ -75,7 +99,102 @@ export interface AdminContentBlock {
   updatedAt: string;
 }
 
+/** `GET /admin/dashboard` */
+export interface AdminDashboard {
+  buckets: AdminOrderBucket[];
+  /** Counts since the shop's local midnight (`since`). */
+  today: { since: string; placed: number; paid: number; shipped: number };
+  openOrders: number;
+  slaBreachedCount: number;
+  updatedAt: string;
+}
+
+/** `GET /admin/customers` row */
+export interface AdminCustomerListItem {
+  id: string;
+  email: string;
+  fullName: string | null;
+  phone: string | null;
+  role: string;
+  status: string;
+  rewardsPoints: number;
+  orderCount: number;
+  createdAt: string;
+}
+
+/** `GET /admin/customers/:id` */
+export interface AdminCustomerDetail {
+  user: User;
+  account: {
+    status: string;
+    suspendedAt: string | null;
+    suspendedReason: string | null;
+    emailVerifiedAt: string | null;
+    lastLoginAt: string | null;
+    /** Mirrors `user.rewardsPoints`; money as integer cents. */
+    rewardBalanceCents: number;
+    orderCount: number;
+  };
+  addresses: SavedAddress[];
+  orders: Array<{ id: string; orderNumber: string; status: string; paymentStatus: string; totalLabel: string; createdAt: string; placedAt: string | null }>;
+}
+
+/** `GET /admin/customers/:id/rewards` row: unlike the customer's own view, staff see who adjusted. */
+export interface AdminRewardLedgerEntry extends RewardLedgerEntry {
+  createdBy: string | null;
+  createdByEmail: string | null;
+}
+
+export interface AdminRewardsPage {
+  balanceCents: number;
+  page: number;
+  pageSize: number;
+  total: number;
+  ledger: AdminRewardLedgerEntry[];
+}
+
+export interface RewardAdjustmentResult {
+  balanceCents: number;
+  entry: AdminRewardLedgerEntry;
+}
+
+/** `GET /admin/promos` row. Money / percentages are decimal strings, never floats. */
+export interface AdminPromoCode {
+  id: string;
+  code: string;
+  type: "PERCENT" | "FIXED";
+  value: string;
+  minOrder: string;
+  maxUses: number | null;
+  perUserLimit: number | null;
+  timesUsed: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** `POST /admin/promos` body (`PATCH` takes a partial). Instants are ISO strings; `null` clears a nullable field. */
+export interface PromoCodeBody {
+  code: string;
+  type: "PERCENT" | "FIXED";
+  value: number;
+  minOrder?: number;
+  maxUses?: number | null;
+  perUserLimit?: number | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  active?: boolean;
+}
+
 export class AdminApiClient extends HttpClient {
+  // --- Dashboard ----------------------------------------------------------------
+
+  dashboard() {
+    return this.request<AdminDashboard>("GET", "/admin/dashboard");
+  }
+
   // --- Orders / fulfillment ---------------------------------------------------
 
   buckets() {
@@ -114,6 +233,11 @@ export class AdminApiClient extends HttpClient {
 
   transition(id: string, input: { status: string; reason?: string }) {
     return this.request<AdminOrderDetail>("POST", `/admin/orders/${encodeURIComponent(id)}/status`, input);
+  }
+
+  /** Internal note on the order timeline (`orders:note`); the customer is not emailed. */
+  addOrderNote(id: string, note: string) {
+    return this.request<AdminOrderDetail>("POST", `/admin/orders/${encodeURIComponent(id)}/note`, { note });
   }
 
   // --- Pricing control ----------------------------------------------------------
@@ -184,21 +308,148 @@ export class AdminApiClient extends HttpClient {
     const q = new URLSearchParams();
     if (opts.search) q.set("search", opts.search);
     if (opts.page) q.set("page", String(opts.page));
-    return this.request<{
-      total: number;
-      items: Array<{ id: string; email: string; fullName: string | null; role: string; status: string; rewardsPoints: number; orderCount: number; createdAt: string }>;
-    }>("GET", `/admin/customers${q.size ? `?${q}` : ""}`);
+    return this.request<{ page: number; pageSize: number; total: number; items: AdminCustomerListItem[] }>("GET", `/admin/customers${q.size ? `?${q}` : ""}`);
   }
 
   customerDetail(idOrEmail: string) {
-    return this.request<{
-      user: { id: string; email: string; fullName: string; rewardsPoints: number; role?: string };
-      addresses: Array<Record<string, string>>;
-      orders: Array<{ id: string; orderNumber: string; status: string; paymentStatus: string; totalLabel: string; createdAt: string }>;
-    }>("GET", `/admin/customers/${encodeURIComponent(idOrEmail)}`);
+    return this.request<AdminCustomerDetail>("GET", `/admin/customers/${encodeURIComponent(idOrEmail)}`);
+  }
+
+  updateCustomer(id: string, patch: { firstName?: string; lastName?: string; phone?: string | null }) {
+    return this.request<AdminCustomerDetail>("PATCH", `/admin/customers/${encodeURIComponent(id)}`, patch);
+  }
+
+  suspendCustomer(id: string, reason: string) {
+    return this.request<AdminCustomerDetail>("POST", `/admin/customers/${encodeURIComponent(id)}/suspend`, { reason });
+  }
+
+  reactivateCustomer(id: string, reason?: string) {
+    return this.request<AdminCustomerDetail>("POST", `/admin/customers/${encodeURIComponent(id)}/reactivate`, reason ? { reason } : {});
   }
 
   adminResetPassword(id: string) {
     return this.request<{ ok: true }>("POST", `/admin/customers/${encodeURIComponent(id)}/reset-password`);
+  }
+
+  customerRewards(id: string, opts: { page?: number; pageSize?: number } = {}) {
+    return this.request<AdminRewardsPage>("GET", `/admin/customers/${encodeURIComponent(id)}/rewards${queryString(opts)}`);
+  }
+
+  /** `deltaCents` is signed integer cents (credit > 0, debit < 0); a reason is mandatory and audited. */
+  adjustCustomerRewards(id: string, input: { deltaCents: number; reason: string }) {
+    return this.request<RewardAdjustmentResult>("POST", `/admin/customers/${encodeURIComponent(id)}/rewards/adjust`, input);
+  }
+
+  // --- Promo codes (promos:*) ------------------------------------------------------
+
+  promos(opts: { search?: string; active?: "true" | "false"; page?: number; pageSize?: number } = {}) {
+    return this.request<Paginated<AdminPromoCode>>("GET", `/admin/promos${queryString(opts)}`);
+  }
+
+  promo(id: string) {
+    return this.request<AdminPromoCode>("GET", `/admin/promos/${encodeURIComponent(id)}`);
+  }
+
+  createPromo(input: PromoCodeBody) {
+    return this.request<AdminPromoCode>("POST", "/admin/promos", input);
+  }
+
+  updatePromo(id: string, patch: Partial<PromoCodeBody>) {
+    return this.request<AdminPromoCode>("PATCH", `/admin/promos/${encodeURIComponent(id)}`, patch);
+  }
+
+  /** Deactivates (`active: false`); codes are never deleted because orders reference them. */
+  deactivatePromo(id: string) {
+    return this.request<AdminPromoCode>("DELETE", `/admin/promos/${encodeURIComponent(id)}`);
+  }
+
+  // --- Staff accounts (users:*) --------------------------------------------------------
+
+  staff(opts: { search?: string; status?: string; roleId?: string; page?: number; pageSize?: number } = {}) {
+    return this.request<Paginated<StaffUser>>("GET", `/admin/users${queryString(opts)}`);
+  }
+
+  staffDetail(id: string) {
+    return this.request<StaffUserDetail>("GET", `/admin/users/${encodeURIComponent(id)}`);
+  }
+
+  createStaff(input: CreateStaffInput) {
+    return this.request<CreateStaffResponse>("POST", "/admin/users", input);
+  }
+
+  resendStaffInvite(id: string) {
+    return this.request<{ ok: true; inviteExpiresAt: string }>("POST", `/admin/users/${encodeURIComponent(id)}/invite/resend`);
+  }
+
+  updateStaff(id: string, patch: { firstName?: string; lastName?: string; phone?: string | null }) {
+    return this.request<StaffUserDetail>("PATCH", `/admin/users/${encodeURIComponent(id)}`, patch);
+  }
+
+  assignStaffRole(id: string, roleId: string) {
+    return this.request<StaffUserDetail>("POST", `/admin/users/${encodeURIComponent(id)}/role`, { roleId });
+  }
+
+  suspendStaff(id: string, reason: string) {
+    return this.request<StaffUserDetail>("POST", `/admin/users/${encodeURIComponent(id)}/suspend`, { reason });
+  }
+
+  reactivateStaff(id: string, reason?: string) {
+    return this.request<StaffUserDetail>("POST", `/admin/users/${encodeURIComponent(id)}/reactivate`, reason ? { reason } : {});
+  }
+
+  resetStaffPassword(id: string) {
+    return this.request<{ ok: true }>("POST", `/admin/users/${encodeURIComponent(id)}/reset-password`);
+  }
+
+  // --- Roles, catalog, overrides (rbac:*) ---------------------------------------------
+
+  permissions() {
+    return this.request<PermissionCatalogEntry[]>("GET", "/admin/permissions");
+  }
+
+  roles() {
+    return this.request<AdminRole[]>("GET", "/admin/roles");
+  }
+
+  role(id: string) {
+    return this.request<AdminRole>("GET", `/admin/roles/${encodeURIComponent(id)}`);
+  }
+
+  createRole(input: CreateRoleInput) {
+    return this.request<AdminRole>("POST", "/admin/roles", input);
+  }
+
+  updateRole(id: string, patch: { name?: string; description?: string | null }) {
+    return this.request<AdminRole>("PATCH", `/admin/roles/${encodeURIComponent(id)}`, patch);
+  }
+
+  setRolePermissions(id: string, permissions: string[]) {
+    return this.request<{ permissions: string[] }>("PUT", `/admin/roles/${encodeURIComponent(id)}/permissions`, { permissions });
+  }
+
+  deleteRole(id: string) {
+    return this.request<{ deleted: true }>("DELETE", `/admin/roles/${encodeURIComponent(id)}`);
+  }
+
+  userPermissions(userId: string) {
+    return this.request<UserPermissionBreakdown>("GET", `/admin/users/${encodeURIComponent(userId)}/permissions`);
+  }
+
+  setUserOverride(userId: string, permissionKey: string, input: SetOverrideInput) {
+    return this.request<{ permissions: string[] }>("PUT", `/admin/users/${encodeURIComponent(userId)}/permissions/${encodeURIComponent(permissionKey)}`, input);
+  }
+
+  clearUserOverride(userId: string, permissionKey: string) {
+    return this.request<{ permissions: string[] }>("DELETE", `/admin/users/${encodeURIComponent(userId)}/permissions/${encodeURIComponent(permissionKey)}`);
+  }
+
+  // --- Audit log (audit:read) -----------------------------------------------------------
+
+  audit(query: AuditQuery = {}) {
+    return this.request<Paginated<AuditEntry>>("GET", `/admin/audit${queryString({ ...query })}`);
+  }
+
+  auditActions() {
+    return this.request<string[]>("GET", "/admin/audit/actions");
   }
 }

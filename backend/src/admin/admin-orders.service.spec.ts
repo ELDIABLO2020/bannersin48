@@ -349,3 +349,67 @@ describe("AdminOrdersService.attachTracking (streamed label)", () => {
     expect(db.state.shipments).toEqual([]);
   });
 });
+
+describe("AdminOrdersService.addNote (orders:note)", () => {
+  it("writes a same-status, un-emailed order event and the audit row in one transaction", async () => {
+    const { db, service } = setup({ status: "IN_PROCESSING", paymentStatus: "MARKED_PAID" });
+    await service.addNote("ord_1", "staff_1", "  Customer called: deliver to the side door.  ", "203.0.113.7");
+
+    expect(db.state.events).toEqual([
+      expect.objectContaining({ orderId: "ord_1", fromStatus: "IN_PROCESSING", toStatus: "IN_PROCESSING", actorId: "staff_1", note: "Customer called: deliver to the side door.", emailed: false }),
+    ]);
+    expect(db.state.audit).toEqual([
+      expect.objectContaining({ action: "order.note", actorId: "staff_1", entityType: "order", entityId: "ord_1", ip: "203.0.113.7", diff: { note: "Customer called: deliver to the side door." } }),
+    ]);
+    expect(db.state.orders[0]).toMatchObject({ status: "IN_PROCESSING", paymentStatus: "MARKED_PAID" });
+  });
+
+  it("writes no event when the audit row fails, and 404s unknown orders", async () => {
+    const { db, service } = setup();
+    db.failOn = "auditLog.create";
+    await expect(service.addNote("ord_1", "staff_1", "note")).rejects.toThrow("injected failure");
+    expect(db.state.events).toEqual([]);
+    db.failOn = null;
+    await expect(service.addNote("ord_missing", "staff_1", "note")).rejects.toMatchObject({ status: 404 });
+  });
+});
+
+describe("AdminOrdersService.dashboard", () => {
+  it("combines the buckets with today's placed / paid / shipped counts and the SLA total", async () => {
+    const now = new Date("2026-10-01T18:30:00Z"); // 14:30 in New York
+    const since = new Date("2026-10-01T04:00:00Z"); // local midnight (EDT, UTC-4)
+    const prisma = {
+      order: {
+        findMany: jest.fn(async () => [
+          { status: "RECEIVED", placedAt: new Date("2026-09-20T12:00:00Z") }, // breached
+          { status: "IN_PROCESSING", placedAt: new Date("2026-10-01T12:00:00Z") },
+        ]),
+        groupBy: jest.fn(async () => [
+          { status: "RECEIVED", _count: { _all: 3 } },
+          { status: "IN_PROCESSING", _count: { _all: 1 } },
+          { status: "DELIVERED", _count: { _all: 9 } },
+        ]),
+        count: jest.fn(async ({ where }: { where: Record<string, { gte: Date }> }) => (where.placedAt ? 2 : where.paymentConfirmedAt ? 1 : 0)),
+      },
+      shipment: { count: jest.fn(async () => 4) },
+    };
+    const service = new AdminOrdersService(prisma as never, {} as never, {} as never, {} as never, {} as never, {} as never);
+    const dashboard = await service.dashboard(now);
+
+    expect(dashboard.today).toEqual({ since: since.toISOString(), placed: 2, paid: 1, shipped: 4 });
+    expect(dashboard.openOrders).toBe(4); // RECEIVED 3 + IN_PROCESSING 1; DELIVERED is closed
+    expect(dashboard.slaBreachedCount).toBe(1);
+    expect(dashboard.buckets.find((b) => b.status === "RECEIVED")).toEqual({ status: "RECEIVED", count: 3, slaBreachedCount: 1 });
+    for (const call of [...prisma.order.count.mock.calls, ...prisma.shipment.count.mock.calls]) {
+      const where = (call[0] as { where: Record<string, { gte: Date }> }).where;
+      expect(Object.values(where)[0].gte.toISOString()).toBe(since.toISOString());
+    }
+  });
+
+  it("starts the day at the shop's midnight on both sides of DST", async () => {
+    const { startOfDayInZone } = await import("./admin-orders.service");
+    expect(startOfDayInZone(new Date("2026-07-04T03:59:00Z"), "America/New_York").toISOString()).toBe("2026-07-03T04:00:00.000Z"); // still July 3 locally
+    expect(startOfDayInZone(new Date("2026-07-04T04:00:00Z"), "America/New_York").toISOString()).toBe("2026-07-04T04:00:00.000Z");
+    expect(startOfDayInZone(new Date("2026-01-15T12:00:00Z"), "America/New_York").toISOString()).toBe("2026-01-15T05:00:00.000Z"); // EST, UTC-5
+  });
+});

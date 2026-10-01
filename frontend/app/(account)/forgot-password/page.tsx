@@ -21,7 +21,7 @@ type ForgotInput = z.infer<typeof forgotSchema>;
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [returnUrl, setReturnUrl] = useState("/dashboard");
+  const [returnUrl, setReturnUrl] = useState("/account");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
             </div>
             <div className="mt-lg">
               <Link
-                href={`/login${returnUrl !== "/dashboard" ? `?next=${encodeURIComponent(returnUrl)}` : ""}`}
+                href={`/login${returnUrl !== "/account" ? `?next=${encodeURIComponent(returnUrl)}` : ""}`}
                 className="inline-flex items-center gap-xs text-body-sm text-link hover:underline"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden /> Back to log in
@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
             <p className="text-body-sm text-ink-muted text-center">
               Remembered it?{" "}
               <Link
-                href={`/login${returnUrl !== "/dashboard" ? `?next=${encodeURIComponent(returnUrl)}` : ""}`}
+                href={`/login${returnUrl !== "/account" ? `?next=${encodeURIComponent(returnUrl)}` : ""}`}
                 className="text-link hover:underline"
               >
                 Log in

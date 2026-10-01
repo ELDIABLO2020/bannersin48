@@ -56,7 +56,7 @@ export default function OrderDetailPage() {
     <div className="bg-surface-tint min-h-[60vh]">
       <div className="mx-auto max-w-content px-md lg:px-2xl py-xl">
         <nav className="text-body-sm text-ink-muted mb-md" aria-label="Breadcrumb">
-          <Link href="/dashboard" className="hover:text-link no-underline">Dashboard</Link>
+          <Link href="/account" className="hover:text-link no-underline">Your account</Link>
           <ChevronRight className="inline h-3 w-3 mx-1" aria-hidden />
           <span aria-current="page">Order {order.orderNumber}</span>
         </nav>

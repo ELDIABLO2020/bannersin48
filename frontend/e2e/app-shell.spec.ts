@@ -35,7 +35,13 @@ test.describe("M3: app shell", () => {
 
   test("internal mode is visibly non-production and noindex", async ({ page, request }) => {
     await page.goto("/");
-    await expect(page.getByText(/internal platform test.*manual payment/i).first()).toBeVisible();
+    // The strip has responsive copy: "Internal platform test · Orders use manual
+    // payment …" at sm+, "Internal test · Manual payment only" below. Assert on the
+    // status region's *rendered* text so the hidden span never makes this pass or
+    // fail on the wrong viewport.
+    const notice = page.getByRole("status").filter({ hasText: /internal (platform )?test/i });
+    await expect(notice).toBeVisible();
+    await expect(notice).toHaveText(/internal (platform )?test.*manual payment/i, { useInnerText: true });
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
       "content",
       /noindex.*nofollow/i,

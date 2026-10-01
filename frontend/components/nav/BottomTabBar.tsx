@@ -12,7 +12,7 @@ import { MobileMenuDrawer } from "./MobileMenuDrawer";
 
 const TABS = [
   { href: "/sizes", label: "Sizes", icon: LayoutGrid },
-  { href: "/dashboard", label: "Account", icon: User },
+  { href: "/account", label: "Account", icon: User },
 ] as const;
 
 /** Product builder pages pin their own price bar below 901px instead of the tabs. */

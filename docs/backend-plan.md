@@ -43,7 +43,7 @@ Platform:
 16. [ ] Session redesign: access token in memory, refresh token in an `httpOnly; Secure; SameSite=None; Path=/auth` cookie, Origin allowlist + custom-header CSRF check, refresh-family reuse detection, nightly token purge (M1).
 17. [ ] argon2id + breached-password (HIBP) check; change-password endpoint that revokes sessions; email verification; neutral register/login responses (M14, M6, M5).
 18. [ ] TOTP MFA with recovery codes for STAFF / ADMIN / CONTENT_EDITOR (H6).
-19. [ ] Admin suspend/role endpoints (audited) (M6). CONTENT_EDITOR artwork access (M3) and customer label downloads (M4) were fixed with item 9.
+19. ~~Admin suspend/role endpoints (audited) (M6).~~ **Superseded by `docs/accounts-admin-rbac-plan.md`** (phase 1 RBAC core shipped: permission catalog, `RbacService`, `PermissionsGuard`, coverage spec; suspend/role endpoints land in its phase 2). CONTENT_EDITOR artwork access (M3) and customer label downloads (M4) were fixed with item 9.
 20. [ ] Query DTOs, `TrackingDto`, slug regex, P2002→409 and Prisma error filter, `nestjs-pino` with redaction (M8, M9, L4, L6).
 21. [ ] Index migration and retention/purge jobs via `@nestjs/schedule` (§6, M15).
 22. [ ] CI: CodeQL or Semgrep, gitleaks, Trivy image scan; IDOR regression tests against real Postgres (M13).

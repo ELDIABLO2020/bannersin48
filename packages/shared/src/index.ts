@@ -10,4 +10,6 @@ export * from "./address";
 export * from "./pricing";
 export * from "./order";
 export * from "./user";
+export * from "./permissions";
+export * from "./admin";
 export * from "./delivery";

@@ -43,6 +43,24 @@ export class ResetPasswordDto {
   password!: string;
 }
 
+/** Staff invite acceptance: the invite token plus the account's first real password. */
+export class AcceptInviteDto {
+  @IsString()
+  @Length(10, 256)
+  token!: string;
+
+  @IsString()
+  @Length(12, 128, { message: "Password must be at least 12 characters." })
+  password!: string;
+}
+
+/** Single-use action token from an emailed link (`/auth/confirm-email-change`, `/auth/verify-email`). */
+export class ActionTokenDto {
+  @IsString()
+  @Length(10, 256)
+  token!: string;
+}
+
 export class LogoutDto {
   @IsOptional()
   @IsString()

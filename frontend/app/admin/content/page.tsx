@@ -1,6 +1,7 @@
 "use client";
 
 import { blockTypeLabel } from "@/lib/admin/labels";
+import { RequirePermission } from "../_components/require-permission";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminApiClient } from "@/lib/api/adminClient";
@@ -49,6 +50,14 @@ function boolField(value: unknown): boolean {
 }
 
 export default function AdminContentPage() {
+  return (
+    <RequirePermission perm="content:read">
+      <ContentEditor />
+    </RequirePermission>
+  );
+}
+
+function ContentEditor() {
   const qc = useQueryClient();
   const blocks = useQuery({ queryKey: ["admin", "content"], queryFn: () => getAdminApiClient().contentList() });
   const [selected, setSelected] = useState<string | null>(null);

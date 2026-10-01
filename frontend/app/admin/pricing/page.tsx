@@ -4,8 +4,9 @@ import { priceModelLabel, tierRateLabel } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminApiClient } from "@/lib/api/adminClient";
-import { useAuth } from "@/lib/stores/auth";
+import { useCan } from "@/lib/auth/useCan";
 import { MATERIALS } from "@bannersin48/shared";
+import { RequirePermission } from "../_components/require-permission";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +16,18 @@ import { ConfirmDialog } from "../_components/confirm-dialog";
 const SQFT_MATERIALS = MATERIALS.filter((m) => m.ratePerSqFt > 0);
 
 export default function AdminPricingPage() {
-  const role = useAuth((s) => s.user?.role);
-  const canEdit = role === "ADMIN";
+  return (
+    <RequirePermission perm="catalog:read">
+      <PricingEditor />
+    </RequirePermission>
+  );
+}
+
+function PricingEditor() {
+  // Rates, flat prices and tiers are `pricing:write`; activating/deactivating rows is `catalog:write`.
+  const canEditRates = useCan("pricing:write");
+  const canEditCatalog = useCan("catalog:write");
+  const canEdit = canEditRates || canEditCatalog;
   const qc = useQueryClient();
   const products = useQuery({ queryKey: ["admin", "products"], queryFn: () => getAdminApiClient().products() });
   const finishings = useQuery({ queryKey: ["admin", "finishings"], queryFn: () => getAdminApiClient().finishingOptions() });
@@ -89,14 +100,14 @@ export default function AdminPricingPage() {
               </div>
               <div className="flex items-center gap-sm">
                 <Badge variant={product.active ? "success" : "neutral"}>{product.active ? "Active" : "Inactive"}</Badge>
-                {canEdit && (
+                {canEditCatalog && (
                   <Button size="sm" variant="ghost" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateProduct(product.id, { active: !product.active }))}>
                     {product.active ? "Deactivate product" : "Activate product"}
                   </Button>
                 )}
               </div>
             </div>
-            <div className="overflow-x-auto">
+            <div className="relative overflow-x-auto">
               <table className="w-full text-body-sm">
                 <caption className="sr-only">Materials and rates for {product.name}</caption>
                 <thead>
@@ -121,7 +132,7 @@ export default function AdminPricingPage() {
                           type="number"
                           step="0.01"
                           min="0"
-                          disabled={!canEdit}
+                          disabled={!canEditRates}
                           value={drafts[`m:${material.id}`] ?? material.ratePerSqft}
                           onChange={(e) => setDrafts((d) => ({ ...d, [`m:${material.id}`]: e.target.value }))}
                         />
@@ -131,8 +142,8 @@ export default function AdminPricingPage() {
                       <td className="text-right">
                         {canEdit && (
                           <div className="flex justify-end gap-xs">
-                            <Button size="sm" variant="secondary" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateMaterial(product.id, material.id, { ratePerSqft: Number(drafts[`m:${material.id}`]) }))}>Save</Button>
-                            <Button size="sm" variant="ghost" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateMaterial(product.id, material.id, { active: !material.active }))}>{material.active ? "Deactivate" : "Activate"}</Button>
+                            {canEditRates && <Button size="sm" variant="secondary" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateMaterial(product.id, material.id, { ratePerSqft: Number(drafts[`m:${material.id}`]) }))}>Save</Button>}
+                            {canEditCatalog && <Button size="sm" variant="ghost" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateMaterial(product.id, material.id, { active: !material.active }))}>{material.active ? "Deactivate" : "Activate"}</Button>}
                           </div>
                         )}
                       </td>
@@ -147,7 +158,7 @@ export default function AdminPricingPage() {
 
       <Card className="bg-surface p-lg">
         <h2 className="text-heading-h4 text-ink mb-md">Finishing adders</h2>
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full text-body-sm">
             <caption className="sr-only">Finishing option adders and rates</caption>
             <thead>
@@ -171,7 +182,7 @@ export default function AdminPricingPage() {
                       type="number"
                       step="0.01"
                       min="0"
-                      disabled={!canEdit}
+                      disabled={!canEditRates}
                       value={drafts[`f:${option.id}`] ?? option.amount}
                       onChange={(e) => setDrafts((d) => ({ ...d, [`f:${option.id}`]: e.target.value }))}
                     />
@@ -180,8 +191,8 @@ export default function AdminPricingPage() {
                   <td className="text-right">
                     {canEdit && (
                       <div className="flex justify-end gap-xs">
-                        <Button size="sm" variant="secondary" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateFinishingOption(option.id, { amount: Number(drafts[`f:${option.id}`]) }))}>Save</Button>
-                        <Button size="sm" variant="ghost" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateFinishingOption(option.id, { active: !option.active }))}>{option.active ? "Deactivate" : "Activate"}</Button>
+                        {canEditRates && <Button size="sm" variant="secondary" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateFinishingOption(option.id, { amount: Number(drafts[`f:${option.id}`]) }))}>Save</Button>}
+                        {canEditCatalog && <Button size="sm" variant="ghost" disabled={mutation.isPending} onClick={() => mutation.mutate(() => getAdminApiClient().updateFinishingOption(option.id, { active: !option.active }))}>{option.active ? "Deactivate" : "Activate"}</Button>}
                       </div>
                     )}
                   </td>
@@ -204,7 +215,7 @@ export default function AdminPricingPage() {
                 <p className="font-bold text-ink">{tier.minBillableSqft}+ sqft</p>
                 <p className="text-xs text-ink-muted">{tierRateLabel(tier.rates)}</p>
               </div>
-              {canEdit && (
+              {canEditRates && (
                 <Button size="sm" variant="ghost" onClick={() => setDeleteTier({ id: tier.id, label: `${tier.minBillableSqft}+ sqft` })}>
                   Delete
                 </Button>
@@ -215,7 +226,7 @@ export default function AdminPricingPage() {
             <p className="text-ink-muted text-body-sm">No volume tiers configured.</p>
           )}
         </div>
-        {canEdit && (
+        {canEditRates && (
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-sm mt-md items-end">
             <label className="block" htmlFor="tier-sqft">
               <span className="text-body-sm text-ink-muted block mb-xs">Minimum sqft</span>

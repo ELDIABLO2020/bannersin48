@@ -9,6 +9,6 @@ describe("safeReturnUrl", () => {
 
   it.each(["https://evil.example", "//evil.example/path", "\\\\evil.example"])(
     "rejects external return target %s",
-    (target) => expect(safeReturnUrl(target)).toBe("/dashboard"),
+    (target) => expect(safeReturnUrl(target)).toBe("/account"),
   );
 });

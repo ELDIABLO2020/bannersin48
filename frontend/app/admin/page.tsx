@@ -1,139 +1,85 @@
 "use client";
 
-import { PageHeader } from "@/components/ui/page-header";
-import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { getAdminApiClient } from "@/lib/api/adminClient";
+import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { getAdminApiClient } from "@/lib/api/adminClient";
+import { RequirePermission } from "./_components/require-permission";
+import { bucketLabel } from "@/lib/admin/labels";
 
-const PAGE_SIZE = 25;
+/** Staff landing page (plan §5.3): today's throughput, the SLA picture and every bucket, each linking into the board. */
+export default function AdminDashboardPage() {
+  return (
+    <RequirePermission perm="orders:read">
+      <Dashboard />
+    </RequirePermission>
+  );
+}
 
-const LABELS: Record<string, string> = {
-  RECEIVED: "New",
-  AWAITING_PAYMENT: "Awaiting payment",
-  IN_PROCESSING: "Paid, in processing",
-  ACCEPTED: "Accepted, tracking added",
-  SHIPPED: "Shipped",
-  DELIVERED: "Delivered",
-  ON_HOLD: "On hold",
-  CANCELLED: "Cancelled",
-};
-
-export default function AdminOrderBoardPage() {
-  const [selected, setSelected] = useState("RECEIVED");
-  const [page, setPage] = useState(1);
-  const buckets = useQuery({ queryKey: ["admin", "buckets"], queryFn: () => getAdminApiClient().buckets(), refetchInterval: 30_000 });
-  const orders = useQuery({
-    queryKey: ["admin", "orders", selected, page],
-    queryFn: () => getAdminApiClient().listOrders({ status: selected, page, pageSize: PAGE_SIZE }),
-  });
-
-  const total = orders.data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+function Dashboard() {
+  const dashboard = useQuery({ queryKey: ["admin", "dashboard"], queryFn: () => getAdminApiClient().dashboard(), refetchInterval: 30_000 });
+  const data = dashboard.data;
 
   return (
     <div className="space-y-xl">
-      <PageHeader title="Order board" intro="Open orders by stage. Pick a stage to list its orders." className="mb-0" />
+      <PageHeader
+        title="Dashboard"
+        intro="What came in, what got paid and what shipped today, plus every order by stage."
+        className="mb-0"
+        actions={<Link href="/admin/orders" className="text-body-sm text-link no-underline hover:underline">Open the order board</Link>}
+      />
 
-      {buckets.isError && <ErrorBox error={buckets.error} />}
-      <fieldset className="border-0 p-0 m-0">
-        <legend className="text-body-sm font-bold text-ink mb-sm sr-only">Filter by order status</legend>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
-          {(buckets.data?.buckets ?? []).map((bucket) => (
-            <button
-              key={bucket.status}
-              type="button"
-              onClick={() => {
-                setSelected(bucket.status);
-                setPage(1);
-              }}
-              aria-pressed={selected === bucket.status}
-              className="text-left border-0 bg-transparent p-0 cursor-pointer"
-            >
-              <Card className={`h-full bg-surface p-md border ${selected === bucket.status ? "border-link" : "border-line-subtle"}`}>
-                <div className="flex items-start justify-between gap-sm">
-                  <span className="font-bold text-ink">{LABELS[bucket.status] ?? bucket.status}</span>
-                  <span className="font-display text-heading-h3 text-ink tabular-nums">{bucket.count}</span>
-                </div>
-                {bucket.slaBreachedCount > 0 && (
-                  <p className="mt-sm text-xs font-bold text-danger">{bucket.slaBreachedCount} past 48-business-hour SLA</p>
-                )}
-              </Card>
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      {dashboard.isError && <div role="alert" className="rounded-feature bg-badge-error-bg text-danger p-md text-body-sm">{(dashboard.error as Error).message}</div>}
 
-      <Card className="bg-surface p-lg overflow-hidden">
-        <div className="flex items-center justify-between mb-md">
-          <h2 className="text-heading-h4 text-ink">{LABELS[selected] ?? selected}</h2>
-          <span className="text-body-sm text-ink-muted" aria-live="polite">
-            {orders.isLoading ? "Loading…" : `${total} orders`}
-          </span>
-        </div>
-        {orders.isLoading ? (
-          <p className="text-ink-muted py-xl" role="status">Loading orders…</p>
-        ) : orders.isError ? (
-          <ErrorBox error={orders.error} />
-        ) : orders.data?.items.length === 0 ? (
-          <div className="py-xl text-center">
-            <p className="text-ink-muted">No orders in this bucket.</p>
-            <p className="text-body-sm text-ink-muted mt-xs">Choose another status or check back later.</p>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-body-sm">
-                <caption className="sr-only">
-                  {LABELS[selected] ?? selected} orders, page {page} of {totalPages}
-                </caption>
-                <thead>
-                  <tr className="border-b border-line-subtle text-left text-ink-muted">
-                    <th scope="col" className="py-sm font-bold">Order</th>
-                    <th scope="col" className="font-bold">Customer</th>
-                    <th scope="col" className="font-bold">Item</th>
-                    <th scope="col" className="font-bold">Total</th>
-                    <th scope="col" className="font-bold">Placed</th>
-                    <th scope="col" className="font-bold">SLA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.data?.items.map((order) => (
-                    <tr key={order.id} className="border-b border-line-subtle last:border-0">
-                      <td className="py-md"><Link className="font-bold text-link no-underline hover:underline" href={`/admin/orders/${order.id}`}>{order.orderNumber}</Link></td>
-                      <td className="text-ink">{order.userEmail ?? "—"}</td>
-                      <td className="text-ink">{order.firstLineLabel}</td>
-                      <td className="text-ink tabular-nums">{order.totalLabel}</td>
-                      <td className="text-ink-muted">{order.placedAt ? new Date(order.placedAt).toLocaleString() : "—"}</td>
-                      <td>{order.slaBreached ? <Badge variant="error">Past SLA</Badge> : <Badge variant="neutral">OK</Badge>}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex items-center justify-between gap-md mt-md">
-              <span className="text-body-sm text-ink-muted">
-                Page {page} of {totalPages}
-              </span>
-              <div className="flex gap-sm">
-                <Button type="button" variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-                  Previous
-                </Button>
-                <Button type="button" variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
-                  Next
-                </Button>
-              </div>
-            </div>
-          </>
+      <section aria-labelledby="dashboard-today">
+        <h2 id="dashboard-today" className="sr-only">Today</h2>
+        <dl className="grid grid-cols-2 md:grid-cols-5 gap-md" data-testid="dashboard-stats">
+          <Stat label="Open orders" value={data?.openOrders} hint="Not yet delivered or cancelled" />
+          <Stat label="Placed today" value={data?.today.placed} />
+          <Stat label="Paid today" value={data?.today.paid} />
+          <Stat label="Shipped today" value={data?.today.shipped} />
+          <Stat label="Past SLA" value={data?.slaBreachedCount} tone={data && data.slaBreachedCount > 0 ? "danger" : "default"} hint="Past the 48-business-hour promise" />
+        </dl>
+        {data && (
+          <p className="text-xs text-ink-muted mt-sm">
+            Counting since {new Date(data.today.since).toLocaleString()} · refreshed {new Date(data.updatedAt).toLocaleTimeString()}
+          </p>
         )}
-      </Card>
+      </section>
+
+      <section aria-labelledby="dashboard-buckets-heading">
+        <h2 id="dashboard-buckets-heading" className="text-heading-h4 text-ink mb-md">Orders by stage</h2>
+        {dashboard.isLoading ? (
+          <p className="text-ink-muted" role="status">Loading…</p>
+        ) : (
+          <ul className="grid grid-cols-2 md:grid-cols-4 gap-md list-none m-0 p-0" data-testid="dashboard-buckets">
+            {(data?.buckets ?? []).map((bucket) => (
+              <li key={bucket.status}>
+                <Link href={`/admin/orders?status=${bucket.status}`} className="block no-underline h-full" aria-label={`${bucketLabel(bucket.status)}: ${bucket.count} orders`}>
+                  <Card className="h-full bg-surface p-md border border-line-subtle hover:border-link">
+                    <div className="flex items-start justify-between gap-sm">
+                      <span className="font-bold text-ink">{bucketLabel(bucket.status)}</span>
+                      <span className="font-display text-heading-h3 text-ink tabular-nums">{bucket.count}</span>
+                    </div>
+                    {bucket.slaBreachedCount > 0 && <p className="mt-sm text-xs font-bold text-danger">{bucket.slaBreachedCount} past SLA</p>}
+                  </Card>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
 
-function ErrorBox({ error }: { error: unknown }) {
-  return <div role="alert" className="rounded-feature bg-badge-error-bg text-danger p-md text-body-sm">{(error as Error).message}</div>;
+function Stat({ label, value, hint, tone = "default" }: { label: string; value: number | undefined; hint?: string; tone?: "default" | "danger" }) {
+  return (
+    <Card className="bg-surface p-md">
+      <dt className="text-body-sm text-ink-muted">{label}</dt>
+      <dd className={`font-display text-heading-h2 tabular-nums mt-xs ${tone === "danger" ? "text-danger" : "text-ink"}`}>{value ?? "—"}</dd>
+      {hint && <dd className="text-xs text-ink-muted mt-xs">{hint}</dd>}
+    </Card>
+  );
 }

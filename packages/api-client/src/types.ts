@@ -30,6 +30,13 @@ export interface ApiClientConfig {
    */
   getToken?: () => string | null;
   fetchImpl?: typeof fetch;
+  /**
+   * Called when the API answers `403 FORBIDDEN_PERMISSION` (the caller's
+   * permissions no longer cover the route) or `403 PASSWORD_CHANGE_REQUIRED`
+   * (a temporary password is pending). The frontend uses it to re-read
+   * `/auth/me` once and tell the user their access changed.
+   */
+  onForbidden?: (error: { status: number; payload: ApiError | null }) => void;
 }
 
 export interface QuoteResponse {

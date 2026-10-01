@@ -58,7 +58,7 @@ const ROUTES: Array<{ path: string; label: string }> = [
   { path: "/cart", label: "cart" },
   { path: "/checkout", label: "checkout" },
   { path: "/orders", label: "orders" },
-  { path: "/dashboard", label: "dashboard" },
+  { path: "/account", label: "account" },
   { path: "/admin", label: "admin" },
   { path: "/not-a-real-route", label: "404" },
 ];

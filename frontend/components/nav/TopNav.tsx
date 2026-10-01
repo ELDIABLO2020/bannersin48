@@ -123,7 +123,7 @@ export function TopNav() {
           </Link>
           <div className="flex items-stretch">
             <Link
-              href={signedIn ? "/dashboard" : "/login"}
+              href={signedIn ? "/account" : "/login"}
               className={cn(
                 "inline-flex items-center justify-center shrink-0 no-underline",
                 "h-11 rounded-l-pill rounded-r-none border border-line-input border-r-0 px-md",

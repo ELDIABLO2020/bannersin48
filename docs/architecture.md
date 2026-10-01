@@ -39,24 +39,63 @@ any pre-ship state → ON_HOLD | CANCELLED; ON_HOLD → IN_PROCESSING | ACCEPTED
 
 Customers may cancel only before payment is marked (`RECEIVED`, `AWAITING_PAYMENT`).
 
-## Roles
+## Roles and permissions
 
-| Role | Access |
-|---|---|
-| `CUSTOMER` | Own account, artwork, and orders. No `/admin/*` |
-| `STAFF` | Fulfillment, customer management, read-only pricing, every customer's artwork |
-| `CONTENT_EDITOR` | CMS content blocks only (no artwork) |
-| `ADMIN` | Everything |
+Access is role + permission based (full design: `docs/accounts-admin-rbac-plan.md`). A
+**permission** is a `resource:action` key from the code-defined catalog in
+`packages/shared/src/permissions.ts` (mirrored into the `permission` table at boot by
+`RbacService.syncCatalog`). An **access role** (`access_role`) is a named set of permissions; each
+user has one primary role (`user.roleId`) plus optional per-user ALLOW/DENY overrides
+(`user_permission`, optionally expiring). Effective permissions are
+`role ∪ ALLOW − DENY`; the `admin` role is the wildcard `*` and ignores overrides.
 
-`JwtAuthGuard` and `RolesGuard` are global (`APP_GUARD`), so every Nest route needs a valid
-access token unless it is marked `@Public()`; `backend/src/app.security.spec.ts` pins the public
-list and checks every other route returns 401 anonymously. The guard re-reads the user row on each
-request, so role changes and suspensions apply at once. The admin UI only hides sections the user
-can't access. The access JWT lives in `localStorage`, so the admin gate is client-side and every
-API call is still enforced by the server.
+| Role (`access_role.key`) | Kind (`User.role`) | Default permissions |
+|---|---|---|
+| `customer` | `CUSTOMER` | none — own account, artwork and orders are ownership-scoped in services, not permissions |
+| `staff` | `STAFF` | order board + fulfillment (`orders:*`), `customers:read`, `artwork:read_any`, `rewards:read`, `catalog:read`, `promos:read`. **Not** `payments:mark_paid` or `customers:reset_password` |
+| `content_editor` | `CONTENT_EDITOR` | `content:read`, `content:edit`, `content:publish` (no artwork) |
+| `admin` | `ADMIN` | `*` — immutable |
+| `fulfillment`, `support`, `catalog_manager` | `STAFF` | editable templates seeded by the migration (Support holds `customers:reset_password` and `rewards:adjust`; Catalog Manager holds `catalog:write` and `pricing:write`) |
 
-Password resets from the admin dashboard: STAFF may reset CUSTOMER accounts only; ADMIN may also
-reset STAFF and CONTENT_EDITOR accounts. No one can reset another ADMIN from the dashboard.
+The legacy `Role` enum on `User.role` is a derived *kind*: `RbacService.assignRole` writes it from
+the role's `legacyRole` whenever `roleId` changes, registration writes `CUSTOMER` + the `customer`
+role, and the phase 1 migration backfilled `roleId` from it. Since phase 5 `user.roleId` is NOT NULL
+(migration `20261005000000_user_role_id_not_null`, which repeats the backfill first), nothing under
+`/admin/*` carries `@Roles`, and the kind is read only for the wire shape, the customer-vs-staff
+target checks and the staff password rules — never for authorization.
+
+Guards, in order: `ThrottlerGuard` → `JwtAuthGuard` → `RolesGuard` → `PermissionsGuard`, all
+global (`APP_GUARD`). `RolesGuard` is kept only for optional coarse gating of future non-admin
+routes and has no implicit ADMIN pass (an admin passes permission checks because the `admin` role
+holds `*`). Every route needs a valid access token unless it is marked `@Public()`;
+`backend/src/app.security.spec.ts` pins the public list and checks every other route returns 401
+anonymously, and `backend/src/rbac/permissions-coverage.spec.ts` fails if any `/admin/*` route
+lacks a permission decorator, still carries `@Roles`, or is `@Public` (deny by default, structurally). `JwtAuthGuard` re-reads the user,
+role and overrides on each request, so role, permission and status changes apply at once; nothing
+about access is in the JWT. The admin UI only hides sections and buttons the user can't use
+(`useCan` / `<Can>` / `hasAdminAccess`, fed by `permissions` from `/auth/me`, which the app
+re-reads on load and after any `403 FORBIDDEN_PERMISSION`). The access JWT lives in
+`localStorage`, so the admin gate is client-side and every API call is still enforced by the server.
+
+Escalation safeguards live in `RbacService` (plan §3.6): grant ceiling (you can only grant what you
+hold; elevated permissions need `rbac:manage`), immutable `admin`/`customer` role sets, no
+self-modification, last-active-admin lock, and target-kind checks (`customers:*` on customer
+accounts, `users:*` on staff). Password resets from the dashboard: `customers:reset_password` for
+customers, `users:reset_password` for staff; another admin's password is CLI-only.
+
+## Admin panel surfaces
+
+The staff area (`/admin`, `frontend/app/admin/**`) lands on a dashboard (`GET /admin/dashboard`:
+today's placed / paid / shipped counts from the shop's local midnight, open orders, SLA breaches,
+and every bucket linking into the order board at `/admin/orders`). Beyond fulfillment it covers
+customers (CUSTOMER-kind accounts only: profile edits on their behalf, suspend / reactivate with a
+reason, reward ledger with manual adjustments), promo codes, catalog & pricing, CMS content, staff,
+roles and the audit log. Every page is permission-gated in the shell and every route by
+`PermissionsGuard` (routes and permissions in [api.md](api.md#admin)). Manual reward adjustments
+are one transaction — balance compare-and-set with a `>= 0` guard, `ADJUSTMENT` ledger row with
+`createdBy`, audit row with the reason — so the denormalised `user.rewardPointsBalance` always
+equals the ledger sum. Promo codes are managed here but **not yet applied at checkout**; order
+notes are same-status `order_event` rows the customer is never emailed about.
 
 ## Conventions
 
@@ -72,7 +111,7 @@ reset STAFF and CONTENT_EDITOR accounts. No one can reset another ADMIN from the
 - **Mocks:** `packages/api-client/src/mocks/handlers.ts` mirrors the real API shapes for
   `NEXT_PUBLIC_ENABLE_MOCKS=1`. Change both together.
 - **Audit:** every staff or admin mutation writes `audit_log` (old→new diff). Catalog rows referenced
-  by orders are deactivated, never deleted (`409 IN_USE`).
+  by orders are deactivated, never deleted (`409 IN_USE`); promo codes likewise (`DELETE` = `active: false`).
 - **Order numbers:** `BI48-000001`, generated from the Postgres sequence `order_number_seq`.
 
 ## Not built yet
@@ -93,6 +132,45 @@ Auth stays custom and is hardened rather than replaced with a hosted provider. T
 [backend-plan.md](backend-plan.md), from the findings in [backend-security-review.md](backend-security-review.md).
 The API never returns reset tokens. Until email exists, nobody receives a reset link, so an operator
 resets passwords over SSH with the CLI below.
+
+## Running and testing the feature set locally
+
+Everything below runs against the real backend (Postgres in Docker). With `NEXT_PUBLIC_ENABLE_MOCKS=1`
+the MSW handlers in `packages/api-client/src/mocks/*` serve the same surfaces from fixtures, which is
+what `npm run e2e` uses.
+
+```bash
+cp backend/.env.example backend/.env            # fill the three secrets: openssl rand -hex 32
+docker compose -f backend/docker-compose.yml up -d
+npm exec -w backend -- prisma migrate deploy    # forward-only; see the three RBAC migrations below
+npm run seed -w backend                         # catalog, content, permission catalog, roles, admin user
+npm run start:dev -w backend                    # :3001
+npm run dev -w @bannersin48/frontend            # :3000
+```
+
+The account/admin/RBAC work ships as three migrations, all applied by `migrate deploy`:
+`20261003000000_rbac_roles_permissions` (tables, permission catalog, system + template roles, backfill
+of `user.roleId`), `20261004000000_customer_account` (notification settings) and
+`20261005000000_user_role_id_not_null` (repeats the backfill, then `roleId NOT NULL`). The seed is
+idempotent and also re-syncs the permission catalog, so re-running it after a code change that adds a
+permission is safe; `RbacService.syncCatalog()` does the same at API boot.
+
+Accounts to test with:
+
+| As | How |
+|---|---|
+| Admin | the seeded `admin@bannersin48.local` / `ChangeMe123!` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`); sign in at `/admin`. Holds `*` |
+| Limited staff | in `/admin/staff`, *Add employee* with a template role (Fulfillment, Support, Catalog Manager) and a temporary password; sign out, sign in at `/admin` as that user, and the first-login password change is enforced before any other call. Narrow further with per-user overrides on the staff detail page |
+| Customer | register at `/register` (gets the empty `customer` role) and use `/account/*`; `/admin` shows the "Staff access only" card |
+
+Checks: `npm run ci` (typecheck, lint, unit tests, mock build, Playwright + axe on desktop Chromium and
+mobile WebKit); `npm run e2e:real` for the release scenarios against the real backend, including the
+staff flow (temporary-password employee → forced change → tracking allowed → mark-paid refused →
+suspension immediate). Known limitations: `EmailService` only logs, so staff *invites*, email change
+and email verification have working endpoints but hidden UI (`frontend/lib/config/features.ts`);
+promo codes are managed in `/admin/promos` but checkout does not apply them yet; the sudo step for
+`rbac:manage` / `users:create` and folding `PasswordReset` into `ActionToken` (plan §11 Q3, Q6) are
+deferred.
 
 ## Local accounts
 
