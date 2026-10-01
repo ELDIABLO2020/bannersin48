@@ -20,7 +20,7 @@
     "ci": "npm run typecheck && npm run lint && npm test && NEXT_PUBLIC_ENABLE_MOCKS=1 npm run build && PORT=3010 NEXT_PUBLIC_ENABLE_MOCKS=1 CI=1 npm run e2e"
   },
   "devDependencies": {
-    "typescript": "~5.4.5"
+    "typescript": "~7.0.2"
   },
   "overrides": {
     "browserslist": "^4.29.3",
