@@ -1,5 +1,6 @@
-# Build context for backend/Dockerfile is the repo root. Keep it small and
-# never send secrets, local data or build output to the daemon.
+# Build context for backend/Dockerfile and frontend/Dockerfile is the repo
+# root. Keep it small and never send secrets, local data or build output to
+# the daemon.
 
 .git
 .github
@@ -32,7 +33,8 @@ backend/storage
 **/test-results
 **/playwright-report
 
-# The frontend is deployed by Vercel; only its manifest is needed so that
-# `npm ci` can verify package-lock.json.
-frontend/*
-!frontend/package.json
+# Frontend test tooling and generated files (sw.js is rebuilt by `next build`).
+frontend/e2e
+frontend/e2e-real
+frontend/audit
+frontend/public/sw.js

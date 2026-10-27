@@ -40,6 +40,7 @@
     "prisma": true,
     "esbuild": true,
     "msw": false,
+    "sharp": false,
     "fsevents": false,
     "unrs-resolver": false
   }

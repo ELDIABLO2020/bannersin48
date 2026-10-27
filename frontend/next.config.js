@@ -1,7 +1,15 @@
+const path = require("path");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Self-contained server (.next/standalone) for the VPS image in frontend/Dockerfile.
+  // Tracing from the repo root pulls in the workspace packages under packages/.
+  output: "standalone",
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname, ".."),
+  },
   // Retired routes. Query strings carry over (e.g. /order/vinyl?width=3 keeps its size).
   async redirects() {
     return [

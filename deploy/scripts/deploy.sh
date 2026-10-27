@@ -4,13 +4,14 @@
 #   /srv/bannersin48/app/deploy/scripts/deploy.sh            # latest origin/main
 #   /srv/bannersin48/app/deploy/scripts/deploy.sh <sha|tag>  # a specific ref
 #
-# Steps: fetch + hard reset the checkout -> build the api image -> make sure
-# postgres is up -> run `prisma migrate deploy` (one-shot, schema-owner role)
-# -> recreate api and wait for its healthcheck -> make sure caddy is up and
-# reload its config -> prune dangling images -> print health.
+# Steps: fetch + hard reset the checkout -> build the api and web images ->
+# make sure postgres is up -> run `prisma migrate deploy` (one-shot,
+# schema-owner role) -> recreate api and web and wait for their healthchecks ->
+# make sure caddy is up and reload its config -> prune dangling images -> print
+# health.
 #
-# Downtime is limited to the api container restart; Caddy holds and retries
-# requests for up to 15 s (lb_try_duration) meanwhile.
+# Downtime is limited to the api and web container restarts; Caddy holds and
+# retries requests for up to 15 s (lb_try_duration) meanwhile.
 #
 # Migrations are forward-only. Deploying an older ref does not roll back the
 # schema, so only roll back to code that is compatible with the current schema.
@@ -32,7 +33,7 @@ preflight() {
   [[ -d "$APP/.git" ]] || die "$APP is not a git checkout"
   docker info >/dev/null 2>&1 ||
     die "cannot reach the Docker daemon (is $(id -un) in the docker group? log in again after bootstrap)"
-  for f in site.env postgres.env migrate.env api.env; do
+  for f in site.env postgres.env migrate.env api.env web.env; do
     [[ -f "$SECRETS/$f" ]] || die "missing $SECRETS/$f (run deploy/scripts/gen-secrets.sh)"
     mode="$(stat -c '%a' "$SECRETS/$f")"
     [[ "$mode" == "600" || "$mode" == "400" ]] || die "$SECRETS/$f has mode $mode; expected 600"
@@ -40,11 +41,17 @@ preflight() {
   if grep -Eq '^ACME_EMAIL=(.*CHANGE_ME.*)?$' "$SECRETS/site.env"; then
     die "set ACME_EMAIL in $SECRETS/site.env first"
   fi
+  grep -Eq '^SITE_DOMAIN=.+' "$SECRETS/site.env" || die "set SITE_DOMAIN in $SECRETS/site.env (see deploy/README.md)"
   [[ -d "$ROOT/storage" && -d "$ROOT/pgdata" ]] || die "run deploy/scripts/bootstrap-vps.sh first"
 }
 
+# KEY=value from an env file (no sourcing, no eval).
+env_value() {
+  grep -E "^$2=" "$SECRETS/$1" | tail -n 1 | cut -d= -f2- || true
+}
+
 main() {
-  local ref="${1:-origin/main}" api_domain
+  local ref="${1:-origin/main}" api_domain site_domain key
 
   # One deploy at a time.
   exec 9>"$ROOT/.deploy.lock"
@@ -62,6 +69,15 @@ main() {
   log "Building api image"
   "${COMPOSE[@]}" build api
 
+  log "Building web image"
+  # Build args for the client bundle (see the web service in the compose file).
+  for key in NEXT_PUBLIC_API_BASE_URL NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_COMMERCE_MODE; do
+    export "$key=$(env_value web.env "$key")"
+  done
+  [[ -n "$NEXT_PUBLIC_API_BASE_URL" && -n "$NEXT_PUBLIC_SITE_URL" ]] ||
+    die "set NEXT_PUBLIC_API_BASE_URL and NEXT_PUBLIC_SITE_URL in $SECRETS/web.env"
+  "${COMPOSE[@]}" build web
+
   log "Starting postgres"
   "${COMPOSE[@]}" up -d --wait postgres
 
@@ -76,6 +92,9 @@ main() {
   log "Recreating api"
   "${COMPOSE[@]}" up -d --no-deps --wait --wait-timeout 120 api
 
+  log "Recreating web"
+  "${COMPOSE[@]}" up -d --no-deps --wait --wait-timeout 120 web
+
   log "Starting / reloading caddy"
   "${COMPOSE[@]}" up -d --no-deps --wait caddy
   # Picks up Caddyfile edits without dropping connections.
@@ -87,14 +106,16 @@ main() {
 
   log "Status"
   "${COMPOSE[@]}" ps
-  api_domain="$(grep -E '^API_DOMAIN=' "$SECRETS/site.env" | tail -n 1 | cut -d= -f2-)"
+  api_domain="$(env_value site.env API_DOMAIN)"
+  site_domain="$(env_value site.env SITE_DOMAIN)"
   echo
-  if curl -fsS --max-time 15 "https://$api_domain/health"; then
+  if curl -fsS --max-time 15 "https://$api_domain/health" &&
+    curl -fsS --max-time 15 -o /dev/null "https://$site_domain/robots.txt"; then
     echo
-    echo "Deployed $GIT_SHA -> https://$api_domain"
+    echo "Deployed $GIT_SHA -> https://$site_domain (site), https://$api_domain (api)"
   else
-    echo "WARNING: https://$api_domain/health did not answer. On a first deploy the"
-    echo "certificate may still be issuing: ${COMPOSE[*]} logs caddy"
+    echo "WARNING: https://$api_domain/health or https://$site_domain did not answer. On a"
+    echo "first deploy the certificate may still be issuing: ${COMPOSE[*]} logs caddy"
     exit 1
   fi
 }

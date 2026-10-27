@@ -1,10 +1,13 @@
-# Banners In 48 - edge proxy for the API.
+# Banners In 48 - edge proxy for the storefront and the API.
 #
 # Caddy is the only container that publishes ports (80, 443/tcp, 443/udp).
-# It terminates TLS (automatic Let's Encrypt certificate for API_DOMAIN),
-# compresses responses and forwards to the single Nest process at api:3001.
+# It terminates TLS (automatic Let's Encrypt certificates for SITE_DOMAIN,
+# www.SITE_DOMAIN and API_DOMAIN), compresses responses and forwards to the
+# Next.js server at web:3000 and the single Nest process at api:3001.
 #
 # Environment (from /srv/bannersin48/secrets/site.env):
+#   SITE_DOMAIN e.g. bannersin48.com (www.SITE_DOMAIN redirects to it). Before
+#               DNS points here, use a test name such as web.179-236-230-7.sslip.io.
 #   API_DOMAIN  e.g. 179-236-230-7.sslip.io, later api.bannersin48.com
 #   ACME_EMAIL  contact address for the ACME account (expiry notices)
 #
@@ -30,6 +33,49 @@
 	}
 
 	grace_period 15s
+}
+
+(access_log) {
+	log {
+		output file /var/log/caddy/{args[0]}.log {
+			roll_size 50MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+	}
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+		-Via
+		-X-Powered-By
+	}
+
+	reverse_proxy web:3000 {
+		health_uri /robots.txt
+		health_interval 10s
+		health_timeout 3s
+		health_status 2xx
+
+		# While `deploy.sh` recreates the web container, hold and retry.
+		lb_try_duration 15s
+		lb_try_interval 250ms
+
+		transport http {
+			dial_timeout 3s
+		}
+	}
+
+	import access_log site-access
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+	import access_log site-access
 }
 
 {$API_DOMAIN} {

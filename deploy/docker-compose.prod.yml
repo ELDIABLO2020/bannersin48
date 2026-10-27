@@ -1,6 +1,7 @@
 # Banners In 48 - production stack (single VPS).
 #
 #   internet -> caddy (80/443, the ONLY published ports)
+#            -> web:3000 (Next.js storefront, non-root, read-only rootfs, no egress)
 #            -> api:3001 (Nest, non-root, read-only rootfs, no internet egress)
 #            -> postgres:5432 (never published)
 #
@@ -93,6 +94,42 @@ services:
     mem_limit: 2g
     pids_limit: 512
     stop_grace_period: 30s
+    logging: *logging
+
+  web:
+    image: bannersin48-web:latest
+    pull_policy: build # never pull a same-named image from a registry
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      # Inlined into the client bundle at build time. deploy.sh exports these
+      # from ${BI48_ROOT}/secrets/web.env before building.
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
+        NEXT_PUBLIC_COMMERCE_MODE: ${NEXT_PUBLIC_COMMERCE_MODE:-internal_manual}
+        GIT_SHA: ${GIT_SHA:-unknown}
+    <<: *hardening
+    user: "1000:1000"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+      # next/image optimizer cache; rebuilt on demand after a restart.
+      - /app/frontend/.next/cache:size=256m,uid=1000,gid=1000
+    restart: unless-stopped
+    env_file:
+      # Server-side code reads the same NEXT_PUBLIC_* values at runtime.
+      - ${BI48_ROOT:-/srv/bannersin48}/secrets/web.env
+    environment:
+      NODE_OPTIONS: --max-old-space-size=384
+    # Healthcheck comes from the image (GET /robots.txt on 127.0.0.1:3000).
+    # Only on the internal proxy network: the storefront never calls out.
+    networks:
+      - proxy
+    mem_limit: 512m
+    pids_limit: 256
+    stop_grace_period: 15s
     logging: *logging
 
   migrate:

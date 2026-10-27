@@ -3,10 +3,11 @@
 # /srv/bannersin48/secrets). Run as the `deploy` user, once, before the first
 # deploy:
 #
-#   deploy/scripts/gen-secrets.sh [--domain 179-236-230-7.sslip.io] [--email ops@example.com]
+#   deploy/scripts/gen-secrets.sh [--domain 179-236-230-7.sslip.io] [--site bannersin48.com] [--email ops@example.com]
 #
 # Files (all mode 600, directory mode 700):
-#   site.env      API_DOMAIN, ACME_EMAIL           -> caddy + api (not secret)
+#   site.env      SITE_DOMAIN, API_DOMAIN, ACME_EMAIL -> caddy + api (not secret)
+#   web.env       NEXT_PUBLIC_* build/runtime config -> web (not secret)
 #   postgres.env  superuser + both role passwords  -> postgres container only
 #   migrate.env   DATABASE_URL (bannersin48_migrate) -> migrate one-shot only
 #   api.env       app config + secrets             -> api only
@@ -21,15 +22,17 @@ set -euo pipefail
 ROOT="${BI48_ROOT:-/srv/bannersin48}"
 SECRETS="$ROOT/secrets"
 API_DOMAIN="${API_DOMAIN:-179-236-230-7.sslip.io}"
+SITE_DOMAIN="${SITE_DOMAIN:-bannersin48.com}"
 ACME_EMAIL="${ACME_EMAIL:-CHANGE_ME@bannersin48.com}"
 
 usage() {
-  sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --domain) API_DOMAIN="${2:?--domain needs a value}"; shift 2 ;;
+    --site) SITE_DOMAIN="${2:?--site needs a value}"; shift 2 ;;
     --email) ACME_EMAIL="${2:?--email needs a value}"; shift 2 ;;
     -h | --help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 64 ;;
@@ -38,6 +41,10 @@ done
 
 if [[ ! "$API_DOMAIN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]]; then
   echo "Invalid --domain '$API_DOMAIN'" >&2
+  exit 64
+fi
+if [[ ! "$SITE_DOMAIN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]]; then
+  echo "Invalid --site '$SITE_DOMAIN'" >&2
   exit 64
 fi
 if [[ ! "$ACME_EMAIL" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]]; then
@@ -97,10 +104,21 @@ write_file() {
 }
 
 write_file site.env <<EOF
-# Public hostname Caddy serves and obtains a certificate for. Also read by the API.
+# Storefront hostname; Caddy also redirects www.SITE_DOMAIN to it. Use a test
+# name (web.<ip>.sslip.io) until the domain's DNS points at this server.
+SITE_DOMAIN=${SITE_DOMAIN}
+# API hostname Caddy serves and obtains a certificate for. Also read by the API.
 API_DOMAIN=${API_DOMAIN}
 # ACME (Let's Encrypt) account contact. deploy.sh refuses to run with the placeholder.
 ACME_EMAIL=${ACME_EMAIL}
+EOF
+
+write_file web.env <<EOF
+# Inlined into the storefront bundle at build time (deploy.sh rebuilds the web
+# image every deploy) and read by its server at runtime.
+NEXT_PUBLIC_API_BASE_URL=https://${API_DOMAIN}
+NEXT_PUBLIC_SITE_URL=https://${SITE_DOMAIN}
+NEXT_PUBLIC_COMMERCE_MODE=internal_manual
 EOF
 
 write_file postgres.env <<EOF

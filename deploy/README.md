@@ -1,21 +1,22 @@
 # Production deploy (Hostinger VPS)
 
-The API runs on one VPS (Ubuntu 24.04, 2 vCPU, 7.8 GiB RAM, 96 GB disk) as a
-Docker Compose stack. The frontend stays on Vercel and calls the API
-cross-origin. Plan items 12–14 in [docs/backend-plan.md](../docs/backend-plan.md).
+The storefront and the API run on one VPS (Ubuntu 24.04, 2 vCPU, 7.8 GiB RAM,
+96 GB disk) as a Docker Compose stack. The browser calls the API cross-origin.
+Moving off Vercel: see [Moving the storefront and DNS off Vercel](#moving-the-storefront-and-dns-off-vercel). Plan items 12–14 in [docs/backend-plan.md](../docs/backend-plan.md).
 
 ```
-                     Vercel: https://bannersin48.com (Next.js)
-                                    │  fetch() cross-origin (CORS_ORIGINS)
+ browser: https://$SITE_DOMAIN pages ─┐  fetch() to https://$API_DOMAIN (CORS_ORIGINS)
                                     ▼
  internet ──► ufw 22/80/443 ──► DOCKER-USER: only 80/tcp, 443/tcp, 443/udp reach containers
                                     │
           ┌─────────────────────────┼──────────── docker network "edge" (egress for ACME)
           │                  ┌──────▼──────┐
-          │                  │   caddy     │  TLS (Let's Encrypt for $API_DOMAIN), HSTS,
+          │                  │   caddy     │  TLS (Let's Encrypt for $SITE_DOMAIN, $API_DOMAIN), HSTS,
           │                  │ 80/443 only │  zstd/gzip, 55 MiB body cap, JSON access log
           │                  └──────┬──────┘
           ├─────────────────────────┼──────────── "proxy" (internal: no internet)
+          │   web :3000 ◄───────────┤  Next.js standalone (node server.js), uid 1000,
+          │                         │  read-only rootfs, 512 MiB
           │                  ┌──────▼──────┐
           │                  │    api      │  Nest (node dist/src/main.js), uid 1000,
           │                  │   :3001     │  read-only rootfs, cap_drop ALL, 2 GiB
@@ -32,7 +33,8 @@ cross-origin. Plan items 12–14 in [docs/backend-plan.md](../docs/backend-plan.
 
 | Path | What |
 |---|---|
-| `docker-compose.prod.yml` | caddy, api, migrate, postgres; hardening, limits, log rotation |
+| `docker-compose.prod.yml` | caddy, web, api, migrate, postgres; hardening, limits, log rotation |
+| `../frontend/Dockerfile` | Storefront image (Next.js standalone); `NEXT_PUBLIC_*` are build args from `web.env` |
 | `Caddyfile` | TLS, HSTS, compression, body limit, health-checked reverse proxy, access log |
 | `postgres/postgresql.conf`, `postgres/pg_hba.conf` | Tuned PG16 config; SCRAM-only auth, app roles from the compose network only |
 | `postgres/init/01-roles.sh` | Creates `bannersin48_migrate` (owner) and `bannersin48_app` (DML only) on first boot |
@@ -89,8 +91,8 @@ installed first; `git`, `curl` and `openssl` ship with Ubuntu.
    ```bash
    /srv/bannersin48/app/deploy/scripts/admin.sh seed
    ```
-6. **Point the frontend at the API.** In Vercel, set
-   `NEXT_PUBLIC_API_BASE_URL=https://179-236-230-7.sslip.io` and redeploy.
+6. **Check the storefront.** `deploy.sh` also builds and starts the `web` service and
+   ends with `GET https://<SITE_DOMAIN>/robots.txt`. `web.env` holds its `NEXT_PUBLIC_*` values.
 7. **Turn on off-site backups** (required before go-live). Create a bucket or
    repository (e.g. Backblaze B2 / S3-compatible, or an SFTP storage box). Fill in
    `RESTIC_REPOSITORY` and the backend credentials in `secrets/backup.env`, then:
@@ -226,16 +228,41 @@ Compose recreate that container on the next `up`.
 Generate DB passwords with `openssl rand -hex 32`. `01-roles.sh` only accepts
 `[A-Za-z0-9._~-]{32,}` so values are safe inside SQL and URLs.
 
+## Moving the storefront and DNS off Vercel
+
+The domain is registered at **GoDaddy**; its DNS was hosted by Vercel
+(`ns1/ns2.vercel-dns.com`). Do not cancel Vercel until step 5 is done, or the
+domain stops resolving.
+
+1. **Run the storefront on a test name.** Set `SITE_DOMAIN=web.179-236-230-7.sslip.io`
+   in `site.env`, create `web.env` (see the table below; `NEXT_PUBLIC_SITE_URL` stays
+   `https://bannersin48.com`), add `https://web.179-236-230-7.sslip.io` to `CORS_ORIGINS`
+   in `api.env`, and run `deploy.sh`. Check pages, quotes and login on the test name.
+2. **Create the zone at Hostinger** (hPanel → Domains → add bannersin48.com as an
+   external domain / DNS zone) with: `A @ 179.236.230.7`, `A www 179.236.230.7`,
+   `A api 179.236.230.7`, the `google-site-verification` `TXT` record, and
+   `CAA 0 issue "letsencrypt.org"`. No `AAAA` (IPv4-only stack); no MX (no mail on this domain yet).
+3. **Point the domain at the VPS.** At GoDaddy (Domain → DNS → Nameservers), change the
+   nameservers to the two Hostinger shows for the zone. Old answers can be cached for up
+   to 48 h; both Vercel and the VPS serve the site meanwhile.
+4. **Serve the real name.** Once `dig +short bannersin48.com @8.8.8.8` prints
+   `179.236.230.7`, set `SITE_DOMAIN=bannersin48.com` in `site.env`, remove the test origin
+   from `CORS_ORIGINS`, and run `deploy.sh`. Caddy obtains the certificates.
+5. **Wait out propagation**, then remove bannersin48.com from the Vercel project and cancel
+   Vercel. Optional: transfer the registration from GoDaddy to Hostinger (unlock + auth
+   code at GoDaddy, then Hostinger → Domains → Transfer); nameservers stay as they are.
+
 ## Switching `API_DOMAIN` to api.bannersin48.com
 
-1. In **Vercel → Domains → bannersin48.com → DNS records**, add `A  api  179.236.230.7`
+1. In the DNS zone for bannersin48.com (Hostinger hPanel → Domains → DNS / Nameservers), add `A  api  179.236.230.7`
    (TTL 60). No `AAAA` record: the stack is IPv4-only. If the zone has a `CAA`
    record, it must allow `letsencrypt.org`.
 2. Wait until `dig +short api.bannersin48.com` prints `179.236.230.7`.
 3. Set `API_DOMAIN=api.bannersin48.com` in `/srv/bannersin48/secrets/site.env`, then
    `$C up -d --no-deps --wait caddy api`. Caddy obtains the new certificate within
    a minute (`admin.sh logs caddy`). The sslip.io name stops being served.
-4. In Vercel, set `NEXT_PUBLIC_API_BASE_URL=https://api.bannersin48.com` and redeploy.
+4. Add `https://api.bannersin48.com` as `NEXT_PUBLIC_API_BASE_URL` in `secrets/web.env` and run
+   `deploy.sh` (the storefront bundle has the API URL baked in).
 
 ## Environment variables
 
@@ -243,7 +270,11 @@ Files in `/srv/bannersin48/secrets` (all mode 600, created by `gen-secrets.sh`).
 
 | Variable | File → container | Value / default | Notes |
 |---|---|---|---|
+| `SITE_DOMAIN` | `site.env` → caddy, api | `bannersin48.com` | Storefront hostname; `www.` redirects to it. A test name (`web.179-236-230-7.sslip.io`) until DNS points here |
 | `API_DOMAIN` | `site.env` → caddy, api | `179-236-230-7.sslip.io` | Public hostname; Caddy site address |
+| `NEXT_PUBLIC_API_BASE_URL` | `web.env` → web (+ build arg) | `https://$API_DOMAIN` | Baked into the client bundle; change needs `deploy.sh` |
+| `NEXT_PUBLIC_SITE_URL` | `web.env` → web (+ build arg) | `https://$SITE_DOMAIN` | Canonical URLs, sitemap |
+| `NEXT_PUBLIC_COMMERCE_MODE` | `web.env` → web (+ build arg) | `internal_manual` | See [architecture](../docs/architecture.md) |
 | `ACME_EMAIL` | `site.env` → caddy, api | set by `--email` | Let's Encrypt contact |
 | `NODE_ENV` | `api.env` → api | `production` | Also set in the image and compose |
 | `PORT` | `api.env` → api | `3001` | Caddy proxies to `api:3001` |

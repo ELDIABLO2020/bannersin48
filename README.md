@@ -51,12 +51,13 @@ Colors, type, spacing and radii live in [`packages/design-tokens/src/tokens.ts`]
 Run `npm run sync-css -w @bannersin48/design-tokens` to sync them into `frontend/app/globals.css`.
 The brand palette is magenta `#CB1079` (actions), green `#3EAF2C` (money/confirmed) and black.
 
-## Deployment (Vercel)
+## Deployment
 
-The frontend deploys to Vercel through the GitHub integration, with **Root Directory** `frontend` and
-**Node.js** 24.x (pinned by `engines` in `frontend/package.json`). [`frontend/vercel.json`](frontend/vercel.json)
-installs and builds from the monorepo root so the workspace packages are available. Production domain:
-`https://bannersin48.com` (project `bannersin48-frontend`).
+The storefront and the API run together on the Hostinger VPS (Docker Compose, Caddy in front); see
+[deploy/README.md](deploy/README.md). [`frontend/Dockerfile`](frontend/Dockerfile) builds the Next.js
+standalone server from the monorepo root; `deploy/scripts/deploy.sh` builds and restarts it on every
+deploy. Production domain: `https://bannersin48.com`. The site is moving off Vercel (project
+`bannersin48-frontend`); [`frontend/vercel.json`](frontend/vercel.json) can be deleted once that is done.
 
 | Variable | Example |
 |---|---|
