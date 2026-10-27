@@ -19,7 +19,7 @@
     "@bannersin48/shared": "*"
   },
   "devDependencies": {
-    "typescript": "~5.4.5",
+    "typescript": "~7.0.2",
     "msw": "^2.4.0",
     "vitest": "^2.0.0"
   }
